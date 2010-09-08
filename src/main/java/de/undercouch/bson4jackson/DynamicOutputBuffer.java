@@ -103,7 +103,7 @@ public class DynamicOutputBuffer {
 	 * @return a new buffer with the current buffer size and the current byte order
 	 */
 	private ByteBuffer allocateNewBuffer() {
-		return ByteBuffer.allocateDirect(_bufferSize).order(_order);
+		return ByteBuffer.allocate(_bufferSize).order(_order);
 	}
 	
 	/**
