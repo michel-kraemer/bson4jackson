@@ -51,28 +51,6 @@ public class BsonGenerator extends JsonGeneratorBase {
 	}
 	
 	/**
-	 * Calculates the length of the given string as if it would be
-	 * encoded as modified UTF-8
-	 * TODO refactor this!
-	 * @param s the string
-	 * @return the length of s as modified UTF-8
-	 */
-	protected int getModifiedUTF8Length(CharSequence s) {
-		int length = 0;
-		for (int i = 0; i < s.length(); ++i) {
-			char c = s.charAt(i);
-			if (c >= 0x0001 && c <= 0x007F) {
-				++length;
-			} else if (c > 0x07FF) {
-				length += 3;
-			} else {
-				length += 2;
-			}
-		}
-		return length;
-	}
-	
-	/**
 	 * Encodes the given string into modified UTF-8 and writes it
 	 * to the output buffer
 	 * @param s the string
@@ -164,6 +142,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 		_typeMarker = _buffer.size();
 		_buffer.putByte((byte)0);
 		
+		//write field name
 		writeModifiedUTF8(name);
 		_buffer.putByte(BsonConstants.END_OF_STRING);
 	}
@@ -181,9 +160,17 @@ public class BsonGenerator extends JsonGeneratorBase {
 			JsonGenerationException {
 		_verifyValueWrite("write string");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_STRING);
-		_buffer.putInt32(getModifiedUTF8Length(text) + 1);
-		writeModifiedUTF8(text);
+		
+		//reserve space for the string size
+		int p = _buffer.size();
+		_buffer.putInt32(0);
+		
+		//write string
+		int l = _buffer.putUTF8(text);
 		_buffer.putByte(BsonConstants.END_OF_STRING);
+		
+		//write string size
+		_buffer.putInt32(p, l + 1);
 	}
 
 	@Override

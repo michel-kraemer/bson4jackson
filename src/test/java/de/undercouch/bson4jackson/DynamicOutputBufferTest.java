@@ -183,4 +183,45 @@ public class DynamicOutputBufferTest {
 		assertEquals((byte)0xCC, r[1]);
 		assertEquals((byte)0xDD, r[0]);
 	}
+	
+	@Test
+	public void putUTF8() throws Exception {
+		DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+		int w = db.putUTF8("Hello");
+		assertEquals(5, w);
+		assertEquals(5, db.size());
+		
+		db = new DynamicOutputBuffer(10);
+		w = db.putUTF8("Hello");
+		assertEquals(5, w);
+		assertEquals(5, db.size());
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		db.writeTo(baos);
+		String s = new String(baos.toByteArray());
+		assertEquals("Hello", s);
+		
+		db = new DynamicOutputBuffer(2);
+		w = db.putUTF8("a\u20AC\u00A2\u00A2bb");
+		assertEquals(10, w);
+		assertEquals(10, db.size());
+		
+		baos = new ByteArrayOutputStream();
+		db.writeTo(baos);
+		byte[] r = baos.toByteArray();
+		assertEquals('a', r[0]);
+		
+		assertEquals((byte)0xE2, r[1]);
+		assertEquals((byte)0x82, r[2]);
+		assertEquals((byte)0xAC, r[3]);
+		
+		assertEquals((byte)0xC2, r[4]);
+		assertEquals((byte)0xA2, r[5]);
+		
+		assertEquals((byte)0xC2, r[6]);
+		assertEquals((byte)0xA2, r[7]);
+		
+		assertEquals('b', r[8]);
+		assertEquals('b', r[9]);
+	}
 }

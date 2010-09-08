@@ -4,8 +4,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
 import java.util.LinkedList;
 
 /**
@@ -56,6 +61,18 @@ public class DynamicOutputBuffer {
 	 * A linked list of internal buffers
 	 */
 	private LinkedList<ByteBuffer> _buffers = new LinkedList<ByteBuffer>();
+	
+	/**
+	 * The character set used in {@link #putUTF8(String)}. Will be
+	 * created lazily in {@link #getUTF8Charset()}
+	 */
+	private Charset _utf8;
+	
+	/**
+	 * The encoder used in {@link #putUTF8(String)}. Will be created
+	 * lazily in {@link #getUTF8Encoder()}
+	 */
+	private CharsetEncoder _utf8Encoder;
 	
 	/**
 	 * Creates a dynamic buffer with BIG_ENDIAN byte order and
@@ -149,6 +166,26 @@ public class DynamicOutputBuffer {
 		if (_position > _size) {
 			_size = _position;
 		}
+	}
+	
+	/**
+	 * @return the lazily created UTF-8 character set
+	 */
+	private Charset getUTF8Charset() {
+		if (_utf8 == null) {
+			_utf8 = Charset.forName("UTF-8");;
+		}
+		return _utf8;
+	}
+	
+	/**
+	 * @return the lazily created UTF-8 encoder
+	 */
+	private CharsetEncoder getUTF8Encoder() {
+		if (_utf8Encoder == null) {
+			_utf8Encoder = getUTF8Charset().newEncoder();
+		}
+		return _utf8Encoder;
 	}
 	
 	/**
@@ -282,6 +319,76 @@ public class DynamicOutputBuffer {
 				putByte(pos + 7, b7);
 			}
 		}
+	}
+	
+	/**
+	 * Encodes the given string as UTF-8, puts it into the buffer
+	 * and increases write position accordingly.
+	 * @param s the string to put
+	 * @return the number of UTF-8 bytes put
+	 */
+	public int putUTF8(String s) {
+		int written = putUTF8(_position, s);
+		incPosition(written);
+		return written;
+	}
+	
+	/**
+	 * Puts the given string as UTF-8 into the buffer at the
+	 * given position. This method does not increase the write position.
+	 * @param pos the position where to put the string
+	 * @param s the string to put
+	 * @return the number of UTF-8 bytes put
+	 */
+	public int putUTF8(int pos, String s) {
+		ByteBuffer minibb = null;
+		
+		CharsetEncoder enc = getUTF8Encoder();
+		CharBuffer in = CharBuffer.wrap(s);
+		
+		int pos2 = pos;
+		ByteBuffer bb = getBuffer(pos2);
+		int index = pos2 % _bufferSize;
+		bb.position(index);
+		
+		while (in.remaining() > 0) {
+			CoderResult res = enc.encode(in, bb, true);
+			
+			//flush minibb first
+			if (bb == minibb) {
+				bb.flip();
+				while (bb.remaining() > 0) {
+					putByte(pos2, bb.get());
+					++pos2;
+				}
+			} else {
+				pos2 += bb.position() - index;
+			}
+			
+			if (res.isOverflow()) {
+				if (bb.remaining() > 0) {
+					//exceeded buffer boundaries; write to a small temporary buffer
+					if (minibb == null) {
+						minibb = ByteBuffer.allocate(4);
+					}
+					minibb.rewind();
+					bb = minibb;
+					index = 0;
+				} else {
+					bb = getBuffer(pos2);
+					index = pos2 % _bufferSize;
+					bb.position(index);
+				}
+			} else if (res.isError()) {
+				try {
+					res.throwException();
+				} catch (CharacterCodingException e) {
+					throw new RuntimeException("Could not encode string", e);
+				}
+			}
+		}
+		
+		return pos2 - pos;
 	}
 	
 	/**
