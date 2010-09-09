@@ -259,4 +259,45 @@ public class DynamicOutputBufferTest {
 		assertEquals(1234.1234f, bb.getFloat(), 0.00001);
 		assertEquals(5678.5678, bb.getDouble(), 0.00001);
 	}
+	
+	@Test
+	public void flush() throws Exception {
+		DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+		db.putByte((byte)1);
+		db.putByte((byte)2);
+		db.putByte((byte)3);
+		db.putByte((byte)4);
+		db.putByte((byte)5);
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		db.flushTo(baos);
+		byte[] r = baos.toByteArray();
+		assertEquals(4, r.length);
+		assertEquals(1, r[0]);
+		assertEquals(2, r[1]);
+		assertEquals(3, r[2]);
+		assertEquals(4, r[3]);
+		
+		db.putByte((byte)6);
+		db.flushTo(baos);
+		r = baos.toByteArray();
+		assertEquals(6, r.length);
+		assertEquals(5, r[4]);
+		assertEquals(6, r[5]);
+		
+		db.putByte((byte)7);
+		db.writeTo(baos);
+		r = baos.toByteArray();
+		assertEquals(7, r.length);
+		assertEquals(7, r[6]);
+	}
+	
+	@Test(expected = java.lang.IndexOutOfBoundsException.class)
+	public void putAfterWrite() throws Exception {
+		DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+		db.putByte((byte)1);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		db.writeTo(baos);
+		db.putByte((byte)8);
+	}
 }

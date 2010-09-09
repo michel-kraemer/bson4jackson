@@ -15,16 +15,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A random-access buffer that resizes itself. This buffer differentiates
- * from {@link java.io.ByteArrayOutputStream} in the following points:
+ * <p>A random-access buffer that resizes itself. This buffer differentiates
+ * from {@link java.io.ByteArrayOutputStream} in the following points:</p>
  * <ul>
- * <li>It allows specifying the byte order</li>
+ * <li>It allows specifying the byte order.</li>
  * <li>It assigns several internal buffers instead of one and therefore
  * saves garbage collection cycles.</li>
+ * <li>It is able to flush some of its internal buffers to an output stream
+ * or to a writable channel.</li>
  * </ul>
- * The buffer has an initial size. This is also the size of each internal
+ * <p>The buffer has an initial size. This is also the size of each internal
  * buffer, so if a new buffer has to be allocated it will take exactly
- * that many bytes.
+ * that many bytes.</p>
+ * <p>By calling {@link #flushTo(OutputStream)} or {@link #flushTo(WritableByteChannel)}
+ * some of this buffer's internal buffers are flushed and then deallocated. The
+ * buffer maintains an internal counter for all flushed buffers. This allows the
+ * {@link #writeTo(OutputStream)} and {@link #writeTo(WritableByteChannel)}
+ * methods to only write non-flushed buffers. So, this class can be used for
+ * streaming by flushing internal buffers from time to time and at the end
+ * writing the rest:
+ * <pre>
+ * ...
+ * buf.flushTo(out);
+ * ...
+ * buf.flushTo(out);
+ * ...
+ * buf.flushTo(out);
+ * ...
+ * buf.writeTo(out);</pre>
+ * </p>
+ * <p>If flushing is never used a single call to one of the <code>writeTo</code>
+ * methods is enough to write the whole buffer.</p>
+ * <p>Once the buffer has been written to an output stream or channel, putting
+ * elements into it is not possible anymore and will lead to an
+ * {@link java.lang.IndexOutOfBoundsException}.</p>
  * @author Michel Kraemer
  */
 public class DynamicOutputBuffer {
@@ -52,6 +76,14 @@ public class DynamicOutputBuffer {
 	 * The current write position
 	 */
 	private int _position;
+	
+	/**
+	 * The position of the first byte that has not been already
+	 * flushed. Any attempt to put something into the buffer at
+	 * a position before this first byte is invalid and causes
+	 * a {@link IndexOutOfBoundsException} to be thrown.
+	 */
+	private int _flushPosition;
 	
 	/**
 	 * The current buffer size (changes dynamically)
@@ -195,6 +227,7 @@ public class DynamicOutputBuffer {
 		_buffers.clear();
 		_buffers.add(allocateNewBuffer());
 		_position = 0;
+		_flushPosition = 0;
 		_size = 0;
 	}
 	
@@ -429,7 +462,44 @@ public class DynamicOutputBuffer {
 	}
 	
 	/**
-	 * Writes the whole buffer to the given output stream
+	 * Tries to copy as much bytes as possible from this buffer to
+	 * the given channel. See {@link #flushTo(WritableByteChannel)}
+	 * for further information.
+	 * @param out the output stream to write to
+	 * @throws IOException if the buffer could not be flushed
+	 */
+	public void flushTo(OutputStream out) throws IOException {
+		flushTo(Channels.newChannel(out));
+	}
+	
+	/**
+	 * Tries to copy as much bytes as possible from this buffer to
+	 * the given channel. This method always copies whole internal
+	 * buffers and deallocates them afterwards. It does not deallocate
+	 * the buffer the write position is currently pointing to nor does
+	 * it deallocate buffers following the write position. The method
+	 * increases an internal pointer so consecutive calls also copy
+	 * consecutive bytes.
+	 * @param out the channel to write to
+	 * @throws IOException if the buffer could not be flushed
+	 */
+	public void flushTo(WritableByteChannel out) throws IOException {
+		int n1 = _flushPosition / _bufferSize;
+		int n2 = _position / _bufferSize;
+		while (n1 < n2) {
+			ByteBuffer bb = _buffers.get(n1);
+			bb.rewind();
+			out.write(bb);
+			_buffers.set(n1, null);
+			_flushPosition += _bufferSize;
+			++n1;
+		}
+	}
+	
+	/**
+	 * Writes all non-flushed internal buffers to the given output
+	 * stream. If {@link #flushTo(OutputStream)} has not been called
+	 * before, this method writes the whole buffer to the output stream.
 	 * @param out the output stream to write to
 	 * @throws IOException if the buffer could not be written
 	 */
@@ -438,20 +508,23 @@ public class DynamicOutputBuffer {
 	}
 	
 	/**
-	 * Writes the whole buffer to the given channel
+	 * Writes all non-flushed internal buffers to the given channel.
+	 * If {@link #flushTo(WritableByteChannel)} has not been called
+	 * before, this method writes the whole buffer to the channel.
 	 * @param out the channel to write to
 	 * @throws IOException if the buffer could not be written
 	 */
 	public void writeTo(WritableByteChannel out) throws IOException {
-		int toWrite = _size;
-		int n = 0;
-		while (toWrite > 0) {
+		int n1 = _flushPosition / _bufferSize;
+		int n2 = _buffers.size();
+		int toWrite = _size - _flushPosition;
+		while (n1 < n2) {
 			int curWrite = Math.min(toWrite, _bufferSize);
-			ByteBuffer bb = _buffers.get(n);
+			ByteBuffer bb = _buffers.get(n1);
 			bb.position(curWrite);
 			bb.flip();
 			out.write(bb);
-			++n;
+			++n1;
 			toWrite -= curWrite;
 		}
 	}
