@@ -11,7 +11,8 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A random-access buffer that resizes itself. This buffer differentiates
@@ -60,7 +61,7 @@ public class DynamicOutputBuffer {
 	/**
 	 * A linked list of internal buffers
 	 */
-	private LinkedList<ByteBuffer> _buffers = new LinkedList<ByteBuffer>();
+	private List<ByteBuffer> _buffers = new ArrayList<ByteBuffer>(1);
 	
 	/**
 	 * The character set used in {@link #putUTF8(String)}. Will be
