@@ -50,4 +50,9 @@ public class BsonGeneratorTest {
 		assertEquals(1234.1234f, (Double)obj.get("Float"), 0.00001);
 		assertEquals(5678.5678, (Double)obj.get("Double"), 0.00001);
 	}
+	
+	@Test
+	public void stream() throws Exception {
+		//TODO test streaming
+	}
 }

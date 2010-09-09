@@ -20,6 +20,17 @@ import org.codehaus.jackson.io.IOContext;
  */
 public class BsonFactory extends JsonFactory {
 	/**
+	 * The BSON generator features enabled by default
+	 */
+	private static final int DEFAULT_BSON_GENERATOR_FEATURE_FLAGS = 0;
+	
+	/**
+	 * The BSON generator features to be enabled when a new
+	 * generator is created
+	 */
+	protected int _bsonGeneratorFeatures = DEFAULT_BSON_GENERATOR_FEATURE_FLAGS;
+	
+	/**
 	 * @see JsonFactory#JsonFactory()
 	 */
 	public BsonFactory() {
@@ -33,6 +44,46 @@ public class BsonFactory extends JsonFactory {
     	super(oc);
     }
     
+    /**
+     * Method for enabling/disabling specified generator features
+     * (check {@link BsonGenerator.Feature} for list of features)
+     * @param f the feature to enable or disable
+     * @param state true if the feature should be enabled, false otherwise
+     */
+    public final BsonFactory configure(BsonGenerator.Feature f, boolean state) {
+    	if (state) {
+    		return enable(f);
+    	}
+    	return disable(f);
+    }
+
+    /**
+     * Method for enabling specified generator features
+     * (check {@link BsonGenerator.Feature} for list of features)
+     * @param f the feature to enable
+     */
+    public BsonFactory enable(BsonGenerator.Feature f) {
+    	_bsonGeneratorFeatures |= f.getMask();
+    	return this;
+    }
+
+    /**
+     * Method for disabling specified generator features
+     * (check {@link BsonGenerator.Feature} for list of features)
+     * @param f the feature to disable
+     */
+    public BsonFactory disable(BsonGenerator.Feature f) {
+    	_bsonGeneratorFeatures &= ~f.getMask();
+    	return this;
+    }
+
+    /**
+     * @return true if the specified generator feature is enabled
+     */
+    public final boolean isEnabled(BsonGenerator.Feature f) {
+    	return (_bsonGeneratorFeatures & f.getMask()) != 0;
+    }
+    
     @Override
     public BsonGenerator createJsonGenerator(OutputStream out, JsonEncoding enc)
     	throws IOException {
@@ -40,7 +91,8 @@ public class BsonFactory extends JsonFactory {
     }
     
     public BsonGenerator createJsonGenerator(OutputStream out) throws IOException {
-    	BsonGenerator result = new BsonGenerator(_objectCodec, out);
+    	BsonGenerator result = new BsonGenerator(_generatorFeatures,
+    			_bsonGeneratorFeatures, _objectCodec, out);
     	result.putHeader();
     	return result;
     }
