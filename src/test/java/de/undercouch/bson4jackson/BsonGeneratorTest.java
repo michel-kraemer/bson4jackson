@@ -28,11 +28,13 @@ public class BsonGeneratorTest {
 		data.put("String", "Hello");
 		data.put("Long", 1234L);
 		data.put("Null", null);
+		data.put("Float", 1234.1234f);
+		data.put("Double", 5678.5678);
 		
 		ObjectMapper om = new ObjectMapper(new BsonFactory());
 		om.writeValue(baos, data);
 		
-		assertEquals(76, baos.size());
+		assertEquals(107, baos.size());
 		
 		byte[] r = baos.toByteArray();
 		ByteArrayInputStream bais = new ByteArrayInputStream(r);
@@ -45,5 +47,7 @@ public class BsonGeneratorTest {
 		assertEquals("Hello", obj.get("String"));
 		assertEquals(1234L, obj.get("Long"));
 		assertEquals(null, obj.get("Null"));
+		assertEquals(1234.1234f, (Double)obj.get("Float"), 0.00001);
+		assertEquals(5678.5678, (Double)obj.get("Double"), 0.00001);
 	}
 }

@@ -231,13 +231,16 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeNumber(double d) throws IOException,
 			JsonGenerationException {
-		// TODO Auto-generated method stub
+		_verifyValueWrite("write number");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_DOUBLE);
+		_buffer.putDouble(d);
 	}
 
 	@Override
 	public void writeNumber(float f) throws IOException,
 			JsonGenerationException {
-		// TODO Auto-generated method stub
+		//BSON understands double values only
+		writeNumber((double)f);
 	}
 
 	@Override
