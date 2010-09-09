@@ -144,27 +144,19 @@ public class DynamicOutputBuffer {
 		int n = position / _bufferSize;
 		while (n >= _buffers.size()) {
 			addNewBuffer();
-			--n;
 		}
-		return _buffers.getLast();
+		return _buffers.get(n);
 	}
 	
 	/**
-	 * Increments the current write position by 1
+	 * Adapts the buffer size so it is at least equal to the
+	 * given number of bytes. This method does not add new
+	 * internal buffers.
+	 * @param size the minimum buffer size
 	 */
-	private void incPosition() {
-		incPosition(1);
-	}
-	
-	/**
-	 * Increments the current write position by the given
-	 * number of bytes
-	 * @param n the increment
-	 */
-	private void incPosition(int n) {
-		_position += n;
-		if (_position > _size) {
-			_size = _position;
+	private void adaptSize(int size) {
+		if (size > _size) {
+			_size = size;
 		}
 	}
 	
@@ -212,7 +204,7 @@ public class DynamicOutputBuffer {
 	 */
 	public void putByte(byte b) {
 		putByte(_position, b);
-		incPosition();
+		++_position;
 	}
 	
 	/**
@@ -222,6 +214,7 @@ public class DynamicOutputBuffer {
 	 * @param b the byte to put
 	 */
 	public void putByte(int pos, byte b) {
+		adaptSize(pos + 1);
 		ByteBuffer bb = getBuffer(pos);
 		int i = pos % _bufferSize;
 		bb.put(i, b);
@@ -234,7 +227,7 @@ public class DynamicOutputBuffer {
 	 */
 	public void putInt32(int i) {
 		putInt32(_position, i);
-		incPosition(4);
+		_position += 4;
 	}
 	
 	/**
@@ -244,6 +237,7 @@ public class DynamicOutputBuffer {
 	 * @param i the integer to put
 	 */
 	public void putInt32(int pos, int i) {
+		adaptSize(pos + 4);
 		ByteBuffer bb = getBuffer(pos);
 		if (bb.remaining() >= 4) {
 			int index = pos % _bufferSize;
@@ -275,7 +269,7 @@ public class DynamicOutputBuffer {
 	 */
 	public void putInt64(long l) {
 		putInt64(_position, l);
-		incPosition(8);
+		_position += 8;
 	}
 	
 	/**
@@ -285,6 +279,7 @@ public class DynamicOutputBuffer {
 	 * @param i the integer to put
 	 */
 	public void putInt64(int pos, long l) {
+		adaptSize(pos + 8);
 		ByteBuffer bb = getBuffer(pos);
 		if (bb.remaining() >= 8) {
 			int index = pos % _bufferSize;
@@ -329,7 +324,7 @@ public class DynamicOutputBuffer {
 	 */
 	public int putUTF8(String s) {
 		int written = putUTF8(_position, s);
-		incPosition(written);
+		_position += written;
 		return written;
 	}
 	
@@ -388,6 +383,7 @@ public class DynamicOutputBuffer {
 			}
 		}
 		
+		adaptSize(pos2);
 		return pos2 - pos;
 	}
 	

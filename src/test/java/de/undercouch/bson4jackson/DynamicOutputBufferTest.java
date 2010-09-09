@@ -224,4 +224,24 @@ public class DynamicOutputBufferTest {
 		assertEquals('b', r[8]);
 		assertEquals('b', r[9]);
 	}
+	
+	@Test
+	public void putRandom() throws Exception {
+		DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+		db.putByte(5, (byte)0);
+		db.putByte(1, (byte)1);
+		db.putByte(4, (byte)2);
+		db.putByte(3, (byte)3);
+		db.putByte(2, (byte)4);
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		db.writeTo(baos);
+		byte[] r = baos.toByteArray();
+		assertEquals(0, r[0]);
+		assertEquals(0, r[5]);
+		assertEquals(1, r[1]);
+		assertEquals(2, r[4]);
+		assertEquals(3, r[3]);
+		assertEquals(4, r[2]);
+	}
 }
