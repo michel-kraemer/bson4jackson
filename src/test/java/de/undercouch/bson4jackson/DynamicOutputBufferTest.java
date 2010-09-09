@@ -3,6 +3,7 @@ package de.undercouch.bson4jackson;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.junit.Test;
@@ -243,5 +244,19 @@ public class DynamicOutputBufferTest {
 		assertEquals(2, r[4]);
 		assertEquals(3, r[3]);
 		assertEquals(4, r[2]);
+	}
+	
+	@Test
+	public void putFloatingPoint() throws Exception {
+		DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+		db.putFloat(1234.1234f);
+		db.putDouble(5678.5678);
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		db.writeTo(baos);
+		byte[] r = baos.toByteArray();
+		ByteBuffer bb = ByteBuffer.wrap(r);
+		assertEquals(1234.1234f, bb.getFloat(), 0.00001);
+		assertEquals(5678.5678, bb.getDouble(), 0.00001);
 	}
 }

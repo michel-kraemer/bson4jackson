@@ -318,6 +318,46 @@ public class DynamicOutputBuffer {
 	}
 	
 	/**
+	 * Puts a 32-bit floating point number into the buffer at the current
+	 * write position and increases write position accordingly.
+	 * @param f the float to put
+	 */
+	public void putFloat(float f) {
+		putFloat(_position, f);
+		_position += 4;
+	}
+	
+	/**
+	 * Puts a 32-bit floating point number into the buffer at the given
+	 * position. Does not increase the write position.
+	 * @param pos the position where to put the float
+	 * @param f the float to put
+	 */
+	public void putFloat(int pos, float f) {
+		putInt32(pos, Float.floatToRawIntBits(f));
+	}
+	
+	/**
+	 * Puts a 64-bit floating point number into the buffer at the current
+	 * write position and increases write position accordingly.
+	 * @param d the double to put
+	 */
+	public void putDouble(double d) {
+		putDouble(_position, d);
+		_position += 8;
+	}
+	
+	/**
+	 * Puts a 64-bit floating point number into the buffer at the given
+	 * position. Does not increase the write position.
+	 * @param pos the position where to put the double
+	 * @param d the double to put
+	 */
+	public void putDouble(int pos, double d) {
+		putInt64(pos, Double.doubleToRawLongBits(d));
+	}
+	
+	/**
 	 * Encodes the given string as UTF-8, puts it into the buffer
 	 * and increases write position accordingly.
 	 * @param s the string to put
