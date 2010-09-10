@@ -151,12 +151,11 @@ public class BsonGenerator extends JsonGeneratorBase {
 		//containing the header might not be available anymore)
 		if (!isEnabled(Feature.ENABLE_STREAMING)) {
 			putHeader();
-		
-			//write buffer to output stream
-			_buffer.writeTo(_out);
-		} else {
-			_buffer.flushTo(_out);
 		}
+		
+		//write buffer to output stream (if streaming is enabled,
+		//this will write the the rest of the buffer)
+		_buffer.writeTo(_out);
 		_out.flush();
 	}
 	
