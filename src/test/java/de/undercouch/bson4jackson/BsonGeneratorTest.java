@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -31,10 +32,15 @@ public class BsonGeneratorTest {
 		data.put("Float", 1234.1234f);
 		data.put("Double", 5678.5678);
 		
+		//BigIntegers will be serialized as Strings, since the standard
+		//serializer (StdSerializers#NumberSerializer) does not handle
+		//them correctly
+		data.put("BigInt", BigInteger.valueOf(Integer.MAX_VALUE));
+		
 		ObjectMapper om = new ObjectMapper(new BsonFactory());
 		om.writeValue(baos, data);
 		
-		assertEquals(107, baos.size());
+		assertEquals(130, baos.size());
 		
 		byte[] r = baos.toByteArray();
 		ByteArrayInputStream bais = new ByteArrayInputStream(r);
@@ -49,6 +55,7 @@ public class BsonGeneratorTest {
 		assertEquals(null, obj.get("Null"));
 		assertEquals(1234.1234f, (Double)obj.get("Float"), 0.00001);
 		assertEquals(5678.5678, (Double)obj.get("Double"), 0.00001);
+		assertEquals(String.valueOf(Integer.MAX_VALUE), obj.get("BigInt"));
 	}
 	
 	@Test

@@ -293,7 +293,14 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeNumber(BigInteger v) throws IOException,
 			JsonGenerationException {
-		// TODO Auto-generated method stub
+		int bl = v.bitLength();
+		if (bl < 32) {
+			writeNumber(v.intValue());
+		} else if (bl < 64) {
+			writeNumber(v.longValue());
+		} else {
+			writeString(v.toString());
+		}
 	}
 
 	@Override
@@ -315,13 +322,23 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeNumber(BigDecimal dec) throws IOException,
 			JsonGenerationException {
-		// TODO Auto-generated method stub
+		float f = dec.floatValue();
+		if (!Float.isInfinite(f)) {
+			writeNumber(f);
+		} else {
+			double d = dec.doubleValue();
+			if (!Double.isInfinite(d)) {
+				writeNumber(d);
+			} else {
+				writeString(dec.toString());
+			}
+		}
 	}
 
 	@Override
 	public void writeNumber(String encodedValue) throws IOException,
 			JsonGenerationException, UnsupportedOperationException {
-		// TODO Auto-generated method stub
+		writeString(encodedValue);
 	}
 
 	@Override
