@@ -242,6 +242,16 @@ public class DynamicOutputBuffer {
 	}
 	
 	/**
+	 * Puts several bytes into the buffer at the given position
+	 * and increases the write position accordingly.
+	 * @param bs an array of bytes to put
+	 */
+	public void putBytes(byte... bs) {
+		putBytes(_position, bs);
+		_position += bs.length;
+	}
+	
+	/**
 	 * Puts a byte into the buffer at the given position. Does
 	 * not increase the write position.
 	 * @param pos the position where to put the byte
@@ -252,6 +262,27 @@ public class DynamicOutputBuffer {
 		ByteBuffer bb = getBuffer(pos);
 		int i = pos % _bufferSize;
 		bb.put(i, b);
+	}
+	
+	/**
+	 * Puts several bytes into the buffer at the given position.
+	 * Does not increase the write position.
+	 * @param pos the position where to put the bytes
+	 * @param bs an array of bytes to put
+	 */
+	public void putBytes(int pos, byte... bs) {
+		adaptSize(pos + bs.length);
+		ByteBuffer bb = null;
+		int i = -1;
+		for (byte b : bs) {
+			if (i == _bufferSize || i < 0) {
+				bb = getBuffer(pos);
+				i = pos % _bufferSize;
+			}
+			bb.put(i, b);
+			++i;
+			++pos;
+		}
 	}
 	
 	/**
@@ -283,15 +314,9 @@ public class DynamicOutputBuffer {
 			byte b3 = (byte)(i >> 24);
 			
 			if (_order == ByteOrder.BIG_ENDIAN) {
-				putByte(pos, b3);
-				putByte(pos + 1, b2);
-				putByte(pos + 2, b1);
-				putByte(pos + 3, b0);
+				putBytes(pos, b3, b2, b1, b0);
 			} else {
-				putByte(pos, b0);
-				putByte(pos + 1, b1);
-				putByte(pos + 2, b2);
-				putByte(pos + 3, b3);
+				putBytes(pos, b0, b1, b2, b3);
 			}
 		}
 	}
@@ -329,23 +354,9 @@ public class DynamicOutputBuffer {
 			byte b7 = (byte)(l >> 56);
 			
 			if (_order == ByteOrder.BIG_ENDIAN) {
-				putByte(pos, b7);
-				putByte(pos + 1, b6);
-				putByte(pos + 2, b5);
-				putByte(pos + 3, b4);
-				putByte(pos + 4, b3);
-				putByte(pos + 5, b2);
-				putByte(pos + 6, b1);
-				putByte(pos + 7, b0);
+				putBytes(pos, b7, b6, b5, b4, b3, b2, b1, b0);
 			} else {
-				putByte(pos, b0);
-				putByte(pos + 1, b1);
-				putByte(pos + 2, b2);
-				putByte(pos + 3, b3);
-				putByte(pos + 4, b4);
-				putByte(pos + 5, b5);
-				putByte(pos + 6, b6);
-				putByte(pos + 7, b7);
+				putBytes(pos, b0, b1, b2, b3, b4, b5, b6, b7);
 			}
 		}
 	}
@@ -469,7 +480,11 @@ public class DynamicOutputBuffer {
 	 * @throws IOException if the buffer could not be flushed
 	 */
 	public void flushTo(OutputStream out) throws IOException {
-		flushTo(Channels.newChannel(out));
+		int n1 = _flushPosition / _bufferSize;
+		int n2 = _position / _bufferSize;
+		if (n1 < n2) {
+			flushTo(Channels.newChannel(out));
+		}
 	}
 	
 	/**
