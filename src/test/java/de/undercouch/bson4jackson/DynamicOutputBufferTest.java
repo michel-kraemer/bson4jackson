@@ -50,7 +50,7 @@ public class DynamicOutputBufferTest {
 		//test the case of a too small initial size
 		DynamicOutputBuffer db = new DynamicOutputBuffer(2);
 		assertEquals(0, db.size());
-		db.putInt32(0xAABBCCDD);
+		db.putInt(0xAABBCCDD);
 		assertEquals(4, db.size());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -64,7 +64,7 @@ public class DynamicOutputBufferTest {
 		//test the case of a large initial size
 		db = new DynamicOutputBuffer(40);
 		assertEquals(0, db.size());
-		db.putInt32(0xAABBCCDD);
+		db.putInt(0xAABBCCDD);
 		assertEquals(4, db.size());
 		
 		baos = new ByteArrayOutputStream();
@@ -81,7 +81,7 @@ public class DynamicOutputBufferTest {
 		//test the case of a too small initial size
 		DynamicOutputBuffer db = new DynamicOutputBuffer(ByteOrder.LITTLE_ENDIAN, 2);
 		assertEquals(0, db.size());
-		db.putInt32(0xAABBCCDD);
+		db.putInt(0xAABBCCDD);
 		assertEquals(4, db.size());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -95,7 +95,7 @@ public class DynamicOutputBufferTest {
 		//test the case of a large initial size
 		db = new DynamicOutputBuffer(ByteOrder.LITTLE_ENDIAN, 40);
 		assertEquals(0, db.size());
-		db.putInt32(0xAABBCCDD);
+		db.putInt(0xAABBCCDD);
 		assertEquals(4, db.size());
 		
 		baos = new ByteArrayOutputStream();
@@ -112,7 +112,7 @@ public class DynamicOutputBufferTest {
 		//test the case of a too small initial size
 		DynamicOutputBuffer db = new DynamicOutputBuffer(2);
 		assertEquals(0, db.size());
-		db.putInt64(0x66778899AABBCCDDL);
+		db.putLong(0x66778899AABBCCDDL);
 		assertEquals(8, db.size());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -130,7 +130,7 @@ public class DynamicOutputBufferTest {
 		//test the case of a large initial size
 		db = new DynamicOutputBuffer(40);
 		assertEquals(0, db.size());
-		db.putInt64(0x66778899AABBCCDDL);
+		db.putLong(0x66778899AABBCCDDL);
 		assertEquals(8, db.size());
 		
 		baos = new ByteArrayOutputStream();
@@ -151,7 +151,7 @@ public class DynamicOutputBufferTest {
 		//test the case of a too small initial size
 		DynamicOutputBuffer db = new DynamicOutputBuffer(ByteOrder.LITTLE_ENDIAN, 2);
 		assertEquals(0, db.size());
-		db.putInt64(0x66778899AABBCCDDL);
+		db.putLong(0x66778899AABBCCDDL);
 		assertEquals(8, db.size());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -169,7 +169,7 @@ public class DynamicOutputBufferTest {
 		//test the case of a large initial size
 		db = new DynamicOutputBuffer(ByteOrder.LITTLE_ENDIAN, 40);
 		assertEquals(0, db.size());
-		db.putInt64(0x66778899AABBCCDDL);
+		db.putLong(0x66778899AABBCCDDL);
 		assertEquals(8, db.size());
 		
 		baos = new ByteArrayOutputStream();

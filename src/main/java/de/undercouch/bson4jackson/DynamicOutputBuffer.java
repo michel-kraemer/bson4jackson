@@ -233,7 +233,7 @@ public class DynamicOutputBuffer {
 	
 	/**
 	 * Puts a byte into the buffer at the current write position
-	 * and increases write position accordingly.
+	 * and increases the write position accordingly.
 	 * @param b the byte to put
 	 */
 	public void putByte(byte b) {
@@ -259,8 +259,8 @@ public class DynamicOutputBuffer {
 	 * and increases write position accordingly.
 	 * @param i the integer to put
 	 */
-	public void putInt32(int i) {
-		putInt32(_position, i);
+	public void putInt(int i) {
+		putInt(_position, i);
 		_position += 4;
 	}
 	
@@ -270,7 +270,7 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the integer
 	 * @param i the integer to put
 	 */
-	public void putInt32(int pos, int i) {
+	public void putInt(int pos, int i) {
 		adaptSize(pos + 4);
 		ByteBuffer bb = getBuffer(pos);
 		if (bb.remaining() >= 4) {
@@ -298,11 +298,11 @@ public class DynamicOutputBuffer {
 	
 	/**
 	 * Puts a 64-bit integer into the buffer at the current write position
-	 * and increases write position accordingly.
+	 * and increases the write position accordingly.
 	 * @param b the byte to put
 	 */
-	public void putInt64(long l) {
-		putInt64(_position, l);
+	public void putLong(long l) {
+		putLong(_position, l);
 		_position += 8;
 	}
 	
@@ -312,7 +312,7 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the integer
 	 * @param i the integer to put
 	 */
-	public void putInt64(int pos, long l) {
+	public void putLong(int pos, long l) {
 		adaptSize(pos + 8);
 		ByteBuffer bb = getBuffer(pos);
 		if (bb.remaining() >= 8) {
@@ -352,7 +352,7 @@ public class DynamicOutputBuffer {
 	
 	/**
 	 * Puts a 32-bit floating point number into the buffer at the current
-	 * write position and increases write position accordingly.
+	 * write position and increases the write position accordingly.
 	 * @param f the float to put
 	 */
 	public void putFloat(float f) {
@@ -367,12 +367,12 @@ public class DynamicOutputBuffer {
 	 * @param f the float to put
 	 */
 	public void putFloat(int pos, float f) {
-		putInt32(pos, Float.floatToRawIntBits(f));
+		putInt(pos, Float.floatToRawIntBits(f));
 	}
 	
 	/**
 	 * Puts a 64-bit floating point number into the buffer at the current
-	 * write position and increases write position accordingly.
+	 * write position and increases the write position accordingly.
 	 * @param d the double to put
 	 */
 	public void putDouble(double d) {
@@ -387,12 +387,12 @@ public class DynamicOutputBuffer {
 	 * @param d the double to put
 	 */
 	public void putDouble(int pos, double d) {
-		putInt64(pos, Double.doubleToRawLongBits(d));
+		putLong(pos, Double.doubleToRawLongBits(d));
 	}
 	
 	/**
 	 * Encodes the given string as UTF-8, puts it into the buffer
-	 * and increases write position accordingly.
+	 * and increases the write position accordingly.
 	 * @param s the string to put
 	 * @return the number of UTF-8 bytes put
 	 */

@@ -125,9 +125,9 @@ public class BsonGenerator extends JsonGeneratorBase {
 	 */
 	public void putHeader() {
 		if (_buffer.size() == 0) {
-			_buffer.putInt32(_buffer.size());
+			_buffer.putInt(_buffer.size());
 		} else {
-			_buffer.putInt32(0, _buffer.size());
+			_buffer.putInt(0, _buffer.size());
 		}
 	}
 	
@@ -227,14 +227,14 @@ public class BsonGenerator extends JsonGeneratorBase {
 		
 		//reserve space for the string size
 		int p = _buffer.size();
-		_buffer.putInt32(0);
+		_buffer.putInt(0);
 		
 		//write string
 		int l = _buffer.putUTF8(text);
 		_buffer.putByte(BsonConstants.END_OF_STRING);
 		
 		//write string size
-		_buffer.putInt32(p, l + 1);
+		_buffer.putInt(p, l + 1);
 		
 		flushBuffer();
 	}
@@ -278,7 +278,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	public void writeNumber(int v) throws IOException, JsonGenerationException {
 		_verifyValueWrite("write number");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_INT32);
-		_buffer.putInt32(v);
+		_buffer.putInt(v);
 		flushBuffer();
 	}
 
@@ -286,7 +286,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	public void writeNumber(long v) throws IOException, JsonGenerationException {
 		_verifyValueWrite("write number");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_INT64);
-		_buffer.putInt64(v);
+		_buffer.putLong(v);
 		flushBuffer();
 	}
 
