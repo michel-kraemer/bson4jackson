@@ -91,6 +91,13 @@ public class BsonGenerator extends JsonGeneratorBase {
 		super(jsonFeatures, codec);
 		_bsonFeatures = bsonFeatures;
 		_out = out;
+		
+		if (isEnabled(Feature.ENABLE_STREAMING)) {
+			//if streaming is enabled, try to reuse some buffers
+			//this will save garbage collector cycles if the tokens
+			//written to the buffer are not too large
+			_buffer.setReuseBuffersCount(2);
+		}
 	}
 	
 	/**
@@ -161,6 +168,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 		//write buffer to output stream (if streaming is enabled,
 		//this will write the the rest of the buffer)
 		_buffer.writeTo(_out);
+		_buffer.clear();
 		_out.flush();
 		
 		if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {

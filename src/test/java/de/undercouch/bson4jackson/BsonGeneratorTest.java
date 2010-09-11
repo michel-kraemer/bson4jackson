@@ -1,6 +1,7 @@
 package de.undercouch.bson4jackson;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -64,7 +65,28 @@ public class BsonGeneratorTest {
 	
 	@Test
 	public void stream() throws Exception {
-		//TODO test streaming
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BsonFactory fac = new BsonFactory();
+		fac.enable(BsonGenerator.Feature.ENABLE_STREAMING);
+		BsonGenerator gen = fac.createJsonGenerator(baos);
+		byte[] dummy = new byte[DynamicOutputBuffer.DEFAULT_BUFFER_SIZE * 3 / 2];
+		gen.writeStartObject();
+		gen.writeFieldName("Test");
+		gen.writeBinary(dummy);
+		
+		assertEquals(DynamicOutputBuffer.DEFAULT_BUFFER_SIZE, baos.size());
+		
+		gen.writeEndObject();
+		gen.writeStartObject();
+		gen.writeFieldName("Test");
+		gen.writeBinary(dummy);
+		
+		assertEquals(DynamicOutputBuffer.DEFAULT_BUFFER_SIZE * 3, baos.size());
+		
+		gen.writeEndObject();
+		gen.close();
+		
+		assertTrue(baos.size() > DynamicOutputBuffer.DEFAULT_BUFFER_SIZE * 3);
 	}
 	
 	private void assertRaw(byte[] r) throws Exception {

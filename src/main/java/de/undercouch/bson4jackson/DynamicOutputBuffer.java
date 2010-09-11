@@ -12,7 +12,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * <p>A random-access buffer that resizes itself. This buffer differentiates
@@ -55,12 +57,12 @@ public class DynamicOutputBuffer {
 	/**
 	 * The default byte order if nothing is specified
 	 */
-	private final static ByteOrder DEFAULT_BYTE_ORDER = ByteOrder.BIG_ENDIAN;
+	public final static ByteOrder DEFAULT_BYTE_ORDER = ByteOrder.BIG_ENDIAN;
 	
 	/**
 	 * The default initial buffer size if nothing is specified
 	 */
-	private final static int DEFAULT_BUFFER_SIZE = 1024 * 8;
+	public final static int DEFAULT_BUFFER_SIZE = 1024 * 8;
 	
 	/**
 	 * The byte order of this buffer
@@ -108,6 +110,19 @@ public class DynamicOutputBuffer {
 	private CharsetEncoder _utf8Encoder;
 	
 	/**
+	 * A queue of buffers that have already been flushed and are
+	 * free to reuse.
+	 * @see #_reuseBuffersCount
+	 */
+	private Queue<ByteBuffer> _buffersToReuse;
+	
+	/**
+	 * The number of buffers to reuse
+	 * @see #_buffersToReuse
+	 */
+	private int _reuseBuffersCount = 0;
+	
+	/**
 	 * Creates a dynamic buffer with BIG_ENDIAN byte order and
 	 * a default initial buffer size of 8192 bytes.
 	 */
@@ -150,10 +165,55 @@ public class DynamicOutputBuffer {
 	}
 	
 	/**
+	 * Sets the number of buffers to save for reuse after they have been
+	 * invalidated by {@link #flushTo(OutputStream)} or {@link #flushTo(WritableByteChannel)}.
+	 * Invalidated buffers will be saved in an internal queue. When the buffer
+	 * needs a new internal buffer, it first attempts to reuse an existing one
+	 * before allocating a new one.
+	 * @param count the number of buffers to save for reuse
+	 */
+	public void setReuseBuffersCount(int count) {
+		_reuseBuffersCount = count;
+		if (_buffersToReuse != null) {
+			if (_reuseBuffersCount == 0) {
+				_buffersToReuse = null;
+			} else {
+				while (_reuseBuffersCount < _buffersToReuse.size()) {
+					_buffersToReuse.poll();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Allocates a new buffer or attempts to reuse an existing one.
 	 * @return a new buffer with the current buffer size and the current byte order
 	 */
-	private ByteBuffer allocateNewBuffer() {
+	private ByteBuffer allocateBuffer() {
+		if (_buffersToReuse != null && !_buffersToReuse.isEmpty()) {
+			ByteBuffer bb = _buffersToReuse.poll();
+			bb.rewind();
+			bb.limit(bb.capacity());
+			return bb;
+		}
 		return ByteBuffer.allocate(_bufferSize).order(_order);
+	}
+	
+	/**
+	 * Removes a buffer from the list of internal buffers and saves it for
+	 * reuse if this feature is enabled. 
+	 * @param n the number of the buffer to remove
+	 */
+	private void deallocateBuffer(int n) {
+		ByteBuffer bb = _buffers.set(n, null);
+		if (bb != null && _reuseBuffersCount > 0) {
+			if (_buffersToReuse == null) {
+				_buffersToReuse = new LinkedList<ByteBuffer>();
+			}
+			if (_reuseBuffersCount > _buffersToReuse.size()) {
+				_buffersToReuse.add(bb);
+			}
+		}
 	}
 	
 	/**
@@ -161,7 +221,7 @@ public class DynamicOutputBuffer {
 	 * @return the new buffer
 	 */
 	private ByteBuffer addNewBuffer() {
-		ByteBuffer bb = allocateNewBuffer();
+		ByteBuffer bb = allocateBuffer();
 		_buffers.add(bb);
 		return bb;
 	}
@@ -224,8 +284,11 @@ public class DynamicOutputBuffer {
 	 * Clear the buffer and reset size and write position
 	 */
 	public void clear() {
+		if (_buffersToReuse != null) {
+			_buffersToReuse.clear();
+		}
 		_buffers.clear();
-		_buffers.add(allocateNewBuffer());
+		_buffers.add(allocateBuffer());
 		_position = 0;
 		_flushPosition = 0;
 		_size = 0;
@@ -535,7 +598,7 @@ public class DynamicOutputBuffer {
 			ByteBuffer bb = _buffers.get(n1);
 			bb.rewind();
 			out.write(bb);
-			_buffers.set(n1, null);
+			deallocateBuffer(n1);
 			_flushPosition += _bufferSize;
 			++n1;
 		}
