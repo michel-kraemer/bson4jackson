@@ -12,7 +12,6 @@ import java.util.Deque;
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.ObjectCodec;
 import org.codehaus.jackson.impl.JsonGeneratorBase;
 import org.codehaus.jackson.impl.JsonWriteContext;
 
@@ -111,11 +110,10 @@ public class BsonGenerator extends JsonGeneratorBase {
      * {@link org.codehaus.jackson.JsonGenerator.Feature}s are enabled.
      * @param bsonFeatures bit flag composed of bits that indicate which
 	 * {@link Feature}s are enabled.
-	 * @param codec the codec used to write the document
 	 * @param out the output stream to write to
 	 */
-	public BsonGenerator(int jsonFeatures, int bsonFeatures, ObjectCodec codec, OutputStream out) {
-		super(jsonFeatures, codec);
+	public BsonGenerator(int jsonFeatures, int bsonFeatures, OutputStream out) {
+		super(jsonFeatures, null);
 		_bsonFeatures = bsonFeatures;
 		_out = out;
 		

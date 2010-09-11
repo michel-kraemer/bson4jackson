@@ -108,7 +108,7 @@ public class BsonGeneratorTest {
 	@Test
 	public void rawChar() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
+		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, baos);
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeRaw(new char[] { 'a', 'b' }, 0, 2);
@@ -120,7 +120,7 @@ public class BsonGeneratorTest {
 	@Test
 	public void rawString() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
+		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, baos);
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeRaw("ab");
@@ -132,7 +132,7 @@ public class BsonGeneratorTest {
 	@Test
 	public void rawBytes() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
+		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, baos);
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeBinary(new byte[] { (byte)1, (byte)2 });

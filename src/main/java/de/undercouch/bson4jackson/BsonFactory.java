@@ -91,8 +91,7 @@ public class BsonFactory extends JsonFactory {
     }
     
     public BsonGenerator createJsonGenerator(OutputStream out) throws IOException {
-    	return new BsonGenerator(_generatorFeatures,
-    			_bsonGeneratorFeatures, _objectCodec, out);
+    	return new BsonGenerator(_generatorFeatures, _bsonGeneratorFeatures, out);
     }
     
     @Override
