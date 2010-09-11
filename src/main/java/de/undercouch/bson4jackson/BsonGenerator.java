@@ -50,6 +50,34 @@ public class BsonGenerator extends JsonGeneratorBase {
 	}
 	
 	/**
+	 * A structure describing the document currently being generated
+	 * @author Michel Kraemer
+	 */
+	private static class DocumentInfo {
+		/**
+		 * The position of the document's header in the output buffer
+		 */
+		final int headerPos;
+		
+		/**
+		 * The current position in the array or -1 if the
+		 * document is no array
+		 */
+		int currentArrayPos;
+		
+		/**
+		 * Creates a new DocumentInfo object
+		 * @param headerPos the position of the document's header
+		 * in the output buffer
+		 * @param array true if the document is an array
+		 */
+		public DocumentInfo(int headerPos, boolean array) {
+			this.headerPos = headerPos;
+			this.currentArrayPos = (array ? 0 : -1);
+		}
+	}
+	
+	/**
 	 * Bit flag composed of bits that indicate which
 	 * {@link Feature}s are enabled.
 	 */
@@ -73,10 +101,9 @@ public class BsonGenerator extends JsonGeneratorBase {
 	protected int _typeMarker = 0;
 	
 	/**
-	 * Saves the positions of object headers (the document's header and headers
-	 * of embedded objects)
+	 * Saves information about documents (the main document and embedded ones)
 	 */
-	protected Deque<Integer> _headerPositions = new ArrayDeque<Integer>();
+	protected Deque<DocumentInfo> _documents = new ArrayDeque<DocumentInfo>();
 	
 	/**
 	 * Creates a new generator
@@ -107,6 +134,29 @@ public class BsonGenerator extends JsonGeneratorBase {
 	 */
 	protected boolean isEnabled(Feature f) {
 		return (_bsonFeatures & f.getMask()) != 0;
+	}
+	
+	/**
+	 * @return true if the generator is currently processing an array
+	 */
+	protected boolean isArray() {
+		return (_documents.isEmpty() ? false : _documents.peek().currentArrayPos >= 0);
+	}
+	
+	/**
+	 * Retrieves and then increases the current position in the array
+	 * currently being generated
+	 * @return the position (before it has been increased) or -1 if
+	 * the current document is not an array
+	 */
+	protected int getAndIncCurrentArrayPos() {
+		if (_documents.isEmpty()) {
+			return -1;
+		}
+		DocumentInfo di = _documents.peek();
+		int r = di.currentArrayPos;
+		++di.currentArrayPos;
+		return r;
 	}
 	
 	/**
@@ -160,7 +210,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	public void close() throws IOException {
 		//finish document
 		if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT)) {
-			while (!_headerPositions.isEmpty()) {
+			while (!_documents.isEmpty()) {
 				writeEndObject();
 			}
 		}
@@ -179,45 +229,67 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	protected void _writeStartArray() throws IOException,
 			JsonGenerationException {
-		//TODO test this method
-		_buffer.putByte(BsonConstants.TYPE_ARRAY);
+		_writeStartObject(true);
 	}
 
 	@Override
 	protected void _writeEndArray() throws IOException, JsonGenerationException {
-		// TODO Auto-generated method stub
+		_writeEndObject();
 	}
 
 	@Override
 	protected void _writeStartObject() throws IOException,
 			JsonGenerationException {
-		if (!_headerPositions.isEmpty()) {
-			//embedded object
-			_buffer.putByte(_typeMarker, BsonConstants.TYPE_DOCUMENT);
+		_writeStartObject(false);
+	}
+	
+	/**
+	 * Creates a new embedded document or array
+	 * @param array true if the embedded object is an array
+	 * @throws IOException if the document could not be created
+	 */
+	protected void _writeStartObject(boolean array) throws IOException {
+		_writeArrayFieldNameIfNeeded();
+		if (!_documents.isEmpty()) {
+			//embedded document/array
+			_buffer.putByte(_typeMarker, (array ? BsonConstants.TYPE_ARRAY :
+				BsonConstants.TYPE_DOCUMENT));
 		}
-		_headerPositions.push(_buffer.size());
+		_documents.push(new DocumentInfo(_buffer.size(), array));
 		reserveHeader();
 	}
 
 	@Override
 	protected void _writeEndObject() throws IOException,
 			JsonGenerationException {
-		if (!_headerPositions.isEmpty()) {
+		if (!_documents.isEmpty()) {
 			_buffer.putByte(BsonConstants.TYPE_END);
-			int headerPos = _headerPositions.pop();
+			DocumentInfo info = _documents.pop();
 			
 			//re-write header to update document size (only if
 			//streaming is not enabled since in this case the buffer
 			//containing the header might not be available anymore)
 			if (!isEnabled(Feature.ENABLE_STREAMING)) {
-				putHeader(headerPos);
+				putHeader(info.headerPos);
 			}
+		}
+	}
+	
+	/**
+	 * If the generator is currently processing an array, this method writes
+	 * the field name of the current element (which is just the position of the
+	 * element in the array)
+	 * @throws IOException if the field name could not be written
+	 */
+	protected void _writeArrayFieldNameIfNeeded() throws IOException {
+		if (isArray()) {
+			int p = getAndIncCurrentArrayPos();
+			_writeFieldName(String.valueOf(p), false);
 		}
 	}
 
 	@Override
-	protected void _writeFieldName(String name, boolean commaBefore)
-			throws IOException, JsonGenerationException {
+	protected void _writeFieldName(String name, boolean commaBefore) {
 		//reserve bytes for the type
 		_typeMarker = _buffer.size();
 		_buffer.putByte((byte)0);
@@ -228,7 +300,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	}
 
 	@Override
-	protected final void _verifyValueWrite(String typeMsg) throws IOException, JsonGenerationException {
+	protected void _verifyValueWrite(String typeMsg) throws IOException {
 		int status = _writeContext.writeValue();
 		if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
 			_reportError("Can not " + typeMsg + ", expecting field name");
@@ -249,6 +321,8 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeString(String text) throws IOException,
 			JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
+		
 		_verifyValueWrite("write string");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_STRING);
 		
@@ -275,6 +349,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeRaw(String text) throws IOException,
 			JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write raw string");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
 		_buffer.putInt(text.length() * 2);
@@ -292,6 +367,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeRaw(char[] text, int offset, int len) throws IOException,
 			JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write raw string");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
 		_buffer.putInt(text.length * 2);
@@ -309,6 +385,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	public void writeBinary(Base64Variant b64variant, byte[] data, int offset,
 			int len) throws IOException, JsonGenerationException {
 		//base64 is not needed for BSON
+		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write binary");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
 		_buffer.putInt(data.length);
@@ -326,6 +403,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 
 	@Override
 	public void writeNumber(int v) throws IOException, JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write number");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_INT32);
 		_buffer.putInt(v);
@@ -334,6 +412,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 
 	@Override
 	public void writeNumber(long v) throws IOException, JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write number");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_INT64);
 		_buffer.putLong(v);
@@ -356,6 +435,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeNumber(double d) throws IOException,
 			JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write number");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_DOUBLE);
 		_buffer.putDouble(d);
@@ -394,6 +474,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeBoolean(boolean state) throws IOException,
 			JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write boolean");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_BOOLEAN);
 		_buffer.putByte((byte)(state ? 1 : 0));
@@ -402,6 +483,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 
 	@Override
 	public void writeNull() throws IOException, JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write null");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_NULL);
 		flushBuffer();
