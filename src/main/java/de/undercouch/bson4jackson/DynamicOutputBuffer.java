@@ -273,9 +273,9 @@ public class DynamicOutputBuffer {
 	public void putBytes(int pos, byte... bs) {
 		adaptSize(pos + bs.length);
 		ByteBuffer bb = null;
-		int i = -1;
+		int i = _bufferSize;
 		for (byte b : bs) {
-			if (i == _bufferSize || i < 0) {
+			if (i == _bufferSize) {
 				bb = getBuffer(pos);
 				i = pos % _bufferSize;
 			}
@@ -399,6 +399,36 @@ public class DynamicOutputBuffer {
 	 */
 	public void putDouble(int pos, double d) {
 		putLong(pos, Double.doubleToRawLongBits(d));
+	}
+	
+	/**
+	 * Puts a character sequence into the buffer at the current
+	 * write position and increases the write position accordingly.
+	 * @param s the character sequence to put
+	 */
+	public void putString(CharSequence s) {
+		putString(_position, s);
+		_position += (s.length() * 2);
+	}
+	
+	/**
+	 * Puts a character sequence into the buffer at the given
+	 * position. Does not increase the write position.
+	 * @param pos the position where to put the character sequence
+	 * @param s the character sequence to put
+	 */
+	public void putString(int pos, CharSequence s) {
+		for (int i = 0; i < s.length(); ++i) {
+			char c = s.charAt(i);
+			byte b0 = (byte)c;
+			byte b1 = (byte)(c >> 8);
+			if (_order == ByteOrder.BIG_ENDIAN) {
+				putBytes(pos, b1, b0);
+			} else {
+				putBytes(pos, b0, b1);
+			}
+			pos += 2;
+		}
 	}
 	
 	/**

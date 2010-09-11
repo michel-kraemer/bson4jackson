@@ -2,9 +2,13 @@ package de.undercouch.bson4jackson;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.CharBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 import org.junit.Test;
 
@@ -299,5 +303,25 @@ public class DynamicOutputBufferTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		db.writeTo(baos);
 		db.putByte((byte)8);
+	}
+	
+	@Test
+	public void putString() throws Exception {
+		DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+		db.putString("Hello");
+		assertEquals(10, db.size());
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		db.writeTo(baos);
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		ReadableByteChannel channel = Channels.newChannel(bais);
+		ByteBuffer buf = ByteBuffer.allocate(10);
+		channel.read(buf);
+		buf.flip();
+		CharBuffer cbuf = buf.asCharBuffer();
+		char[] c = new char[5];
+		cbuf.get(c);
+		String s = String.valueOf(c);
+		assertEquals("Hello", s);
 	}
 }
