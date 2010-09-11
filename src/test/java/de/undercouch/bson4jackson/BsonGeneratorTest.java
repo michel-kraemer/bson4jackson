@@ -84,7 +84,6 @@ public class BsonGeneratorTest {
 	public void rawChar() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
-		gen.putHeader();
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeRaw(new char[] { 'a', 'b' }, 0, 2);
@@ -97,7 +96,6 @@ public class BsonGeneratorTest {
 	public void rawString() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
-		gen.putHeader();
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeRaw("ab");
@@ -110,7 +108,6 @@ public class BsonGeneratorTest {
 	public void rawBytes() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
-		gen.putHeader();
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeBinary(new byte[] { (byte)1, (byte)2 });
@@ -125,5 +122,33 @@ public class BsonGeneratorTest {
 		assertEquals(2, o.length);
 		assertEquals((byte)1, o[0]);
 		assertEquals((byte)2, o[1]);
+	}
+	
+	@Test
+	public void stackedObjects() throws Exception {
+		Map<String, Object> data1 = new LinkedHashMap<String, Object>();
+		data1.put("Int32", 5);
+		Map<String, Object> data3 = new LinkedHashMap<String, Object>();
+		data3.put("String", "Hello");
+		
+		Map<String, Object> data2 = new LinkedHashMap<String, Object>();
+		data2.put("Int64", 10L);
+		data2.put("data1", data1);
+		data2.put("data3", data3);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectMapper om = new ObjectMapper(new BsonFactory());
+		om.writeValue(baos, data2);
+		
+		byte[] r = baos.toByteArray();
+		ByteArrayInputStream bais = new ByteArrayInputStream(r);
+		
+		BSONDecoder decoder = new BSONDecoder();
+		BSONObject obj2 = decoder.readObject(bais);
+		assertEquals(10L, obj2.get("Int64"));
+		BSONObject obj1 = (BSONObject)obj2.get("data1");
+		assertEquals(5, obj1.get("Int32"));
+		BSONObject obj3 = (BSONObject)obj2.get("data3");
+		assertEquals("Hello", obj3.get("String"));
 	}
 }

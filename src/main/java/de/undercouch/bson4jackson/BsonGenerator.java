@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonGenerationException;
@@ -71,10 +73,10 @@ public class BsonGenerator extends JsonGeneratorBase {
 	protected int _typeMarker = 0;
 	
 	/**
-	 * Counts the number of nested objects. In level 0 no object marker will
-	 * be written.
+	 * Saves the positions of object headers (the document's header and headers
+	 * of embedded objects)
 	 */
-	protected int _objectLevel = 0;
+	protected Deque<Integer> _headerPositions = new ArrayDeque<Integer>();
 	
 	/**
 	 * Creates a new generator
@@ -122,15 +124,19 @@ public class BsonGenerator extends JsonGeneratorBase {
 	}
 	
 	/**
-	 * Writes the BSON header to the output buffer. This method can be called
-	 * repeatedly. It just overwrites the first bytes of the buffer.
+	 * Reserves bytes for the BSON document header
 	 */
-	public void putHeader() {
-		if (_buffer.size() == 0) {
-			_buffer.putInt(_buffer.size());
-		} else {
-			_buffer.putInt(0, _buffer.size());
-		}
+	protected void reserveHeader() {
+		_buffer.putInt(0);
+	}
+	
+	/**
+	 * Writes the BSON document header to the output buffer at the
+	 * given position. Does not increase the buffer's write position. 
+	 * @param pos the position where to write the header
+	 */
+	protected void putHeader(int pos) {
+		_buffer.putInt(pos, _buffer.size() - pos);
 	}
 	
 	@Override
@@ -146,21 +152,19 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void close() throws IOException {
 		//finish document
-		_buffer.putByte(BsonConstants.TYPE_END);
-		
-		//re-write header to update document size (only if
-		//streaming is not enabled since in this case the buffer
-		//containing the header might not be available anymore)
-		if (!isEnabled(Feature.ENABLE_STREAMING)) {
-			putHeader();
+		if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT)) {
+			while (!_headerPositions.isEmpty()) {
+				writeEndObject();
+			}
 		}
 		
 		//write buffer to output stream (if streaming is enabled,
 		//this will write the the rest of the buffer)
 		_buffer.writeTo(_out);
+		_out.flush();
 		
 		if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {
-			_out.flush();
+			_out.close();
 		}
 	}
 	
@@ -179,17 +183,27 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	protected void _writeStartObject() throws IOException,
 			JsonGenerationException {
-		if (_objectLevel > 0) {
-			_buffer.putByte(BsonConstants.TYPE_DOCUMENT);
+		if (!_headerPositions.isEmpty()) {
+			//embedded object
+			_buffer.putByte(_typeMarker, BsonConstants.TYPE_DOCUMENT);
 		}
-		++_objectLevel;
+		_headerPositions.push(_buffer.size());
+		reserveHeader();
 	}
 
 	@Override
 	protected void _writeEndObject() throws IOException,
 			JsonGenerationException {
-		if (_objectLevel > 0) {
-			--_objectLevel;
+		if (!_headerPositions.isEmpty()) {
+			_buffer.putByte(BsonConstants.TYPE_END);
+			int headerPos = _headerPositions.pop();
+			
+			//re-write header to update document size (only if
+			//streaming is not enabled since in this case the buffer
+			//containing the header might not be available anymore)
+			if (!isEnabled(Feature.ENABLE_STREAMING)) {
+				putHeader(headerPos);
+			}
 		}
 	}
 
