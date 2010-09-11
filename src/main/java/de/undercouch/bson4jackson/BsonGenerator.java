@@ -8,6 +8,7 @@ import java.nio.ByteOrder;
 
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.ObjectCodec;
 import org.codehaus.jackson.impl.JsonGeneratorBase;
 import org.codehaus.jackson.impl.JsonWriteContext;
@@ -156,7 +157,10 @@ public class BsonGenerator extends JsonGeneratorBase {
 		//write buffer to output stream (if streaming is enabled,
 		//this will write the the rest of the buffer)
 		_buffer.writeTo(_out);
-		_out.flush();
+		
+		if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {
+			_out.flush();
+		}
 	}
 	
 	@Override
