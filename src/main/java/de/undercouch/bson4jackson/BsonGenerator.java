@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
+import java.nio.CharBuffer;
 
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonGenerationException;
@@ -252,30 +253,53 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeRaw(String text) throws IOException,
 			JsonGenerationException {
-		// TODO Auto-generated method stub
+		_verifyValueWrite("write raw string");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
+		_buffer.putInt(text.length() * 2);
+		_buffer.putByte(BsonConstants.SUBTYPE_BINARY);
+		_buffer.putString(text);
+		flushBuffer();
 	}
 
 	@Override
 	public void writeRaw(String text, int offset, int len) throws IOException,
 			JsonGenerationException {
-		// TODO Auto-generated method stub
+		writeRaw(text.substring(offset, len));
 	}
 
 	@Override
 	public void writeRaw(char[] text, int offset, int len) throws IOException,
 			JsonGenerationException {
-		// TODO Auto-generated method stub
+		_verifyValueWrite("write raw string");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
+		_buffer.putInt(text.length * 2);
+		_buffer.putByte(BsonConstants.SUBTYPE_BINARY);
+		_buffer.putString(CharBuffer.wrap(text));
+		flushBuffer();
 	}
 
 	@Override
 	public void writeRaw(char c) throws IOException, JsonGenerationException {
-		// TODO Auto-generated method stub
+		writeRaw(new char[] { c }, 0, 1);
 	}
 
 	@Override
 	public void writeBinary(Base64Variant b64variant, byte[] data, int offset,
 			int len) throws IOException, JsonGenerationException {
-		// TODO Auto-generated method stub
+		//base64 is not needed for BSON
+		_verifyValueWrite("write binary");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
+		_buffer.putInt(data.length);
+		_buffer.putByte(BsonConstants.SUBTYPE_BINARY);
+		int end = offset + len;
+		if (end > data.length) {
+			end = data.length;
+		}
+		while (offset < end) {
+			_buffer.putByte(data[offset]);
+			++offset;
+		}
+		flushBuffer();
 	}
 
 	@Override

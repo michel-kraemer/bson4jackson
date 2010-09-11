@@ -39,4 +39,14 @@ public final class BsonConstants {
 	public static final byte TYPE_INT64 = 0x12;
 	public static final byte TYPE_MINKEY = (byte)0xFF;
 	public static final byte TYPE_MAXKEY = 0x7f;
+	
+	/**
+	 * Binary subtypes
+	 */
+	public static final byte SUBTYPE_BINARY = 0x00;
+	public static final byte SUBTYPE_FUNCTION = 0x01;
+	public static final byte SUBTYPE_BINARY_OLD = 0x02;
+	public static final byte SUBTYPE_UUID = 0x03;
+	public static final byte SUBTYPE_MD5 = 0x05;
+	public static final byte SUBTYPE_USER_DEFINED = (byte)0x80;
 }

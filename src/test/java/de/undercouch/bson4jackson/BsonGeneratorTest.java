@@ -5,11 +5,15 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.CharBuffer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
@@ -61,5 +65,65 @@ public class BsonGeneratorTest {
 	@Test
 	public void stream() throws Exception {
 		//TODO test streaming
+	}
+	
+	private void assertRaw(byte[] r) throws Exception {
+		ByteArrayInputStream bais = new ByteArrayInputStream(r);
+		BSONDecoder decoder = new BSONDecoder();
+		BSONObject obj = decoder.readObject(bais);
+		byte[] o = (byte[])obj.get("Test");
+		CharBuffer buf = ByteBuffer.wrap(o).order(ByteOrder.LITTLE_ENDIAN).asCharBuffer();
+		assertEquals(2, buf.remaining());
+		char a = buf.get();
+		char b = buf.get();
+		assertEquals('a', a);
+		assertEquals('b', b);
+	}
+	
+	@Test
+	public void rawChar() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
+		gen.putHeader();
+		gen.writeStartObject();
+		gen.writeFieldName("Test");
+		gen.writeRaw(new char[] { 'a', 'b' }, 0, 2);
+		gen.writeEndObject();
+		gen.close();
+		assertRaw(baos.toByteArray());
+	}
+	
+	@Test
+	public void rawString() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
+		gen.putHeader();
+		gen.writeStartObject();
+		gen.writeFieldName("Test");
+		gen.writeRaw("ab");
+		gen.writeEndObject();
+		gen.close();
+		assertRaw(baos.toByteArray());
+	}
+	
+	@Test
+	public void rawBytes() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, null, baos);
+		gen.putHeader();
+		gen.writeStartObject();
+		gen.writeFieldName("Test");
+		gen.writeBinary(new byte[] { (byte)1, (byte)2 });
+		gen.writeEndObject();
+		gen.close();
+		
+		byte[] r = baos.toByteArray();
+		ByteArrayInputStream bais = new ByteArrayInputStream(r);
+		BSONDecoder decoder = new BSONDecoder();
+		BSONObject obj = decoder.readObject(bais);
+		byte[] o = (byte[])obj.get("Test");
+		assertEquals(2, o.length);
+		assertEquals((byte)1, o[0]);
+		assertEquals((byte)2, o[1]);
 	}
 }
