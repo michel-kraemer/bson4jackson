@@ -1,4 +1,4 @@
-package de.undercouch.bson4jackson;
+package de.undercouch.bson4jackson.io;
 
 import java.io.IOException;
 import java.io.OutputStream;

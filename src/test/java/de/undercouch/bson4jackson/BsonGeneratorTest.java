@@ -21,6 +21,8 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
+import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+
 /**
  * Tests {@link BsonGenerator}
  * @author Michel Kraemer

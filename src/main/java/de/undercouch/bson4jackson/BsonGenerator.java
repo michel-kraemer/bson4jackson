@@ -15,6 +15,8 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.impl.JsonGeneratorBase;
 import org.codehaus.jackson.impl.JsonWriteContext;
 
+import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+
 /**
  * Writes BSON code to the provided output stream
  * @author Michel Kraemer
