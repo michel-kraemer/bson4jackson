@@ -1,5 +1,6 @@
 package de.undercouch.bson4jackson;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -97,22 +98,19 @@ public class BsonFactory extends JsonFactory {
     @Override
     protected JsonParser _createJsonParser(InputStream in, IOContext ctxt)
     	throws IOException, JsonParseException {
-    	//TODO
-    	return null;
+    	return new BsonParser(_parserFeatures, in);
     }
 
     @Override
     protected JsonParser _createJsonParser(Reader r, IOContext ctxt)
     	throws IOException, JsonParseException {
-    	//TODO
-    	return null;
+    	throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
     }
     
     @Override
     protected JsonParser _createJsonParser(byte[] data, int offset, int len, IOContext ctxt)
     	throws IOException, JsonParseException {
-    	//TODO
-    	return null;
+    	return _createJsonParser(new ByteArrayInputStream(data, offset, len), ctxt);
     }
     
     @Override
