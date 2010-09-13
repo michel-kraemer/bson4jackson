@@ -4,11 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
 
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
@@ -26,6 +29,8 @@ public class BsonParserTest {
 		o.put("Null", null);
 		o.put("Bool1", true);
 		o.put("Bool2", false);
+		o.put("Int32", 1234);
+		o.put("Int64", 1234L);
 		BSONEncoder enc = new BSONEncoder();
 		byte[] b = enc.encode(o);
 		
@@ -38,5 +43,24 @@ public class BsonParserTest {
 		assertNull(data.get("Null"));
 		assertEquals(true, data.get("Bool1"));
 		assertEquals(false, data.get("Bool2"));
+		assertEquals(1234, data.get("Int32"));
+		assertEquals(1234L, data.get("Int64"));
+	}
+	
+	@Test
+	public void parseBig() throws Exception {
+		BSONObject o = new BasicBSONObject();
+		o.put("Double", 5.0);
+		o.put("Int32", 1234);
+		BSONEncoder enc = new BSONEncoder();
+		byte[] b = enc.encode(o);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(b);
+		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+		mapper.configure(DeserializationConfig.Feature.USE_BIG_DECIMAL_FOR_FLOATS, true);
+		mapper.configure(DeserializationConfig.Feature.USE_BIG_INTEGER_FOR_INTS, true);
+		Map<?, ?> data = mapper.readValue(bais, Map.class);
+		assertEquals(BigDecimal.class, data.get("Double").getClass());
+		assertEquals(BigInteger.class, data.get("Int32").getClass());
 	}
 }

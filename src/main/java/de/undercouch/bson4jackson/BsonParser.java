@@ -177,14 +177,18 @@ public class BsonParser extends JsonParserMinimalBase {
 				//case BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE:
 					//TODO
 					
-				//case BsonConstants.TYPE_INT32:
-					//TODO
+				case BsonConstants.TYPE_INT32:
+					ctx.value = _in.readInt();
+					_currToken = JsonToken.VALUE_NUMBER_INT;
+					break;
 					
 				//case BsonConstants.TYPE_TIMESTAMP:
 					//TODO
 					
-				//case BsonConstants.TYPE_INT64:
-					//TODO
+				case BsonConstants.TYPE_INT64:
+					ctx.value = _in.readLong();
+					_currToken = JsonToken.VALUE_NUMBER_INT;
+					break;
 					
 				//case BsonConstants.TYPE_MINKEY:
 					//TODO
@@ -312,33 +316,55 @@ public class BsonParser extends JsonParserMinimalBase {
 
 	@Override
 	public Number getNumberValue() throws IOException, JsonParseException {
-		// TODO Auto-generated method stub
-		return null;
+		return (Number)getContext().value;
 	}
 
 	@Override
 	public NumberType getNumberType() throws IOException, JsonParseException {
-		// TODO Auto-generated method stub
+		Context ctx = _contexts.peek();
+		if (ctx == null) {
+			return null;
+		}
+		if (ctx.value instanceof Integer) {
+			return NumberType.INT;
+		} else if (ctx.value instanceof Long) {
+			return NumberType.LONG;
+		} else if (ctx.value instanceof BigInteger) {
+			return NumberType.BIG_INTEGER;
+		} else if (ctx.value instanceof Float) {
+			return NumberType.FLOAT;
+		} else if (ctx.value instanceof Double) {
+			return NumberType.DOUBLE;
+		} else if (ctx.value instanceof BigDecimal) {
+			return NumberType.BIG_DECIMAL;
+		}
 		return null;
 	}
 
 	@Override
 	public int getIntValue() throws IOException, JsonParseException {
-		// TODO Auto-generated method stub
-		return 0;
+		return ((Number)getContext().value).intValue();
 	}
 
 	@Override
 	public long getLongValue() throws IOException, JsonParseException {
-		// TODO Auto-generated method stub
-		return 0;
+		return ((Number)getContext().value).longValue();
 	}
 
 	@Override
 	public BigInteger getBigIntegerValue() throws IOException,
 			JsonParseException {
-		// TODO Auto-generated method stub
-		return null;
+		Number n = getNumberValue();
+		if (n == null) {
+			return null;
+		}
+		if (n instanceof Byte || n instanceof Integer ||
+			n instanceof Long || n instanceof Short) {
+			return BigInteger.valueOf(n.longValue());
+		} else if (n instanceof Double || n instanceof Float) {
+			return BigDecimal.valueOf(n.doubleValue()).toBigInteger();
+		}
+		return new BigInteger(n.toString());
 	}
 
 	@Override
@@ -353,8 +379,17 @@ public class BsonParser extends JsonParserMinimalBase {
 
 	@Override
 	public BigDecimal getDecimalValue() throws IOException, JsonParseException {
-		// TODO Auto-generated method stub
-		return null;
+		Number n = getNumberValue();
+		if (n == null) {
+			return null;
+		}
+		if (n instanceof Byte || n instanceof Integer ||
+			n instanceof Long || n instanceof Short) {
+			return BigDecimal.valueOf(n.longValue());
+		} else if (n instanceof Double || n instanceof Float) {
+			return BigDecimal.valueOf(n.doubleValue());
+		}
+		return new BigDecimal(n.toString());
 	}
 
 	@Override
