@@ -18,6 +18,8 @@ import org.codehaus.jackson.impl.JsonParserMinimalBase;
 
 import de.undercouch.bson4jackson.io.CountingInputStream;
 import de.undercouch.bson4jackson.io.LittleEndianInputStream;
+import de.undercouch.bson4jackson.types.Symbol;
+import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Reads a BSON document from the provided input stream
@@ -171,8 +173,10 @@ public class BsonParser extends JsonParserMinimalBase {
 				//case BsonConstants.TYPE_JAVASCRIPT:
 					//TODO
 					
-				//case BsonConstants.TYPE_SYMBOL:
-					//TODO
+				case BsonConstants.TYPE_SYMBOL:
+					ctx.value = readSymbol();
+					_currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+					break;
 					
 				//case BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE:
 					//TODO
@@ -182,19 +186,25 @@ public class BsonParser extends JsonParserMinimalBase {
 					_currToken = JsonToken.VALUE_NUMBER_INT;
 					break;
 					
-				//case BsonConstants.TYPE_TIMESTAMP:
-					//TODO
+				case BsonConstants.TYPE_TIMESTAMP:
+					ctx.value = readTimestamp();
+					_currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+					break;
 					
 				case BsonConstants.TYPE_INT64:
 					ctx.value = _in.readLong();
 					_currToken = JsonToken.VALUE_NUMBER_INT;
 					break;
 					
-				//case BsonConstants.TYPE_MINKEY:
-					//TODO
+				case BsonConstants.TYPE_MINKEY:
+					ctx.value = "MinKey";
+					_currToken = JsonToken.VALUE_STRING;
+					break;
 					
-				//case BsonConstants.TYPE_MAXKEY:
-					//TODO
+				case BsonConstants.TYPE_MAXKEY:
+					ctx.value = "MaxKey";
+					_currToken = JsonToken.VALUE_STRING;
+					break;
 				
 				default:
 					throw new JsonParseException("Unknown element type " + ctx.type,
@@ -235,6 +245,26 @@ public class BsonParser extends JsonParserMinimalBase {
 		//read terminating zero
 		_in.readByte();
 		return s;
+	}
+	
+	/**
+	 * Reads a symbol object from the input stream
+	 * @return the symbol
+	 * @throws IOException if the symbol could not be read
+	 */
+	protected Symbol readSymbol() throws IOException {
+		return new Symbol(readString());
+	}
+	
+	/**
+	 * Reads a timestamp object from the input stream
+	 * @return the timestamp
+	 * @throws IOException if the timestamp could not be read
+	 */
+	protected Timestamp readTimestamp() throws IOException {
+		int inc = _in.readInt();
+		int time = _in.readInt();
+		return new Timestamp(time, inc);
 	}
 	
 	/**
@@ -397,6 +427,12 @@ public class BsonParser extends JsonParserMinimalBase {
 			JsonParseException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public Object getEmbeddedObject() throws IOException, JsonParseException {
+		Context ctx = _contexts.peek();
+		return (ctx != null ? ctx.value : null);
 	}
 
 	@Override

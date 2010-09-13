@@ -11,9 +11,13 @@ import java.util.Map;
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
+import org.bson.types.BSONTimestamp;
+import org.bson.types.Symbol;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
+
+import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Tests {@link BsonParser}
@@ -62,5 +66,20 @@ public class BsonParserTest {
 		Map<?, ?> data = mapper.readValue(bais, Map.class);
 		assertEquals(BigDecimal.class, data.get("Double").getClass());
 		assertEquals(BigInteger.class, data.get("Int32").getClass());
+	}
+	
+	@Test
+	public void parseComplex() throws Exception {
+		BSONObject o = new BasicBSONObject();
+		o.put("Timestamp", new BSONTimestamp(0xAABB, 0xCCDD));
+		o.put("Symbol", new Symbol("Test"));
+		BSONEncoder enc = new BSONEncoder();
+		byte[] b = enc.encode(o);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(b);
+		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+		Map<?, ?> data = mapper.readValue(bais, Map.class);
+		assertEquals(new Timestamp(0xAABB, 0xCCDD), data.get("Timestamp"));
+		assertEquals(new de.undercouch.bson4jackson.types.Symbol("Test"), data.get("Symbol"));
 	}
 }
