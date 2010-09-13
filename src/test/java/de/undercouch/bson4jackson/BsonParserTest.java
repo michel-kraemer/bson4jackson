@@ -2,6 +2,7 @@ package de.undercouch.bson4jackson;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -81,5 +82,25 @@ public class BsonParserTest {
 		Map<?, ?> data = mapper.readValue(bais, Map.class);
 		assertEquals(new Timestamp(0xAABB, 0xCCDD), data.get("Timestamp"));
 		assertEquals(new de.undercouch.bson4jackson.types.Symbol("Test"), data.get("Symbol"));
+	}
+	
+	@Test
+	public void parseUndefined() throws Exception {
+		BSONObject o = new BasicBSONObject();
+		o.put("Undefined", new Object());
+		o.put("Int32", 5);
+		BSONEncoder enc = new BSONEncoder() {
+			@Override
+			protected boolean putSpecial(String name, Object o) {
+				putUndefined(name);
+				return true;
+			}
+		};
+		byte[] b = enc.encode(o);
+		ByteArrayInputStream bais = new ByteArrayInputStream(b);
+		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+		Map<?, ?> data = mapper.readValue(bais, Map.class);
+		assertEquals(1, data.size());
+		assertEquals(5, data.get("Int32"));
 	}
 }

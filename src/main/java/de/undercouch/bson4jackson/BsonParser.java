@@ -111,17 +111,24 @@ public class BsonParser extends JsonParserMinimalBase {
 			}
 			
 			if (ctx.state == State.FIELDNAME) {
-				//read field name or end of document
-				ctx.type = _in.readByte();
-				if (ctx.type == BsonConstants.TYPE_END) {
-					//end of document
-					_currToken = JsonToken.END_OBJECT;
-					_contexts.pop();
-				} else {
-					//read field name
-					ctx.fieldName = readCString();
-					ctx.state = State.VALUE;
-					_currToken = JsonToken.FIELD_NAME;
+				while (true) {
+					//read field name or end of document
+					ctx.type = _in.readByte();
+					if (ctx.type == BsonConstants.TYPE_END) {
+						//end of document
+						_currToken = JsonToken.END_OBJECT;
+						_contexts.pop();
+					} else if (ctx.type == BsonConstants.TYPE_UNDEFINED) {
+						//read field name and then ignore this token
+						readCString();
+						continue;
+					} else {
+						//read field name
+						ctx.fieldName = readCString();
+						ctx.state = State.VALUE;
+						_currToken = JsonToken.FIELD_NAME;
+					}
+					break;
 				}
 			} else {
 				//parse element's value
@@ -143,9 +150,6 @@ public class BsonParser extends JsonParserMinimalBase {
 					//TODO
 					
 				//case BsonConstants.TYPE_BINARY:
-					//TODO
-					
-				//case BsonConstants.TYPE_UNDEFINED:
 					//TODO
 					
 				//case BsonConstants.TYPE_OBJECTID:
