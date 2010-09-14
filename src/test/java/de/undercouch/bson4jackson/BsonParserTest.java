@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
@@ -89,6 +90,9 @@ public class BsonParserTest {
 		o.put("Timestamp", new BSONTimestamp(0xAABB, 0xCCDD));
 		o.put("Symbol", new Symbol("Test"));
 		o.put("ObjectId", new org.bson.types.ObjectId(1, 2, 3));
+		Pattern p = Pattern.compile(".*", Pattern.CASE_INSENSITIVE |
+				Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNICODE_CASE);
+		o.put("Regex", p);
 		
 		Map<?, ?> data = parseBsonObject(o);
 		assertEquals(new Timestamp(0xAABB, 0xCCDD), data.get("Timestamp"));
@@ -97,6 +101,9 @@ public class BsonParserTest {
 		assertEquals(1, oid.getTime());
 		assertEquals(2, oid.getMachine());
 		assertEquals(3, oid.getInc());
+		Pattern p2 = (Pattern)data.get("Regex");
+		assertEquals(p.flags(), p2.flags());
+		assertEquals(p.pattern(), p2.pattern());
 	}
 	
 	@Test

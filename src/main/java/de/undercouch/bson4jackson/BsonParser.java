@@ -11,6 +11,7 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonLocation;
@@ -189,8 +190,9 @@ public class BsonParser extends JsonParserMinimalBase {
 					_currToken = JsonToken.VALUE_NULL;
 					break;
 					
-				//case BsonConstants.TYPE_REGEX:
-					//TODO
+				case BsonConstants.TYPE_REGEX:
+					_currToken = handleRegEx();
+					break;
 					
 				case BsonConstants.TYPE_DBPOINTER:
 					_currToken = handleDBPointer();
@@ -289,6 +291,58 @@ public class BsonParser extends JsonParserMinimalBase {
 			break;
 		}
 		
+		return JsonToken.VALUE_EMBEDDED_OBJECT;
+	}
+	
+	/**
+	 * Converts a BSON regex pattern string to a combined value of Java flags that
+	 * can be used in {@link Pattern#compile(String, int)}
+	 * @param pattern the regex pattern string
+	 * @return the Java flags
+	 * @throws JsonParseException if the pattern string contains a unsupported flag
+	 */
+	protected int regexStrToFlags(String pattern) throws JsonParseException {
+		int flags = 0;
+		for (int i = 0; i < pattern.length(); ++i) {
+			char c = pattern.charAt(i);
+			switch (c) {
+			case 'i':
+				flags |= Pattern.CASE_INSENSITIVE;
+				break;
+				
+			case 'm':
+				flags |= Pattern.MULTILINE;
+				break;
+				
+			case 's':
+				flags |= Pattern.DOTALL;
+				break;
+				
+			case 'u':
+				flags |= Pattern.UNICODE_CASE;
+				break;
+				
+			case 'l':	
+			case 'x':
+				//unsupported
+				break;
+				
+			default:
+				throw new JsonParseException("Invalid regex", getTokenLocation());
+			}
+		}
+		return flags;
+	}
+	
+	/**
+	 * Reads and compiles a regular expression
+	 * @return the json token read
+	 * @throws IOException if an I/O error occurs
+	 */
+	protected JsonToken handleRegEx() throws IOException {
+		String regex = readCString();
+		String pattern = readCString();
+		getContext().value = Pattern.compile(regex, regexStrToFlags(pattern));
 		return JsonToken.VALUE_EMBEDDED_OBJECT;
 	}
 	
