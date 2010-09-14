@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonLocation;
@@ -164,8 +165,9 @@ public class BsonParser extends JsonParserMinimalBase {
 					_currToken = handleNewDocument(true);
 					break;
 					
-				//case BsonConstants.TYPE_BINARY:
-					//TODO
+				case BsonConstants.TYPE_BINARY:
+					_currToken = handleBinary();
+					break;
 					
 				case BsonConstants.TYPE_OBJECTID:
 					ctx.value = readObjectId();
@@ -255,6 +257,39 @@ public class BsonParser extends JsonParserMinimalBase {
 		_in.readInt();
 		_contexts.push(new Context(array));
 		return (array ? JsonToken.START_ARRAY : JsonToken.START_OBJECT);
+	}
+	
+	/**
+	 * Reads binary data from the input stream
+	 * @return the json token read
+	 * @throws IOException if an I/O error occurs
+	 */
+	protected JsonToken handleBinary() throws IOException {
+		int size = _in.readInt();
+		byte subtype = _in.readByte();
+		Context ctx = getContext();
+		switch (subtype) {
+		case BsonConstants.SUBTYPE_BINARY_OLD:
+			int size2 = _in.readInt();
+			byte[] buf2 = new byte[size2];
+			_in.readFully(buf2);
+			ctx.value = buf2;
+			break;
+			
+		case BsonConstants.SUBTYPE_UUID:
+			long l1 = _in.readLong();
+			long l2 = _in.readLong();
+			ctx.value = new UUID(l1, l2);
+			break;
+			
+		default:
+			byte[] buf = new byte[size];
+			_in.readFully(buf);
+			ctx.value = buf;
+			break;
+		}
+		
+		return JsonToken.VALUE_EMBEDDED_OBJECT;
 	}
 	
 	/**
@@ -521,8 +556,7 @@ public class BsonParser extends JsonParserMinimalBase {
 	@Override
 	public byte[] getBinaryValue(Base64Variant b64variant) throws IOException,
 			JsonParseException {
-		// TODO Auto-generated method stub
-		return null;
+		return getText().getBytes();
 	}
 	
 	@Override

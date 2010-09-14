@@ -1,5 +1,6 @@
 package de.undercouch.bson4jackson;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -10,11 +11,13 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 import org.bson.types.BSONTimestamp;
+import org.bson.types.Binary;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
 import org.bson.types.Symbol;
@@ -23,6 +26,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import de.undercouch.bson4jackson.types.JavaScript;
+import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
@@ -84,10 +88,15 @@ public class BsonParserTest {
 		BSONObject o = new BasicBSONObject();
 		o.put("Timestamp", new BSONTimestamp(0xAABB, 0xCCDD));
 		o.put("Symbol", new Symbol("Test"));
+		o.put("ObjectId", new org.bson.types.ObjectId(1, 2, 3));
 		
 		Map<?, ?> data = parseBsonObject(o);
 		assertEquals(new Timestamp(0xAABB, 0xCCDD), data.get("Timestamp"));
 		assertEquals(new de.undercouch.bson4jackson.types.Symbol("Test"), data.get("Symbol"));
+		ObjectId oid = (ObjectId)data.get("ObjectId");
+		assertEquals(1, oid.getTime());
+		assertEquals(2, oid.getMachine());
+		assertEquals(3, oid.getInc());
 	}
 	
 	@Test
@@ -160,5 +169,20 @@ public class BsonParserTest {
 		assertEquals("alert('Hello');", c2.getCode());
 		Map<String, Object> c1scope = c1.getScope();
 		assertEquals(5, c1scope.get("Int32"));
+	}
+	
+	@Test
+	public void parseBinary() throws Exception {
+		byte[] b = new byte[] { 1, 2, 3, 4, 5 };
+		BSONObject o = new BasicBSONObject();
+		o.put("b1", b);
+		o.put("b2", new Binary(BsonConstants.SUBTYPE_BINARY, b));
+		o.put("uuid", new UUID(1L, 2L));
+		
+		Map<?, ?> data = parseBsonObject(o);
+		assertEquals(3, data.size());
+		assertArrayEquals(b, (byte[])data.get("b1"));
+		assertArrayEquals(b, (byte[])data.get("b2"));
+		assertEquals(new UUID(1L, 2L), data.get("uuid"));
 	}
 }
