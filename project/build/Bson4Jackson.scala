@@ -8,4 +8,12 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) {
   val junitInterface = "com.novocode" % "junit-interface" % "0.4" % "test"
   val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.6.0" % "test"
   val mongodb = "org.mongodb" % "mongo-java-driver" % "2.1" % "test"
+  
+  //omit scala version
+  override def outputPath = "target"
+  override def moduleID = "bson4jackson"
+  
+  //change names of source artifacts
+  override def packageSrcJar = defaultJarPath("-sources.jar")
+  override def packageTestSrcJar = defaultJarPath("-test-sources.jar")
 }
