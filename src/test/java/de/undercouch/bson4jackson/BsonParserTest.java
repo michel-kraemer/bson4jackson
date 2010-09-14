@@ -2,11 +2,13 @@ package de.undercouch.bson4jackson;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.BSONEncoder;
@@ -25,6 +27,15 @@ import de.undercouch.bson4jackson.types.Timestamp;
  * @author Michel Kraemer
  */
 public class BsonParserTest {
+	private Map<?, ?> parseBsonObject(BSONObject o) throws IOException {
+		BSONEncoder enc = new BSONEncoder();
+		byte[] b = enc.encode(o);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(b);
+		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+		return mapper.readValue(bais, Map.class);
+	}
+	
 	@Test
 	public void parsePrimitives() throws Exception {
 		BSONObject o = new BasicBSONObject();
@@ -36,12 +47,8 @@ public class BsonParserTest {
 		o.put("Bool2", false);
 		o.put("Int32", 1234);
 		o.put("Int64", 1234L);
-		BSONEncoder enc = new BSONEncoder();
-		byte[] b = enc.encode(o);
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
-		Map<?, ?> data = mapper.readValue(bais, Map.class);
+
+		Map<?, ?> data = parseBsonObject(o);
 		assertEquals(5.0, data.get("Double"));
 		assertEquals(10.0, data.get("Float"));
 		assertEquals("Hello World", data.get("String"));
@@ -74,12 +81,8 @@ public class BsonParserTest {
 		BSONObject o = new BasicBSONObject();
 		o.put("Timestamp", new BSONTimestamp(0xAABB, 0xCCDD));
 		o.put("Symbol", new Symbol("Test"));
-		BSONEncoder enc = new BSONEncoder();
-		byte[] b = enc.encode(o);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
-		Map<?, ?> data = mapper.readValue(bais, Map.class);
+		Map<?, ?> data = parseBsonObject(o);
 		assertEquals(new Timestamp(0xAABB, 0xCCDD), data.get("Timestamp"));
 		assertEquals(new de.undercouch.bson4jackson.types.Symbol("Test"), data.get("Symbol"));
 	}
@@ -101,6 +104,39 @@ public class BsonParserTest {
 		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
 		Map<?, ?> data = mapper.readValue(bais, Map.class);
 		assertEquals(1, data.size());
+		assertEquals(5, data.get("Int32"));
+	}
+	
+	@Test
+	public void parseEmbeddedDocument() throws Exception {
+		BSONObject o1 = new BasicBSONObject();
+		o1.put("Int32", 5);
+		BSONObject o2 = new BasicBSONObject();
+		o2.put("Int64", 10L);
+		o1.put("Obj", o2);
+		o1.put("String", "Hello");
+		
+		Map<?, ?> data = parseBsonObject(o1);
+		assertEquals(3, data.size());
+		assertEquals(5, data.get("Int32"));
+		Map<?, ?> data2 = (Map<?, ?>)data.get("Obj");
+		assertEquals(1, data2.size());
+		assertEquals(10L, data2.get("Int64"));
+		assertEquals("Hello", data.get("String"));
+	}
+	
+	@Test
+	public void parseEmbeddedArray() throws Exception {
+		List<Integer> i = new ArrayList<Integer>();
+		i.add(5);
+		i.add(6);
+		BSONObject o = new BasicBSONObject();
+		o.put("Int32", 5);
+		o.put("Arr", i);
+		o.put("String", "Hello");
+		
+		Map<?, ?> data = parseBsonObject(o);
+		assertEquals(3, data.size());
 		assertEquals(5, data.get("Int32"));
 	}
 }

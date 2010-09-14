@@ -93,10 +93,7 @@ public class BsonParser extends JsonParserMinimalBase {
 	@Override
 	public JsonToken nextToken() throws IOException, JsonParseException {
 		if (_currToken == null) {
-			//read document header (skip size, we're not interested)
-			_in.readInt();
-			_currToken = JsonToken.START_OBJECT;
-			_contexts.push(new Context());
+			_currToken = handleNewDocument(false);
 		} else {
 			_tokenPos = _counter.getPosition();
 			Context ctx = _contexts.peek();
@@ -109,14 +106,16 @@ public class BsonParser extends JsonParserMinimalBase {
 				//next field
 				ctx.reset();
 			}
-			
+
+			boolean readValue = true;
 			if (ctx.state == State.FIELDNAME) {
+				readValue = false;
 				while (true) {
 					//read field name or end of document
 					ctx.type = _in.readByte();
 					if (ctx.type == BsonConstants.TYPE_END) {
 						//end of document
-						_currToken = JsonToken.END_OBJECT;
+						_currToken = (ctx.array ? JsonToken.END_ARRAY : JsonToken.END_OBJECT);
 						_contexts.pop();
 					} else if (ctx.type == BsonConstants.TYPE_UNDEFINED) {
 						//read field name and then ignore this token
@@ -127,10 +126,17 @@ public class BsonParser extends JsonParserMinimalBase {
 						ctx.fieldName = readCString();
 						ctx.state = State.VALUE;
 						_currToken = JsonToken.FIELD_NAME;
+						
+						//immediately read value of array element (discard field name)
+						if (ctx.array) {
+							readValue = true;
+						}
 					}
 					break;
 				}
-			} else {
+			}
+
+			if (readValue) {
 				//parse element's value
 				switch (ctx.type) {
 				case BsonConstants.TYPE_DOUBLE:
@@ -143,11 +149,13 @@ public class BsonParser extends JsonParserMinimalBase {
 					_currToken = JsonToken.VALUE_STRING;
 					break;
 					
-				//case BsonConstants.TYPE_DOCUMENT:
-					//TODO
+				case BsonConstants.TYPE_DOCUMENT:
+					_currToken = handleNewDocument(false);
+					break;
 					
-				//case BsonConstants.TYPE_ARRAY:
-					//TODO
+				case BsonConstants.TYPE_ARRAY:
+					_currToken = handleNewDocument(true);
+					break;
 					
 				//case BsonConstants.TYPE_BINARY:
 					//TODO
@@ -218,6 +226,20 @@ public class BsonParser extends JsonParserMinimalBase {
 			}
 		}
 		return _currToken;
+	}
+	
+	/**
+	 * Can be called when a new embedded document is found. Reads the
+	 * document's header and creates a new {@link Context} in the stack.
+	 * @param array true if the document is an embedded array
+	 * @return the json token read
+	 * @throws IOException if an I/O error occurs
+	 */
+	protected JsonToken handleNewDocument(boolean array) throws IOException {
+		//read document header (skip size, we're not interested)
+		_in.readInt();
+		_contexts.push(new Context(array));
+		return (array ? JsonToken.START_ARRAY : JsonToken.START_OBJECT);
 	}
 	
 	/**
@@ -459,6 +481,11 @@ public class BsonParser extends JsonParserMinimalBase {
 	 */
 	private static class Context {
 		/**
+		 * True if the document currently being parsed is an array
+		 */
+		final boolean array;
+		
+		/**
 		 * The bson type of the current element
 		 */
 		byte type;
@@ -477,6 +504,10 @@ public class BsonParser extends JsonParserMinimalBase {
 		 * The parsing state of the current token
 		 */
 		State state = State.FIELDNAME;
+		
+		public Context(boolean array) {
+			this.array = array;
+		}
 		
 		public void reset() {
 			type = 0;
