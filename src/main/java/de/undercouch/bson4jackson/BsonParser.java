@@ -6,7 +6,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
+import java.util.Date;
 import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonLocation;
@@ -15,9 +18,13 @@ import org.codehaus.jackson.JsonStreamContext;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.ObjectCodec;
 import org.codehaus.jackson.impl.JsonParserMinimalBase;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import de.undercouch.bson4jackson.io.CountingInputStream;
 import de.undercouch.bson4jackson.io.LittleEndianInputStream;
+import de.undercouch.bson4jackson.types.JavaScript;
+import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
 import de.undercouch.bson4jackson.types.Timestamp;
 
@@ -160,8 +167,10 @@ public class BsonParser extends JsonParserMinimalBase {
 				//case BsonConstants.TYPE_BINARY:
 					//TODO
 					
-				//case BsonConstants.TYPE_OBJECTID:
-					//TODO
+				case BsonConstants.TYPE_OBJECTID:
+					ctx.value = readObjectId();
+					_currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+					break;
 					
 				case BsonConstants.TYPE_BOOLEAN:
 					boolean b = _in.readBoolean();
@@ -169,8 +178,10 @@ public class BsonParser extends JsonParserMinimalBase {
 					_currToken = (b ? JsonToken.VALUE_TRUE : JsonToken.VALUE_FALSE);
 					break;
 					
-				//case BsonConstants.TYPE_DATETIME:
-					//TODO
+				case BsonConstants.TYPE_DATETIME:
+					ctx.value = new Date(_in.readLong());
+					_currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+					break;
 					
 				case BsonConstants.TYPE_NULL:
 					_currToken = JsonToken.VALUE_NULL;
@@ -179,19 +190,23 @@ public class BsonParser extends JsonParserMinimalBase {
 				//case BsonConstants.TYPE_REGEX:
 					//TODO
 					
-				//case BsonConstants.TYPE_DBPOINTER:
-					//TODO
+				case BsonConstants.TYPE_DBPOINTER:
+					_currToken = handleDBPointer();
+					break;
 					
-				//case BsonConstants.TYPE_JAVASCRIPT:
-					//TODO
+				case BsonConstants.TYPE_JAVASCRIPT:
+					ctx.value = new JavaScript(readString());
+					_currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+					break;
 					
 				case BsonConstants.TYPE_SYMBOL:
 					ctx.value = readSymbol();
 					_currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
 					break;
 					
-				//case BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE:
-					//TODO
+				case BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE:
+					_currToken = handleJavascriptWithScope();
+					break;
 					
 				case BsonConstants.TYPE_INT32:
 					ctx.value = _in.readInt();
@@ -243,6 +258,34 @@ public class BsonParser extends JsonParserMinimalBase {
 	}
 	
 	/**
+	 * Reads a DBPointer from the stream
+	 * @return the json token read
+	 * @throws IOException if an I/O error occurs
+	 */
+	protected JsonToken handleDBPointer() throws IOException {
+		Map<String, Object> pointer = new LinkedHashMap<String, Object>();
+		pointer.put("$ns", readString());
+		pointer.put("$id", readObjectId());
+		getContext().value = pointer;
+		return JsonToken.VALUE_EMBEDDED_OBJECT;
+	}
+	
+	/**
+	 * Can be called when embedded javascript code with scope is found. Reads
+	 * the code and the embedded document.
+	 * @return the json token read
+	 * @throws IOException if an I/O error occurs
+	 */
+	protected JsonToken handleJavascriptWithScope() throws IOException {
+		//skip size
+		_in.readInt();
+		String code = readString();
+		Map<String, Object> doc = readDocument();
+		getContext().value = new JavaScript(code, doc);
+		return JsonToken.VALUE_EMBEDDED_OBJECT;
+	}
+	
+	/**
 	 * @return a null-terminated string read from the input stream
 	 * @throws IOException if the string could not be read
 	 */
@@ -291,6 +334,33 @@ public class BsonParser extends JsonParserMinimalBase {
 		int inc = _in.readInt();
 		int time = _in.readInt();
 		return new Timestamp(time, inc);
+	}
+	
+	/**
+	 * Reads a ObjectID from the input stream
+	 * @return the ObjectID
+	 * @throws IOException if the ObjectID could not be read
+	 */
+	protected ObjectId readObjectId() throws IOException {
+		int time = _in.readInt();
+		int machine = _in.readInt();
+		int inc = _in.readInt();
+		return new ObjectId(time, machine, inc);
+	}
+	
+	/**
+	 * Fully reads an embedded document, reusing this parser
+	 * @return the parsed document
+	 * @throws IOException if the document could not be read
+	 */
+	protected Map<String, Object> readDocument() throws IOException {
+		ObjectMapper om = new ObjectMapper();
+		ObjectCodec currentCodec = getCodec();
+		if (currentCodec != null && (currentCodec instanceof ObjectMapper)) {
+			om.setDeserializationConfig(((ObjectMapper)currentCodec).copyDeserializationConfig());
+		}
+		_currToken = handleNewDocument(false);
+		return om.readValue(this, new TypeReference<Map<String, Object>>() {});
 	}
 	
 	/**

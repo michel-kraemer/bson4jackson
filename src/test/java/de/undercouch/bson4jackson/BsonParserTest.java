@@ -15,11 +15,14 @@ import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 import org.bson.types.BSONTimestamp;
+import org.bson.types.Code;
+import org.bson.types.CodeWScope;
 import org.bson.types.Symbol;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
+import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
@@ -138,5 +141,24 @@ public class BsonParserTest {
 		Map<?, ?> data = parseBsonObject(o);
 		assertEquals(3, data.size());
 		assertEquals(5, data.get("Int32"));
+	}
+	
+	@Test
+	public void parseCode() throws Exception {
+		BSONObject scope = new BasicBSONObject();
+		scope.put("Int32", 5);
+		
+		BSONObject o = new BasicBSONObject();
+		o.put("Code1", new CodeWScope("alert('test');", scope));
+		o.put("Code2", new Code("alert('Hello');"));
+		
+		Map<?, ?> data = parseBsonObject(o);
+		assertEquals(2, data.size());
+		JavaScript c1 = (JavaScript)data.get("Code1");
+		JavaScript c2 = (JavaScript)data.get("Code2");
+		assertEquals("alert('test');", c1.getCode());
+		assertEquals("alert('Hello');", c2.getCode());
+		Map<String, Object> c1scope = c1.getScope();
+		assertEquals(5, c1scope.get("Int32"));
 	}
 }
