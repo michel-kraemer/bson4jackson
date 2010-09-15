@@ -367,8 +367,8 @@ public class DynamicOutputBuffer {
 	public void putInt(int pos, int i) {
 		adaptSize(pos + 4);
 		ByteBuffer bb = getBuffer(pos);
-		if (bb.remaining() >= 4) {
-			int index = pos % _bufferSize;
+		int index = pos % _bufferSize;
+		if (bb.limit() - index >= 4) {
 			bb.putInt(index, i);
 		} else {
 			byte b0 = (byte)i;
@@ -403,8 +403,8 @@ public class DynamicOutputBuffer {
 	public void putLong(int pos, long l) {
 		adaptSize(pos + 8);
 		ByteBuffer bb = getBuffer(pos);
-		if (bb.remaining() >= 8) {
-			int index = pos % _bufferSize;
+		int index = pos % _bufferSize;
+		if (bb.limit() - index >= 8) {
 			bb.putLong(index, l);
 		} else {
 			byte b0 = (byte)l;
