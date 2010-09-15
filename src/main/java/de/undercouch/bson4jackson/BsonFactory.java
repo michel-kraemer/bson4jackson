@@ -96,9 +96,14 @@ public class BsonFactory extends JsonFactory {
     }
     
     @Override
+    public BsonParser createJsonParser(InputStream in) throws IOException {
+    	return new BsonParser(_parserFeatures, in);
+    }
+    
+    @Override
     protected JsonParser _createJsonParser(InputStream in, IOContext ctxt)
     	throws IOException, JsonParseException {
-    	return new BsonParser(_parserFeatures, in);
+    	return createJsonParser(in);
     }
 
     @Override
