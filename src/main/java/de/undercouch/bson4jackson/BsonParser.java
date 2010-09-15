@@ -127,18 +127,21 @@ public class BsonParser extends JsonParserMinimalBase {
 						_currToken = (ctx.array ? JsonToken.END_ARRAY : JsonToken.END_OBJECT);
 						_contexts.pop();
 					} else if (ctx.type == BsonConstants.TYPE_UNDEFINED) {
-						//read field name and then ignore this token
-						readCString();
+						//skip field name and then ignore this token
+						skipCString();
 						continue;
 					} else {
-						//read field name
-						ctx.fieldName = readCString();
 						ctx.state = State.VALUE;
 						_currToken = JsonToken.FIELD_NAME;
 						
-						//immediately read value of array element (discard field name)
 						if (ctx.array) {
+							//immediately read value of array element (discard field name)
 							readValue = true;
+							skipCString();
+							ctx.fieldName = null;
+						} else {
+							//read field name
+							ctx.fieldName = readCString();
 						}
 					}
 					break;
@@ -380,6 +383,14 @@ public class BsonParser extends JsonParserMinimalBase {
 	 */
 	protected String readCString() throws IOException {
 		return _in.readUTF(-1);
+	}
+	
+	/**
+	 * Skips over a null-terminated string in the input stream
+	 * @throws IOException if an I/O error occurs
+	 */
+	protected void skipCString() throws IOException {
+		while (_in.readByte() != 0);
 	}
 	
 	/**
