@@ -20,7 +20,6 @@ import org.codehaus.jackson.JsonStreamContext;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.ObjectCodec;
 import org.codehaus.jackson.impl.JsonParserMinimalBase;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import de.undercouch.bson4jackson.io.CountingInputStream;
@@ -454,13 +453,13 @@ public class BsonParser extends JsonParserMinimalBase {
 	 * @throws IOException if the document could not be read
 	 */
 	protected Map<String, Object> readDocument() throws IOException {
-		ObjectMapper om = new ObjectMapper();
-		ObjectCodec currentCodec = getCodec();
-		if (currentCodec != null && (currentCodec instanceof ObjectMapper)) {
-			om.setDeserializationConfig(((ObjectMapper)currentCodec).copyDeserializationConfig());
+		ObjectCodec codec = getCodec();
+		if (codec == null) {
+			throw new IllegalStateException("Could not parse embedded document " +
+					"because BSON parser has no codec");
 		}
 		_currToken = handleNewDocument(false);
-		return om.readValue(this, new TypeReference<Map<String, Object>>() {});
+		return codec.readValue(this, new TypeReference<Map<String, Object>>() {});
 	}
 	
 	/**

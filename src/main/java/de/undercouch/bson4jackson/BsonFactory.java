@@ -97,7 +97,12 @@ public class BsonFactory extends JsonFactory {
     
     @Override
     public BsonParser createJsonParser(InputStream in) throws IOException {
-    	return new BsonParser(_parserFeatures, in);
+    	BsonParser p = new BsonParser(_parserFeatures, in);
+    	ObjectCodec codec = getCodec();
+    	if (codec != null) {
+    		p.setCodec(codec);
+    	}
+    	return p;
     }
     
     @Override

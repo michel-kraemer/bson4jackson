@@ -40,7 +40,9 @@ public class BsonParserTest {
 		byte[] b = enc.encode(o);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
-		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+		BsonFactory fac = new BsonFactory();
+		ObjectMapper mapper = new ObjectMapper(fac);
+		fac.setCodec(mapper);
 		return mapper.readValue(bais, Map.class);
 	}
 	
