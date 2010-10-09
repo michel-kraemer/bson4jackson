@@ -23,7 +23,7 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with B
   override def bndBundleVendor = Some("Michel Kraemer")
   override def bndExportPackage = Seq(
     "de.undercouch.bson4jackson",
-    "de.undercouch.bson4jackson.io," +
+    "de.undercouch.bson4jackson.io",
     "de.undercouch.bson4jackson.types"
   ).map(_ + ";version=" + projectVersion.value)
   override def bndPrivatePackage = Seq()
