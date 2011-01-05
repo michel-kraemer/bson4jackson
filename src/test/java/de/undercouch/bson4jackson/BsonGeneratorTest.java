@@ -42,15 +42,23 @@ public class BsonGeneratorTest {
 		data.put("Float", 1234.1234f);
 		data.put("Double", 5678.5678);
 		
-		//BigIntegers will be serialized as Strings, since the standard
-		//serializer (StdSerializers#NumberSerializer) does not handle
-		//them correctly
-		data.put("BigInt", BigInteger.valueOf(Integer.MAX_VALUE));
+		//BigInteger that can be serialized as an Integer
+		data.put("BigInt1", BigInteger.valueOf(Integer.MAX_VALUE));
+		
+		//BigInteger that can be serialized as a Long
+		BigInteger bi2 = BigInteger.valueOf(Integer.MAX_VALUE)
+			.multiply(BigInteger.valueOf(2));
+		data.put("BigInt2", bi2);
+		
+		//BigInteger that will be serialized as a String
+		BigInteger bi3 = BigInteger.valueOf(Long.MAX_VALUE)
+			.multiply(BigInteger.valueOf(Long.MAX_VALUE));
+		data.put("BigInt3", bi3);
 		
 		ObjectMapper om = new ObjectMapper(new BsonFactory());
 		om.writeValue(baos, data);
 		
-		assertEquals(130, baos.size());
+		assertEquals(189, baos.size());
 		
 		byte[] r = baos.toByteArray();
 		ByteArrayInputStream bais = new ByteArrayInputStream(r);
@@ -65,7 +73,9 @@ public class BsonGeneratorTest {
 		assertEquals(null, obj.get("Null"));
 		assertEquals(1234.1234f, (Double)obj.get("Float"), 0.00001);
 		assertEquals(5678.5678, (Double)obj.get("Double"), 0.00001);
-		assertEquals(String.valueOf(Integer.MAX_VALUE), obj.get("BigInt"));
+		assertEquals(Integer.MAX_VALUE, obj.get("BigInt1"));
+		assertEquals(Long.valueOf(Integer.MAX_VALUE) * 2L, obj.get("BigInt2"));
+		assertEquals(bi3.toString(), obj.get("BigInt3"));
 	}
 	
 	@Test
