@@ -23,6 +23,11 @@ import java.nio.charset.CoderResult;
  */
 public class LittleEndianInputStream extends FilterInputStream implements DataInput {
 	/**
+	 * A unique key for a buffer used in {@link #readUTF(DataInput, int)}
+	 */
+	private static final StaticBuffers.Key UTF8_BUFFER = StaticBuffers.Key.BUFFER0;
+	
+	/**
 	 * A small buffer to speed up reading slightly
 	 */
 	private byte[] _rawBuf;
@@ -38,14 +43,9 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	private CharBuffer _lineBuffer;
 	
 	/**
-	 * A buffer that will lazily be initialized by {@link #readUTF(int)}
+	 * Used to create re-usable buffers
 	 */
-	private byte[] _rawUtf8Buf;
-	
-	/**
-	 * Wraps around {@link #_rawBuf}
-	 */
-	private ByteBuffer _utf8buf;
+	private final StaticBuffers _staticBuffers;
 	
 	/**
 	 * The character set used in {@link #readUTF(int)}. Will be
@@ -66,6 +66,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		super(in);
 		_rawBuf = new byte[8];
 		_buf = ByteBuffer.wrap(_rawBuf).order(ByteOrder.LITTLE_ENDIAN);
+		_staticBuffers = StaticBuffers.getInstance();
 	}
 	
 	/**
@@ -261,67 +262,61 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	 * @throws CharacterCodingException if an invalid UTF-8 character
 	 * has been read
 	 */
-	public static String readUTF(DataInput input, int len) throws IOException {
-		ByteBuffer utf8buf;
-		byte[] rawUtf8Buf;
+	public String readUTF(DataInput input, int len) throws IOException {
+		ByteBuffer utf8buf = _staticBuffers.byteBuffer(UTF8_BUFFER, 1024 * 8);
+		byte[] rawUtf8Buf = utf8buf.array();
 
-		if (input instanceof LittleEndianInputStream) {
-			LittleEndianInputStream leis = (LittleEndianInputStream)input;
-			if (leis._utf8buf == null) {
-				leis._rawUtf8Buf = new byte[1024 * 8];
-				leis._utf8buf = ByteBuffer.wrap(leis._rawUtf8Buf);
-			} else {
-				leis._utf8buf.rewind();
-			}
-			utf8buf = leis._utf8buf;
-			rawUtf8Buf = leis._rawUtf8Buf;
-		} else {
-			rawUtf8Buf = new byte[1024 * 8];
-			utf8buf = ByteBuffer.wrap(rawUtf8Buf);
-		}
-		
 		CharsetDecoder dec = getUTF8Decoder();
 		int expectedLen = (len > 0 ? (int)(dec.averageCharsPerByte() * len) + 1 : 1024);
-		CharBuffer cb = CharBuffer.allocate(expectedLen);
-		while (len != 0 || utf8buf.position() > 0) {
-			//read as much as possible
-			if (len < 0) {
-				//read until the first zero byte
-				while (utf8buf.remaining() > 0) {
-					byte b = input.readByte();
-					if (b == 0) {
-						len = 0;
-						break;
+		CharBuffer cb = _staticBuffers.charBuffer(UTF8_BUFFER, expectedLen);
+		try {
+			while (len != 0 || utf8buf.position() > 0) {
+				//read as much as possible
+				if (len < 0) {
+					//read until the first zero byte
+					while (utf8buf.remaining() > 0) {
+						byte b = input.readByte();
+						if (b == 0) {
+							len = 0;
+							break;
+						}
+						utf8buf.put(b);
 					}
-					utf8buf.put(b);
+					utf8buf.flip();
+				} else if (len > 0) {
+					int r = Math.min(len, utf8buf.remaining());
+					input.readFully(rawUtf8Buf, utf8buf.position(), r);
+					len -= r;
+					utf8buf.limit(r);
+					utf8buf.rewind();
+				} else {
+					utf8buf.flip();
 				}
-				utf8buf.flip();
-			} else if (len > 0) {
-				int r = Math.min(len, utf8buf.remaining());
-				input.readFully(rawUtf8Buf, utf8buf.position(), r);
-				len -= r;
-				utf8buf.limit(r);
-				utf8buf.rewind();
-			} else {
-				utf8buf.flip();
+	
+				//decode byte buffer
+				CoderResult cr = dec.decode(utf8buf, cb, len == 0);
+				if (cr.isUnderflow()) {
+					//too few input bytes. move rest of the buffer
+					//to the beginning and then try again
+					utf8buf.compact();
+				} else if (cr.isOverflow()) {
+					//output buffer to small. enlarge buffer and try again
+					utf8buf.compact();
+					
+					//create a new char buffer with the same key
+					CharBuffer newBuf = _staticBuffers.charBuffer(UTF8_BUFFER,
+							cb.capacity() + 1024);
+					
+					cb.flip();
+					newBuf.put(cb);
+					cb = newBuf;
+				} else if (cr.isError()) {
+					cr.throwException();
+				}
 			}
-
-			//decode byte buffer
-			CoderResult cr = dec.decode(utf8buf, cb, len == 0);
-			if (cr.isUnderflow()) {
-				//too few input bytes. move rest of the buffer
-				//to the beginning and then try again
-				utf8buf.compact();
-			} else if (cr.isOverflow()) {
-				//output buffer to small. enlarge buffer and try again
-				utf8buf.compact();
-				CharBuffer newBuf = CharBuffer.allocate(cb.capacity() + 1024);
-				cb.flip();
-				newBuf.put(cb);
-				cb = newBuf;
-			} else if (cr.isError()) {
-				cr.throwException();
-			}
+		} finally {
+			_staticBuffers.releaseCharBuffer(UTF8_BUFFER, cb);
+			_staticBuffers.releaseByteBuffer(UTF8_BUFFER, utf8buf);
 		}
 		
 		cb.flip();

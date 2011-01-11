@@ -24,6 +24,7 @@ import org.codehaus.jackson.type.TypeReference;
 
 import de.undercouch.bson4jackson.io.CountingInputStream;
 import de.undercouch.bson4jackson.io.LittleEndianInputStream;
+import de.undercouch.bson4jackson.io.StaticBufferedInputStream;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
@@ -74,7 +75,7 @@ public class BsonParser extends JsonParserMinimalBase {
 	public BsonParser(int jsonFeatures, InputStream in) {
 		super(jsonFeatures);
 		if (!(in instanceof BufferedInputStream)) {
-			in = new BufferedInputStream(in);
+			in = new StaticBufferedInputStream(in);
 		}
 		_counter = new CountingInputStream(in);
 		_in = new LittleEndianInputStream(_counter);
