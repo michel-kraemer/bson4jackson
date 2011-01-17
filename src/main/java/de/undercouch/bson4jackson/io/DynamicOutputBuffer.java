@@ -60,9 +60,14 @@ public class DynamicOutputBuffer {
 	public final static ByteOrder DEFAULT_BYTE_ORDER = ByteOrder.BIG_ENDIAN;
 	
 	/**
+	 * A unique key to make the first buffer re-usable
+	 */
+	private static final StaticBuffers.Key BUFFER_KEY = StaticBuffers.Key.BUFFER2;
+	
+	/**
 	 * The default initial buffer size if nothing is specified
 	 */
-	public final static int DEFAULT_BUFFER_SIZE = 1024 * 8;
+	public final static int DEFAULT_BUFFER_SIZE = Math.max(StaticBuffers.GLOBAL_MIN_SIZE, 1024 * 8);
 	
 	/**
 	 * The byte order of this buffer
@@ -124,7 +129,7 @@ public class DynamicOutputBuffer {
 	
 	/**
 	 * Creates a dynamic buffer with BIG_ENDIAN byte order and
-	 * a default initial buffer size of 8192 bytes.
+	 * a default initial buffer size of {@value #DEFAULT_BUFFER_SIZE} bytes.
 	 */
 	public DynamicOutputBuffer() {
 		this(DEFAULT_BYTE_ORDER);
@@ -141,7 +146,7 @@ public class DynamicOutputBuffer {
 	
 	/**
 	 * Creates a dynamic buffer with the given byte order and
-	 * a default initial buffer size of 8192 bytes.
+	 * a default initial buffer size of {@value #DEFAULT_BUFFER_SIZE} bytes.
 	 * @param order the byte order
 	 */
 	public DynamicOutputBuffer(ByteOrder order) {
@@ -196,7 +201,9 @@ public class DynamicOutputBuffer {
 			bb.limit(bb.capacity());
 			return bb;
 		}
-		return ByteBuffer.allocate(_bufferSize).order(_order);
+		ByteBuffer r = StaticBuffers.getInstance().byteBuffer(BUFFER_KEY, _bufferSize);
+		r.limit(_bufferSize);
+		return r.order(_order);
 	}
 	
 	/**
@@ -284,6 +291,13 @@ public class DynamicOutputBuffer {
 	 * Clear the buffer and reset size and write position
 	 */
 	public void clear() {
+		//release a static buffer if possible
+		if (_buffersToReuse != null && !_buffersToReuse.isEmpty()) {
+			StaticBuffers.getInstance().releaseByteBuffer(BUFFER_KEY, _buffersToReuse.peek());
+		} else if (!_buffers.isEmpty()) {
+			StaticBuffers.getInstance().releaseByteBuffer(BUFFER_KEY, _buffers.get(0));
+		}
+		
 		if (_buffersToReuse != null) {
 			_buffersToReuse.clear();
 		}
