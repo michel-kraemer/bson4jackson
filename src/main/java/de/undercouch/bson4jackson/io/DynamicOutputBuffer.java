@@ -288,7 +288,6 @@ public class DynamicOutputBuffer {
 			_buffersToReuse.clear();
 		}
 		_buffers.clear();
-		_buffers.add(allocateBuffer());
 		_position = 0;
 		_flushPosition = 0;
 		_size = 0;
