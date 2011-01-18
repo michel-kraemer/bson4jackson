@@ -2,11 +2,16 @@ import sbt._
 import com.weiglewilczek.bnd4sbt.BNDPlugin
 
 class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with BNDPlugin {
-  val jacksonRepo = Resolver.url("Jackson Maven Repository",
-    new java.net.URL("http://snapshots.repository.codehaus.org/"))(Patterns(
-    "[organisation]/[module]/[revision]-SNAPSHOT/[artifact]-[revision](-[timestamp]).[ext]"))
-  val jackson = "org.codehaus.jackson" % "jackson-core-asl" % "1.7.0" extra ("timestamp" -> "20110105.013252-7")
-  val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.7.0" extra ("timestamp" -> "20110105.013252-7")
+  //snapshot dependencies:
+  //val jacksonRepo = Resolver.url("Jackson Maven Repository",
+  //  new java.net.URL("http://snapshots.repository.codehaus.org/"))(Patterns(
+  //  "[organisation]/[module]/[revision]-SNAPSHOT/[artifact]-[revision](-[timestamp]).[ext]"))
+  //val jackson = "org.codehaus.jackson" % "jackson-core-asl" % "1.7.0" extra ("timestamp" -> "20110105.013252-7")
+  //val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.7.0" extra ("timestamp" -> "20110105.013252-7")
+  
+  //stable dependencies
+  val jackson = "org.codehaus.jackson" % "jackson-core-asl" % "1.7.1"
+  val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.7.1"
   
   val junit = "junit" % "junit" % "4.8.1" % "test"
   val junitInterface = "com.novocode" % "junit-interface" % "0.4" % "test"
