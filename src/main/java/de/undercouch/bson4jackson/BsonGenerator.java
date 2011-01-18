@@ -203,22 +203,31 @@ public class BsonGenerator extends JsonGeneratorBase {
 		if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {
 			_out.close();
 		}
+		
+		super.close();
 	}
 	
 	@Override
-	protected void _writeStartArray() throws IOException,
+	public void writeStartArray() throws IOException,
 			JsonGenerationException {
+		_verifyValueWrite("start an array");
+        _writeContext = _writeContext.createChildArrayContext();
 		_writeStartObject(true);
 	}
 
 	@Override
-	protected void _writeEndArray() throws IOException, JsonGenerationException {
-		_writeEndObject();
+	public void writeEndArray() throws IOException, JsonGenerationException {
+		if (!_writeContext.inArray()) {
+            _reportError("Current context not an ARRAY but " + _writeContext.getTypeDesc());
+        }
+		writeEndObjectInternal();
+		_writeContext = _writeContext.getParent();
 	}
 
 	@Override
-	protected void _writeStartObject() throws IOException,
-			JsonGenerationException {
+	public void writeStartObject() throws IOException, JsonGenerationException {
+		_verifyValueWrite("start an object");
+        _writeContext = _writeContext.createChildObjectContext();
 		_writeStartObject(false);
 	}
 	
@@ -239,8 +248,16 @@ public class BsonGenerator extends JsonGeneratorBase {
 	}
 
 	@Override
-	protected void _writeEndObject() throws IOException,
-			JsonGenerationException {
+	public void writeEndObject() throws IOException, JsonGenerationException {
+		if (!_writeContext.inObject()) {
+            _reportError("Current context not an object but " +
+            		_writeContext.getTypeDesc());
+        }
+        _writeContext = _writeContext.getParent();
+        writeEndObjectInternal();
+	}
+        
+	private void writeEndObjectInternal() {
 		if (!_documents.isEmpty()) {
 			_buffer.putByte(BsonConstants.TYPE_END);
 			DocumentInfo info = _documents.pop();
@@ -263,12 +280,20 @@ public class BsonGenerator extends JsonGeneratorBase {
 	protected void _writeArrayFieldNameIfNeeded() throws IOException {
 		if (isArray()) {
 			int p = getAndIncCurrentArrayPos();
-			_writeFieldName(String.valueOf(p), false);
+			_writeFieldName(String.valueOf(p));
 		}
 	}
 
 	@Override
-	protected void _writeFieldName(String name, boolean commaBefore) {
+	public void writeFieldName(String name) throws IOException, JsonGenerationException {
+		int status = _writeContext.writeFieldName(name);
+        if (status == JsonWriteContext.STATUS_EXPECT_VALUE) {
+            _reportError("Can not write a field name, expecting a value");
+        }
+        _writeFieldName(name);
+	}
+        
+	private void _writeFieldName(String name) throws IOException, JsonGenerationException {
 		//reserve bytes for the type
 		_typeMarker = _buffer.size();
 		_buffer.putByte((byte)0);
@@ -466,5 +491,35 @@ public class BsonGenerator extends JsonGeneratorBase {
 		_verifyValueWrite("write null");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_NULL);
 		flushBuffer();
+	}
+
+	@Override
+	public void writeRawUTF8String(byte[] text, int offset, int length)
+			throws IOException, JsonGenerationException {
+		_writeArrayFieldNameIfNeeded();
+		
+		_verifyValueWrite("write raw utf8 string");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_STRING);
+		
+		//reserve space for the string size
+		int p = _buffer.size();
+		_buffer.putInt(0);
+		
+		//write string
+		for (int i = offset; i < length; ++i) {
+			_buffer.putByte(text[i]);
+		}
+		_buffer.putByte(BsonConstants.END_OF_STRING);
+		
+		//write string size
+		_buffer.putInt(p, length);
+		
+		flushBuffer();		
+	}
+
+	@Override
+	public void writeUTF8String(byte[] text, int offset, int length)
+			throws IOException, JsonGenerationException {
+		writeRawUTF8String(text, offset, length);
 	}
 }
