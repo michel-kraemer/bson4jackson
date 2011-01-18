@@ -222,4 +222,21 @@ public class BsonGeneratorTest {
 		BSONObject b6 = o6.get(0);
 		assertEquals("Hello", b6.get("Str"));
 	}
+	
+	@Test
+	public void utf8Strings() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, baos);
+		gen.writeStartObject();
+		gen.writeFieldName("a\u20AC\u00A2\u00A2bb");
+		gen.writeString("a\u20AC\u00A2\u00A2bb");
+		gen.writeEndObject();
+		gen.close();
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		BSONDecoder decoder = new BSONDecoder();
+		BSONObject obj = decoder.readObject(bais);
+		String s = (String)obj.get("a\u20AC\u00A2\u00A2bb");
+		assertEquals("a\u20AC\u00A2\u00A2bb", s);
+	}
 }

@@ -160,27 +160,6 @@ public class BsonGenerator extends JsonGeneratorBase {
 	}
 	
 	/**
-	 * Encodes the given string into modified UTF-8 and writes it
-	 * to the output buffer
-	 * @param s the string
-	 */
-	protected void writeModifiedUTF8(CharSequence s) {
-		for (int i = 0; i < s.length(); ++i) {
-			char c = s.charAt(i);
-			if (c >= 0x0001 && c <= 0x007F) {
-				_buffer.putByte((byte)c);
-			} else if (c > 0x07FF) {
-				_buffer.putByte((byte)(0xE0 | ((c >> 12) & 0x0F)));
-				_buffer.putByte((byte)(0x80 | ((c >> 6) & 0x3F)));
-				_buffer.putByte((byte)(0x80 | (c & 0x3F)));
-			} else {
-				_buffer.putByte((byte)(0xC0 | ((c >> 6) & 0x1F)));
-				_buffer.putByte((byte)(0x80 | (c & 0x3F)));
-			}
-		}
-	}
-	
-	/**
 	 * Reserves bytes for the BSON document header
 	 */
 	protected void reserveHeader() {
@@ -295,7 +274,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 		_buffer.putByte((byte)0);
 		
 		//write field name
-		writeModifiedUTF8(name);
+		_buffer.putUTF8(name);
 		_buffer.putByte(BsonConstants.END_OF_STRING);
 	}
 
