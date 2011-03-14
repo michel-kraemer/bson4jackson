@@ -16,6 +16,11 @@ import sbt._
 import com.weiglewilczek.bnd4sbt.BNDPlugin
 
 class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with BNDPlugin {
+  //include license
+  def extraResources = "LICENSE.txt"
+  override def mainResources = super.mainResources +++ extraResources
+  override def testResources = super.testResources +++ extraResources
+  
   //snapshot dependencies:
   //val jacksonRepo = Resolver.url("Jackson Maven Repository",
   //  new java.net.URL("http://snapshots.repository.codehaus.org/"))(Patterns(
@@ -44,5 +49,5 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with B
     "de.undercouch.bson4jackson.types"
   ).map(_ + ";version=" + projectVersion.value)
   override def bndPrivatePackage = Seq()
-  override def bndIncludeResource = Seq()
+  override def bndIncludeResource = Seq(extraResources)
 }
