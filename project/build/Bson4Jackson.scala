@@ -24,8 +24,8 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with B
   //val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.7.0" extra ("timestamp" -> "20110105.013252-7")
   
   //stable dependencies
-  val jackson = "org.codehaus.jackson" % "jackson-core-asl" % "1.7.1"
-  val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.7.1"
+  val jackson = "org.codehaus.jackson" % "jackson-core-asl" % "1.7.4"
+  val jacksonMapper = "org.codehaus.jackson" % "jackson-mapper-asl" % "1.7.4"
   
   val junit = "junit" % "junit" % "4.8.1" % "test"
   val junitInterface = "com.novocode" % "junit-interface" % "0.4" % "test"
