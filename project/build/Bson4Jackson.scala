@@ -78,7 +78,14 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with B
       <developerConnection>
         scm:git:git://github.com/michel-kraemer/bson4jackson.git
       </developerConnection>
-    </scm>
+    </scm> ++
+    <developers>
+      <developer>
+        <id>michel-kraemer</id>
+        <name>Michel Kraemer</name>
+        <email>michel@undercouch.de</email>
+      </developer>
+    </developers>
   
   //never include other repositories in the pom.xml (needed for Maven central)
   override def pomIncludeRepository(repo: MavenRepository) = false
