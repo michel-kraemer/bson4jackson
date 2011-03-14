@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonLocation;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonStreamContext;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.ObjectCodec;
@@ -560,7 +561,7 @@ public class BsonParser extends JsonParserMinimalBase {
 	}
 
 	@Override
-	public NumberType getNumberType() throws IOException, JsonParseException {
+	public JsonParser.NumberType getNumberType() throws IOException, JsonParseException {
 		Context ctx = _contexts.peek();
 		if (ctx == null) {
 			return null;
