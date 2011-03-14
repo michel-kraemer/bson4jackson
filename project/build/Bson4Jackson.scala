@@ -50,4 +50,23 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with B
   ).map(_ + ";version=" + projectVersion.value)
   override def bndPrivatePackage = Seq()
   override def bndIncludeResource = Seq(extraResources)
+  
+  //add information to Maven pom.xml
+  override def pomExtra =
+    <name>bson4jackson</name> ++
+    <description>A pluggable BSON generator and parser for Jackson JSON processor.</description> ++
+    <url>http://www.michel-kraemer.de</url> ++
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses> ++
+    <scm>
+      <url>https://github.com/michel-kraemer/bson4jackson</url>
+    </scm>
+  
+  //never include other repositories in the pom.xml (needed for Maven central)
+  override def pomIncludeRepository(repo: MavenRepository) = false
 }
