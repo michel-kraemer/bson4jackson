@@ -44,6 +44,9 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with B
   override def packageSrcJar = defaultJarPath("-sources.jar")
   override def packageTestSrcJar = defaultJarPath("-test-sources.jar")
   
+  //change names of doc artifacts
+  override def packageDocsJar = defaultJarPath("-javadoc.jar")
+  
   //configure OSGi bundle
   override def bndBundleName = "bson4jackson"
   override def bndBundleVendor = Some("Michel Kraemer")
