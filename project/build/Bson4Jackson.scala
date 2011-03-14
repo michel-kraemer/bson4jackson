@@ -68,7 +68,13 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with B
       </license>
     </licenses> ++
     <scm>
-      <url>https://github.com/michel-kraemer/bson4jackson</url>
+      <connection>
+        scm:git:git://github.com/michel-kraemer/bson4jackson.git
+      </connection>
+      <url>scm:git:git://github.com/michel-kraemer/bson4jackson.git</url>
+      <developerConnection>
+        scm:git:git://github.com/michel-kraemer/bson4jackson.git
+      </developerConnection>
     </scm>
   
   //never include other repositories in the pom.xml (needed for Maven central)
