@@ -106,7 +106,12 @@ public class BsonFactory extends JsonFactory {
     }
     
     public BsonGenerator createJsonGenerator(OutputStream out) throws IOException {
-    	return new BsonGenerator(_generatorFeatures, _bsonGeneratorFeatures, out);
+    	BsonGenerator g = new BsonGenerator(_generatorFeatures, _bsonGeneratorFeatures, out);
+    	ObjectCodec codec = getCodec();
+    	if (codec != null) {
+    		g.setCodec(codec);
+    	}
+    	return g;
     }
     
     @Override
