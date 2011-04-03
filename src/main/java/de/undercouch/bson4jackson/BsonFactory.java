@@ -143,6 +143,11 @@ public class BsonFactory extends JsonFactory {
     }
     
     @Override
+    protected JsonGenerator _createUTF8JsonGenerator(OutputStream out, IOContext ctxt) throws IOException {
+    	return createJsonGenerator(out, ctxt.getEncoding());
+    }
+    
+    @Override
     protected JsonGenerator _createJsonGenerator(Writer out, IOContext ctxt)
     	throws IOException {
     	throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
