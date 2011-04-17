@@ -34,14 +34,14 @@ You may also use `Maven <http://maven.apache.org/>`_ to download bson4jackson::
     <dependency>
       <groupId>de.undercouch</groupId>
       <artifactId>bson4jackson</artifactId>
-      <version>1.1.1</version>
+      <version>1.1.2</version>
     </dependency>
   </dependencies>
 
 If you're using `sbt <http://code.google.com/p/simple-build-tool/>`_,
 you may add the following line to your project::
 
-  val bson4jackson = "de.undercouch" % "bson4jackson" % "1.1.1"
+  val bson4jackson = "de.undercouch" % "bson4jackson" % "1.1.2"
 
 License
 -------
