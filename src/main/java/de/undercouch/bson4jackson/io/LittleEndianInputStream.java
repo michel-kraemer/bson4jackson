@@ -176,6 +176,13 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		return _buf.getInt(0);
 	}
 
+	public int readIntBigEndian() throws IOException {
+		readFully(_rawBuf, 0, 4);
+                int result = _buf.order(ByteOrder.BIG_ENDIAN).getInt(0);
+                _buf.order(ByteOrder.LITTLE_ENDIAN);
+		return result;
+	}
+
 	@Override
 	public long readLong() throws IOException {
 		readFully(_rawBuf, 0, 8);

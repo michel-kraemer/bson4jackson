@@ -457,9 +457,9 @@ public class BsonParser extends JsonParserMinimalBase {
 	 * @throws IOException if the ObjectID could not be read
 	 */
 	protected ObjectId readObjectId() throws IOException {
-		int time = _in.readInt();
-		int machine = _in.readInt();
-		int inc = _in.readInt();
+		int time = _in.readIntBigEndian();
+		int machine = _in.readIntBigEndian();
+		int inc = _in.readIntBigEndian();
 		return new ObjectId(time, machine, inc);
 	}
 	
