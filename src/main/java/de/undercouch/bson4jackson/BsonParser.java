@@ -37,6 +37,7 @@ import org.codehaus.jackson.ObjectCodec;
 import org.codehaus.jackson.impl.JsonParserMinimalBase;
 import org.codehaus.jackson.type.TypeReference;
 
+import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.CountingInputStream;
 import de.undercouch.bson4jackson.io.LittleEndianInputStream;
 import de.undercouch.bson4jackson.io.StaticBufferedInputStream;
@@ -457,9 +458,9 @@ public class BsonParser extends JsonParserMinimalBase {
 	 * @throws IOException if the ObjectID could not be read
 	 */
 	protected ObjectId readObjectId() throws IOException {
-		int time = _in.readInt();
-		int machine = _in.readInt();
-		int inc = _in.readInt();
+		int time = ByteOrderUtil.flip(_in.readInt());
+		int machine = ByteOrderUtil.flip(_in.readInt());
+		int inc = ByteOrderUtil.flip(_in.readInt());
 		return new ObjectId(time, machine, inc);
 	}
 	
