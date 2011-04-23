@@ -34,7 +34,7 @@ class Bson4JacksonProject(info: ProjectInfo) extends DefaultProject(info) with B
   
   val junit = "junit" % "junit" % "4.8.1" % "test"
   val junitInterface = "com.novocode" % "junit-interface" % "0.4" % "test"
-  val mongodb = "org.mongodb" % "mongo-java-driver" % "2.1" % "test"
+  val mongodb = "org.mongodb" % "mongo-java-driver" % "2.5.3" % "test"
   
   //omit scala version
   override def outputPath = "target"
