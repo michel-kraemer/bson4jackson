@@ -27,7 +27,6 @@ public class BsonModule extends SimpleModule {
 				throw new JsonGenerationException(
 						"BsonUuidSerializer can only be used with BsonGenerator");
 			}
-			System.out.println("Serializing " + value.toString());
 			((BsonGenerator) jgen).writeBinary(null,
 					BsonConstants.SUBTYPE_UUID, uuidToLittleEndianBytes(value),
 					0, 16);
