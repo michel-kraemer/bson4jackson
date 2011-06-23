@@ -6,5 +6,8 @@
 	<classpathentry kind="src" output="target/scala_2.8.0/test-resources" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="sbt.eclipse.CLASSPATH_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jackson-all-1.8.2.jar"/>
+	<classpathentry kind="lib" path="lib/mongo-2.6.3.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="target/scala_2.8.0/classes"/>
 </classpath>
