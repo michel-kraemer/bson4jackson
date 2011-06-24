@@ -3,3 +3,5 @@ src_managed/
 target/
 project/boot/
 project/plugins/project/
+
+/lib/
