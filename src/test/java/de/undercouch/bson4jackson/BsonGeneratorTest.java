@@ -15,6 +15,7 @@
 package de.undercouch.bson4jackson;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
@@ -262,5 +264,29 @@ public class BsonGeneratorTest {
 		BSONObject obj = decoder.readObject(bais);
 		String s = (String)obj.get("a\u20AC\u00A2\u00A2bb");
 		assertEquals("a\u20AC\u00A2\u00A2bb", s);
+	}
+	
+	@Test
+	public void uuids() throws Exception {
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		data.put("Int32", 5);
+		data.put("Arr", Arrays.asList("a", "b", "c"));
+		UUID uuid = UUID.randomUUID();
+		data.put("Uuid", uuid);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectMapper om = new ObjectMapper(new BsonFactory());
+		om.registerModule(new BsonModule());
+		om.writeValue(baos, data);
+
+		byte[] r = baos.toByteArray();
+		ByteArrayInputStream bais = new ByteArrayInputStream(r);
+
+		BSONDecoder decoder = new BSONDecoder();
+		BSONObject obj = decoder.readObject(bais);
+		assertEquals(5, obj.get("Int32"));
+		assertNotNull(obj.get("Uuid"));
+		assertEquals(UUID.class, obj.get("Uuid").getClass());
+		assertEquals(uuid, obj.get("Uuid"));
 	}
 }
