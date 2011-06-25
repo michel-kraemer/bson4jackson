@@ -38,6 +38,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+import de.undercouch.bson4jackson.uuid.BsonUuidModule;
 
 /**
  * Tests {@link BsonGenerator}
@@ -276,7 +277,7 @@ public class BsonGeneratorTest {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectMapper om = new ObjectMapper(new BsonFactory());
-		om.registerModule(new BsonModule());
+		om.registerModule(new BsonUuidModule());
 		om.writeValue(baos, data);
 
 		byte[] r = baos.toByteArray();

@@ -402,13 +402,23 @@ public class BsonGenerator extends JsonGeneratorBase {
 	@Override
 	public void writeBinary(Base64Variant b64variant, byte[] data, int offset,
 			int len) throws IOException, JsonGenerationException {
-		this.writeBinary(b64variant, BsonConstants.SUBTYPE_BINARY, data,
+		writeBinary(b64variant, BsonConstants.SUBTYPE_BINARY, data,
 				offset, len);
 	}
 
+	/**
+	 * Similar to {@link #writeBinary(Base64Variant, byte, byte[], int, int)},
+	 * but with the possibility to specify a binary subtype (see
+	 * {@link BsonConstants}).
+	 * @param b64variant base64 variant to use (will be ignored for BSON)
+	 * @param subType the binary subtype
+	 * @param data the binary data to write
+	 * @param offset the offset of the first byte to write
+	 * @param len the number of bytes to write
+	 * @throws IOException if the binary data could not be written
+	 */
 	public void writeBinary(Base64Variant b64variant, byte subType,
-			byte[] data, int offset, int len) throws IOException,
-			JsonGenerationException {
+			byte[] data, int offset, int len) throws IOException {
 		//base64 is not needed for BSON
 		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write binary");
