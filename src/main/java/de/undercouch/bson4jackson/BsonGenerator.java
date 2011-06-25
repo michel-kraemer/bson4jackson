@@ -414,7 +414,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 		_verifyValueWrite("write binary");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
 		_buffer.putInt(data.length);
-		_buffer.putByte(BsonConstants.SUBTYPE_BINARY);
+		_buffer.putByte(subType);
 		int end = offset + len;
 		if (end > data.length) {
 			end = data.length;
