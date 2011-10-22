@@ -16,6 +16,7 @@ package de.undercouch.bson4jackson;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.ByteArrayInputStream;
@@ -36,6 +37,8 @@ import org.bson.types.Binary;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
 import org.bson.types.Symbol;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
@@ -173,6 +176,58 @@ public class BsonParserTest {
 		Map<?, ?> data = parseBsonObject(o);
 		assertEquals(3, data.size());
 		assertEquals(5, data.get("Int32"));
+	}
+	
+	/**
+	 * Tests reading an embedded document through
+	 * {@link BsonParser#readValueAsTree()}. Refers issue #9
+	 * @throws Exception if something went wrong
+	 * @author audistard
+	 */
+	@Test
+	public void parseEmbeddedDocumentAsTree() throws Exception {
+		BSONObject o2 = new BasicBSONObject();
+		o2.put("Int64", 10L);
+		
+		BSONObject o3 = new BasicBSONObject();
+		o3.put("Int64", 11L);
+		
+		BSONObject o1 = new BasicBSONObject();
+		o1.put("Obj2", o2);
+		o1.put("Obj3", o3);
+		
+		BSONEncoder enc = new BSONEncoder();
+		byte[] b = enc.encode(o1);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(b);
+		BsonFactory fac = new BsonFactory();
+		ObjectMapper mapper = new ObjectMapper(fac);
+		fac.setCodec(mapper);
+		
+		BsonParser dec = fac.createJsonParser(bais);
+		
+		assertEquals(JsonToken.START_OBJECT, dec.nextToken());
+		
+		assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
+		assertEquals("Obj2", dec.getCurrentName());
+		assertEquals(JsonToken.START_OBJECT, dec.nextToken());
+		JsonNode obj2 = dec.readValueAsTree(); 
+		assertEquals(1, obj2.size());
+		assertNotNull(obj2.get("Int64"));
+		assertEquals(10L, obj2.get("Int64").getValueAsLong());
+		
+		assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
+		assertEquals("Obj3", dec.getCurrentName());
+		assertEquals(JsonToken.START_OBJECT, dec.nextToken());
+		
+		assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
+		assertEquals("Int64", dec.getCurrentName());
+		assertEquals(JsonToken.VALUE_NUMBER_INT, dec.nextToken());
+		assertEquals(11L, dec.getLongValue());
+		
+		assertEquals(JsonToken.END_OBJECT, dec.nextToken());
+		
+		assertEquals(JsonToken.END_OBJECT, dec.nextToken());
 	}
 	
 	@Test

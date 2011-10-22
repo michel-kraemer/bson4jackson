@@ -117,11 +117,11 @@ public class BsonParser extends JsonParserMinimalBase {
 
 	@Override
 	public JsonToken nextToken() throws IOException, JsonParseException {
-		if (_currToken == null) {
+		Context ctx = _contexts.peek();
+		if (_currToken == null && ctx == null) {
 			_currToken = handleNewDocument(false);
 		} else {
 			_tokenPos = _counter.getPosition();
-			Context ctx = _contexts.peek();
 			if (ctx == null) {
 				throw new JsonParseException("Found element outside the document",
 						getTokenLocation());
