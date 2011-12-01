@@ -18,8 +18,10 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -262,5 +264,32 @@ public class BsonParserTest {
 		assertArrayEquals(b, (byte[])data.get("b1"));
 		assertArrayEquals(b, (byte[])data.get("b2"));
 		assertEquals(new UUID(1L, 2L), data.get("uuid"));
+	}
+	
+	/**
+	 * Test if {@link BsonParser#nextToken()} returns null if there
+	 * is no more input. Refers issue #10.
+	 * @throws Exception if something went wrong
+	 * @author hertzsprung
+	 * @author Michel Kraemer
+	 */
+	@Test
+	public void parseBeyondEnd() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		BsonFactory bsonFactory = new BsonFactory();
+		BsonGenerator generator = bsonFactory.createJsonGenerator(out);
+		generator.writeStartObject();
+		generator.writeStringField("myField", "myValue");
+		generator.writeEndObject();
+		generator.close();
+
+		BsonParser parser = (BsonParser)bsonFactory.createJsonParser(out.toByteArray());
+		//the following loop shall throw no exception and end after 4 iterations
+		int i = 0;
+		while (parser.nextToken() != null) {
+			++i;
+			assertTrue(i <= 4);
+		}
+		assertEquals(4, i);
 	}
 }

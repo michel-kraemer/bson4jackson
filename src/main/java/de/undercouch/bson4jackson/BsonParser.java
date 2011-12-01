@@ -123,6 +123,10 @@ public class BsonParser extends JsonParserMinimalBase {
 		} else {
 			_tokenPos = _counter.getPosition();
 			if (ctx == null) {
+				if (_currToken == JsonToken.END_OBJECT) {
+					//end of input
+					return null;
+				}
 				throw new JsonParseException("Found element outside the document",
 						getTokenLocation());
 			}
