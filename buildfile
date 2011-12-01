@@ -8,7 +8,7 @@ JACKSON_MAPPER = 'org.codehaus.jackson:jackson-mapper-asl:jar:1.7.4'
 MONGODB = 'org.mongodb:mongo-java-driver:jar:2.5.3'
 
 define 'bson4jackson' do
-  project.version = '1.1.2'
+  project.version = '1.2.0'
   project.group = 'de.undercouch'
   
   compile.with JACKSON, JACKSON_MAPPER
