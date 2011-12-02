@@ -272,7 +272,7 @@ public class BsonParser extends JsonParserMinimalBase {
 	
 	/**
 	 * Can be called when a new embedded document is found. Reads the
-	 * document's header and creates a new {@link Context} in the stack.
+	 * document's header and creates a new context on the stack.
 	 * @param array true if the document is an embedded array
 	 * @return the json token read
 	 * @throws IOException if an I/O error occurs

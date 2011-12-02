@@ -85,7 +85,7 @@ public class StaticBuffers {
 	 * this method multiple times with the same key will always return the
 	 * same buffer, as long as it has the minimum size and is marked to be
 	 * re-used. Buffers that are allowed to be re-used should be released using
-	 * {@link #releaseCharBuffer(int, CharBuffer)}.
+	 * {@link #releaseCharBuffer(Key, CharBuffer)}.
 	 * @param key the buffer's identifier
 	 * @param minSize the minimum size
 	 * @return the {@link CharBuffer} instance

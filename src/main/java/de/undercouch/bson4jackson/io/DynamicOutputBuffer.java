@@ -143,7 +143,7 @@ public class DynamicOutputBuffer {
 	
 	/**
 	 * Creates a dynamic buffer with BIG_ENDIAN byte order and
-	 * a default initial buffer size of {@value #DEFAULT_BUFFER_SIZE} bytes.
+	 * a default initial buffer size of {@link #DEFAULT_BUFFER_SIZE} bytes.
 	 */
 	public DynamicOutputBuffer() {
 		this(DEFAULT_BYTE_ORDER);
@@ -160,7 +160,7 @@ public class DynamicOutputBuffer {
 	
 	/**
 	 * Creates a dynamic buffer with the given byte order and
-	 * a default initial buffer size of {@value #DEFAULT_BUFFER_SIZE} bytes.
+	 * a default initial buffer size of {@link #DEFAULT_BUFFER_SIZE} bytes.
 	 * @param order the byte order
 	 */
 	public DynamicOutputBuffer(ByteOrder order) {
@@ -414,7 +414,7 @@ public class DynamicOutputBuffer {
 	/**
 	 * Puts a 64-bit integer into the buffer at the current write position
 	 * and increases the write position accordingly.
-	 * @param b the byte to put
+	 * @param l the 64-bit integer to put
 	 */
 	public void putLong(long l) {
 		putLong(_position, l);
@@ -425,7 +425,7 @@ public class DynamicOutputBuffer {
 	 * Puts a 64-bit integer into the buffer at the given position. Does
 	 * not increase the write position.
 	 * @param pos the position where to put the integer
-	 * @param i the integer to put
+	 * @param l the 64-bit integer to put
 	 */
 	public void putLong(int pos, long l) {
 		adaptSize(pos + 8);

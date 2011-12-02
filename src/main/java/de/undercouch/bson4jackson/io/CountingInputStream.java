@@ -30,7 +30,7 @@ public class CountingInputStream extends FilterInputStream {
 	private int _pos;
 	
 	/**
-	 * @see FilteredInputStream#FilteredInputStream(InputStream)
+	 * @see FilterInputStream#FilterInputStream(InputStream)
 	 */
 	public CountingInputStream(InputStream in) {
 		super(in);
