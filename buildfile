@@ -20,7 +20,7 @@ define 'bson4jackson' do
     bnd['Bundle-Vendor'] = 'Michel Kraemer'
     bnd['Include-Resource'] = _('LICENSE.txt')
   end
-  package(:bundle).pom.from create_pom(package(:jar), compile.dependencies)
+  package(:bundle).pom.from create_pom(package(:bundle), compile.dependencies)
   package :sources
   package :javadoc
   
@@ -29,6 +29,7 @@ end
 
 def create_pom(pkg, deps)
  file(_(:target, "pom.xml")) do |file|
+   Dir.mkdir(_(:target))
    File.open(file.to_s, 'w') do |f|
      xml = Builder::XmlMarkup.new(:target => f, :indent => 2)
      xml.instruct!
