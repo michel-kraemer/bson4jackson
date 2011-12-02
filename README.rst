@@ -58,24 +58,29 @@ limitations under the License.
 Compiling
 ---------
 
-You need sbt in order to compile the bson4jackson library. Please follow
-the `instructions on the sbt wiki <http://code.google.com/p/simple-build-tool/wiki/Setup>`_.
+You need buildr in order to compile the bson4jackson library. Please follow
+the `instructions on the buildr website <http://buildr.apache.org/installing.html>`_.
 
 Execute the following command to compile the library and to run the
 unit tests::
 
-  sbt update compile test
+  buildr compile test
 
 If everything runs successfully, you may create a .jar library::
 
-  sbt clean package
+  buildr clean package
 
 The library will be located under the ``target`` directory.
 
 Eclipse
 .......
 
-The source code includes a Eclipse project file. You may use the
-`sbt-eclipse-plugin <http://github.com/Gekkio/sbt-eclipse-plugin>`_
-to include libraries managed by sbt into the project's classpath.
+buildr includes a task that creates the files required to develop
+bson4jackson in Eclipse. Run the following command::
 
+  buildr eclipse
+
+Then import the project into your workspace. If Eclipse complains about
+your classpath, make sure the variable ``M2_REPO`` is set to your local
+Maven repository. You can change that variable under
+"Window/Preferences/Java/Build Path/Classpath Variables".
