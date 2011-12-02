@@ -43,6 +43,10 @@ you may add the following line to your project::
 
   val bson4jackson = "de.undercouch" % "bson4jackson" % "1.1.2"
 
+For `buildr <http://buildr.apache.org/>`_ use the following snippet::
+
+  compile.with 'de.undercouch:bson4jackson:jar:1.1.2'
+
 License
 -------
 
