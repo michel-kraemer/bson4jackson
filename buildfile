@@ -23,8 +23,6 @@ define 'bson4jackson' do
   package(:bundle).pom.from create_pom(package(:bundle), compile.dependencies)
   package :sources
   package :javadoc
-  
-  eclipse.natures :plugin
 end
 
 def create_pom(pkg, deps)
