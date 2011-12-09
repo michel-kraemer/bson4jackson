@@ -20,9 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -291,5 +289,34 @@ public class BsonParserTest {
 			assertTrue(i <= 4);
 		}
 		assertEquals(4, i);
+	}
+
+	/**
+	 * Make sure we honor the length of the document if requested
+	 *
+	 * @throws Exception if something went wrong
+	 */
+	@Test
+	public void honorLength() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		BsonFactory bsonFactory = new BsonFactory();
+		bsonFactory.enable(BsonParser.Feature.HONOR_DOCUMENT_LENGTH);
+		BsonGenerator generator = bsonFactory.createJsonGenerator(out);
+		generator.writeStartObject();
+		generator.writeStringField("myField", "myValue");
+		generator.writeEndObject();
+		generator.close();
+
+		out.write(new String("Hello world!\n").getBytes());
+
+		InputStream is = new ByteArrayInputStream(out.toByteArray());
+		ObjectMapper mapper = new ObjectMapper(bsonFactory);
+		bsonFactory.setCodec(mapper);
+		Map result = mapper.readValue(is, Map.class);
+		assertEquals("myValue", result.get("myField"));
+
+		// Now check that we can read the extra string we put at the end
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		assertEquals("Hello world!", reader.readLine());
 	}
 }
