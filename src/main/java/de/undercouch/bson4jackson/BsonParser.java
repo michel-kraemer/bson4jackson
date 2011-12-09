@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.Deque;
@@ -37,6 +39,7 @@ import org.codehaus.jackson.ObjectCodec;
 import org.codehaus.jackson.impl.JsonParserMinimalBase;
 import org.codehaus.jackson.type.TypeReference;
 
+import de.undercouch.bson4jackson.io.BoundedInputStream;
 import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.CountingInputStream;
 import de.undercouch.bson4jackson.io.LittleEndianInputStream;
@@ -52,6 +55,30 @@ import de.undercouch.bson4jackson.types.Timestamp;
  */
 public class BsonParser extends JsonParserMinimalBase {
 	/**
+	 * Defines toggable features
+	 */
+	public enum Feature {
+		/**
+		 * Honors the document length field when parsing, useful for when
+		 * reading from streams that may contain other content after the
+		 * document that will be read by something else.
+		 */
+		HONOR_DOCUMENT_LENGTH;
+
+		/**
+		 * @return the bit mask that identifies this feature
+		 */
+		public int getMask() {
+			return (1 << ordinal());
+		}
+	}
+
+	/**
+	 * The features for this parser
+	 */
+	private int _bsonFeatures;
+
+	/**
 	 * The input stream to read from
 	 */
 	private LittleEndianInputStream _in;
@@ -60,7 +87,12 @@ public class BsonParser extends JsonParserMinimalBase {
 	 * Counts the number of bytes read from {@link #_in}
 	 */
 	private CountingInputStream _counter;
-	
+
+	/**
+	 * The raw input stream passed in
+	 */
+	private InputStream _rawInputStream;
+
 	/**
 	 * True if the parser has been closed
 	 */
@@ -81,22 +113,38 @@ public class BsonParser extends JsonParserMinimalBase {
 	 * parser state.
 	 */
 	private Deque<Context> _contexts = new ArrayDeque<Context>();
-	
+
 	/**
 	 * Constructs a new parser
 	 * @param jsonFeatures bit flag composed of bits that indicate which
-     * {@link org.codehaus.jackson.JsonParser.Feature}s are enabled.
-	 * @param in the input stream to parse. 
+	 * {@link org.codehaus.jackson.JsonParser.Feature}s are enabled.
+	 * @param bsonFeatures bit flag composed of bits that indicate which
+	 * {@link Feature}s are enabled.
+	 * @param in the input stream to parse.
 	 */
-	public BsonParser(int jsonFeatures, InputStream in) {
+	public BsonParser(int jsonFeatures, int bsonFeatures, InputStream in) {
 		super(jsonFeatures);
-		if (!(in instanceof BufferedInputStream)) {
-			in = new StaticBufferedInputStream(in);
+		_bsonFeatures = bsonFeatures;
+		_rawInputStream = in;
+		//only initialize streams here if document length isn't going to be honored
+		if (!isEnabled(Feature.HONOR_DOCUMENT_LENGTH)) {
+			if (!(in instanceof BufferedInputStream)) {
+				in = new StaticBufferedInputStream(in);
+			}
+			_counter = new CountingInputStream(in);
+			_in = new LittleEndianInputStream(_counter);
 		}
-		_counter = new CountingInputStream(in);
-		_in = new LittleEndianInputStream(_counter);
 	}
-	
+
+	/**
+	 * Checks if a generator feature is enabled
+	 * @param f the feature
+	 * @return true if the given feature is enabled
+	 */
+	protected boolean isEnabled(Feature f) {
+		return (_bsonFeatures & f.getMask()) != 0;
+	}
+
 	@Override
 	public ObjectCodec getCodec() {
 		return _codec;
@@ -109,7 +157,7 @@ public class BsonParser extends JsonParserMinimalBase {
 
 	@Override
 	public void close() throws IOException {
-		if (isEnabled(Feature.AUTO_CLOSE_SOURCE)) {
+		if (isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE)) {
 			_in.close();
 		}
 		_closed = true;
@@ -278,8 +326,36 @@ public class BsonParser extends JsonParserMinimalBase {
 	 * @throws IOException if an I/O error occurs
 	 */
 	protected JsonToken handleNewDocument(boolean array) throws IOException {
-		//read document header (skip size, we're not interested)
-		_in.readInt();
+		if (_in == null) {
+			//this means Feature.HONOR_DOCUMENT_LENGTH is enabled, and w
+			//haven't yet started reading. Read the first int to find out the
+			//length of the document.
+			byte[] buf = new byte[Integer.SIZE / Byte.SIZE];
+			int len = 0;
+			while (len < buf.length) {
+				int l = _rawInputStream.read(buf, len, buf.length - len);
+				if (l == -1) {
+					throw new IOException("Not enough bytes for length of document");
+				}
+				len += l;
+			}
+			
+			//wrap the input stream by a bounded stream, subtract buf.length from the
+			//length because the size itself is included in the length
+			int documentLength = ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).getInt();
+			InputStream in = new BoundedInputStream(_rawInputStream, documentLength - buf.length);
+			
+			//buffer if the raw input stream is not already buffered
+			if (!(_rawInputStream instanceof BufferedInputStream)) {
+				in = new StaticBufferedInputStream(in);
+			}
+			_counter = new CountingInputStream(in);
+			_in = new LittleEndianInputStream(_counter);
+		} else {
+			//read document header (skip size, we're not interested)
+			_in.readInt();
+		}
+
 		_contexts.push(new Context(array));
 		return (array ? JsonToken.START_ARRAY : JsonToken.START_OBJECT);
 	}
