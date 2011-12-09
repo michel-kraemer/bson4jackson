@@ -38,13 +38,24 @@ public class BsonFactory extends JsonFactory {
 	 * The BSON generator features enabled by default
 	 */
 	private static final int DEFAULT_BSON_GENERATOR_FEATURE_FLAGS = 0;
-	
+
+	/**
+	 * The BSON parser features enabled by default
+	 */
+	private static final int DEFAULT_BSON_PARSER_FEATURE_FLAGS = 0;
+
 	/**
 	 * The BSON generator features to be enabled when a new
 	 * generator is created
 	 */
 	protected int _bsonGeneratorFeatures = DEFAULT_BSON_GENERATOR_FEATURE_FLAGS;
-	
+
+	/**
+	 * The BSON parser features to be enabled when a new parser
+	 * is created
+	 */
+	protected int _bsonParserFeatures = DEFAULT_BSON_PARSER_FEATURE_FLAGS;
+
 	/**
 	 * @see JsonFactory#JsonFactory()
 	 */
@@ -98,8 +109,51 @@ public class BsonFactory extends JsonFactory {
     public final boolean isEnabled(BsonGenerator.Feature f) {
     	return (_bsonGeneratorFeatures & f.getMask()) != 0;
     }
-    
-    @Override
+
+	/**
+	 * Method for enabling/disabling specified parser features
+	 * (check {@link BsonParser.Feature} for list of features)
+	 *
+	 * @param f	 the feature to enable or disable
+	 * @param state true if the feature should be enabled, false otherwise
+	 */
+	public final BsonFactory configure(BsonParser.Feature f, boolean state) {
+		if (state) {
+			return enable(f);
+		}
+		return disable(f);
+	}
+
+	/**
+	 * Method for enabling specified parser features
+	 * (check {@link BsonParser.Feature} for list of features)
+	 *
+	 * @param f the feature to enable
+	 */
+	public BsonFactory enable(BsonParser.Feature f) {
+		_bsonParserFeatures |= f.getMask();
+		return this;
+	}
+
+	/**
+	 * Method for disabling specified parser features
+	 * (check {@link BsonParser.Feature} for list of features)
+	 *
+	 * @param f the feature to disable
+	 */
+	public BsonFactory disable(BsonParser.Feature f) {
+		_bsonParserFeatures &= ~f.getMask();
+		return this;
+	}
+
+	/**
+	 * @return true if the specified parser feature is enabled
+	 */
+	public final boolean isEnabled(BsonParser.Feature f) {
+		return (_bsonParserFeatures & f.getMask()) != 0;
+	}
+
+	@Override
     public BsonGenerator createJsonGenerator(OutputStream out, JsonEncoding enc)
     	throws IOException {
     	return createJsonGenerator(out);
@@ -116,7 +170,7 @@ public class BsonFactory extends JsonFactory {
     
     @Override
     public BsonParser createJsonParser(InputStream in) throws IOException {
-    	BsonParser p = new BsonParser(_parserFeatures, in);
+    	BsonParser p = new BsonParser(_parserFeatures, _bsonParserFeatures, in);
     	ObjectCodec codec = getCodec();
     	if (codec != null) {
     		p.setCodec(codec);
