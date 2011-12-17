@@ -47,6 +47,12 @@ For `buildr <http://buildr.apache.org/>`_ use the following snippet::
 
   compile.with 'de.undercouch:bson4jackson:jar:1.1.2'
 
+Compatibility
+-------------
+
+bson4jackson is compatible to Jackson 1.7 and higher. It has already been
+tested successfully with Jackson 1.8 and 1.9.
+
 License
 -------
 
