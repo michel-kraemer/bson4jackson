@@ -27,7 +27,7 @@ end
 
 def create_pom(pkg, deps)
  file(_(:target, "pom.xml")) do |file|
-   Dir.mkdir(_(:target))
+   Dir.mkdir(_(:target)) unless FileTest.exists?(_(:target))
    File.open(file.to_s, 'w') do |f|
      xml = Builder::XmlMarkup.new(:target => f, :indent => 2)
      xml.instruct!
