@@ -21,8 +21,16 @@ import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.util.ArrayDeque;
+import java.util.Date;
 import java.util.Deque;
+import java.util.Map;
+import java.util.regex.Pattern;
 
+import de.undercouch.bson4jackson.io.ByteOrderUtil;
+import de.undercouch.bson4jackson.types.JavaScript;
+import de.undercouch.bson4jackson.types.ObjectId;
+import de.undercouch.bson4jackson.types.Symbol;
+import de.undercouch.bson4jackson.types.Timestamp;
 import org.codehaus.jackson.Base64Variant;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
@@ -30,6 +38,7 @@ import org.codehaus.jackson.impl.JsonGeneratorBase;
 import org.codehaus.jackson.impl.JsonWriteContext;
 
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+import org.codehaus.jackson.map.SerializerProvider;
 
 /**
  * Writes BSON code to the provided output stream
@@ -119,7 +128,13 @@ public class BsonGenerator extends JsonGeneratorBase {
 	 * Saves information about documents (the main document and embedded ones)
 	 */
 	protected Deque<DocumentInfo> _documents = new ArrayDeque<DocumentInfo>();
-	
+
+	/**
+	 * Indicates that the next object to be encountered is actually embedded inside a value, and not a complete value
+	 * itself.  This causes things like context validation and writing out the type to be skipped.
+	 */
+	protected boolean nextObjectIsEmbeddedInValue = false;
+
 	/**
 	 * Creates a new generator
 	 * @param jsonFeatures bit flag composed of bits that indicate which
@@ -240,9 +255,18 @@ public class BsonGenerator extends JsonGeneratorBase {
 
 	@Override
 	public void writeStartObject() throws IOException, JsonGenerationException {
-		_verifyValueWrite("start an object");
-        _writeContext = _writeContext.createChildObjectContext();
-		_writeStartObject(false);
+		if (nextObjectIsEmbeddedInValue) {
+			_writeContext = _writeContext.createChildObjectContext();
+			_documents.push(new DocumentInfo(_buffer.size(), false));
+			reserveHeader();
+
+			// We've skipped everything we need to skip, the next object may not be embedded in a value
+			nextObjectIsEmbeddedInValue = false;
+		} else {
+			_verifyValueWrite("start an object");
+			_writeContext = _writeContext.createChildObjectContext();
+			_writeStartObject(false);
+		}
 	}
 	
 	/**
@@ -343,18 +367,9 @@ public class BsonGenerator extends JsonGeneratorBase {
 		
 		_verifyValueWrite("write string");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_STRING);
-		
-		//reserve space for the string size
-		int p = _buffer.size();
-		_buffer.putInt(0);
-		
-		//write string
-		int l = _buffer.putUTF8(text);
-		_buffer.putByte(BsonConstants.END_OF_STRING);
-		
-		//write string size
-		_buffer.putInt(p, l + 1);
-		
+
+		_writeString(text);
+
 		flushBuffer();
 	}
 
@@ -552,5 +567,171 @@ public class BsonGenerator extends JsonGeneratorBase {
 	public void writeUTF8String(byte[] text, int offset, int length)
 			throws IOException, JsonGenerationException {
 		writeRawUTF8String(text, offset, length);
+	}
+
+	/**
+	 * Write a BSON date time
+	 *
+	 * @param date The date to write
+	 * @throws IOException If an error occurred in the stream while writing
+	 */
+	public void writeDateTime(Date date) throws IOException {
+		_writeArrayFieldNameIfNeeded();
+		_verifyValueWrite("write datetime");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_DATETIME);
+		_buffer.putLong(date.getTime());
+		flushBuffer();
+	}
+
+	/**
+	 * Write a BSON ObjectId
+	 *
+	 * @param objectId The objectId to write
+	 * @throws IOException If an error occurred in the stream while writing
+	 */
+	public void writeObjectId(ObjectId objectId) throws IOException {
+		_writeArrayFieldNameIfNeeded();
+		_verifyValueWrite("write datetime");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_OBJECTID);
+		// ObjectIds have their byte order flipped
+		int time = ByteOrderUtil.flip(objectId.getTime());
+		int machine = ByteOrderUtil.flip(objectId.getMachine());
+		int inc = ByteOrderUtil.flip(objectId.getInc());
+		_buffer.putInt(time);
+		_buffer.putInt(machine);
+		_buffer.putInt(inc);
+		flushBuffer();
+	}
+
+	/**
+	 * Converts a a Java flags word into a BSON options pattern
+	 *
+	 * @param flags the Java flags
+	 * @return the regex options string
+	 */
+	protected String flagsToRegexOptions(int flags) {
+		StringBuilder options = new StringBuilder();
+		if ((flags & Pattern.CASE_INSENSITIVE) != 0) {
+			options.append("i");
+		}
+		if ((flags & Pattern.MULTILINE) != 0) {
+			options.append("m");
+		}
+		if ((flags & Pattern.DOTALL) != 0) {
+			options.append("s");
+		}
+		if ((flags & Pattern.UNICODE_CASE) != 0) {
+			options.append("u");
+		}
+		return options.toString();
+	}
+
+	/**
+	 * Write a BSON regex
+	 *
+	 * @param pattern The regex to write
+	 * @throws IOException If an error occurred in the stream while writing
+	 */
+	public void writeRegex(Pattern pattern) throws IOException {
+		_writeArrayFieldNameIfNeeded();
+		_verifyValueWrite("write regex");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_REGEX);
+		_writeCString(pattern.pattern());
+		_writeCString(flagsToRegexOptions(pattern.flags()));
+		flushBuffer();
+	}
+
+	/**
+	 * Write a MongoDB timestamp
+	 *
+	 * @param timestamp The timestamp to write
+	 * @throws IOException If an error occurred in the stream while writing
+	 */
+	public void writeTimestamp(Timestamp timestamp) throws IOException {
+		_writeArrayFieldNameIfNeeded();
+		_verifyValueWrite("write timestamp");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_TIMESTAMP);
+		_buffer.putInt(timestamp.getInc());
+		_buffer.putInt(timestamp.getTime());
+		flushBuffer();
+	}
+
+	/**
+	 * Write a BSON JavaScript object
+	 *
+	 * @param javaScript The javaScript to write
+	 * @param provider The serializer provider, for serializing the scope
+	 * @throws IOException If an error occurred in the stream while writing
+	 */
+	public void writeJavaScript(JavaScript javaScript, SerializerProvider provider) throws IOException {
+		_writeArrayFieldNameIfNeeded();
+		_verifyValueWrite("write javascript");
+		if (javaScript.getScope() == null) {
+			_buffer.putByte(_typeMarker, BsonConstants.TYPE_JAVASCRIPT);
+			_writeString(javaScript.getCode());
+		} else {
+			_buffer.putByte(_typeMarker, BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE);
+			// reserve space for the entire structure size
+			int p = _buffer.size();
+			_buffer.putInt(0);
+
+			// write the code
+			_writeString(javaScript.getCode());
+
+			nextObjectIsEmbeddedInValue = true;
+			// write the document
+			provider.findValueSerializer(Map.class, null).serialize(javaScript.getScope(), this, provider);
+			// write the length
+			if (!isEnabled(Feature.ENABLE_STREAMING)) {
+				int l = _buffer.size() - p + 4;
+				_buffer.putInt(p, l);
+			}
+		}
+		flushBuffer();
+	}
+
+	/**
+	 * Write a BSON Symbol object
+	 *
+	 * @param symbol The symbol to write
+	 * @throws IOException If an error occurred in the stream while writing
+	 */
+	public void writeSymbol(Symbol symbol) throws IOException {
+		_writeArrayFieldNameIfNeeded();
+		_verifyValueWrite("write symbol");
+		_buffer.putByte(_typeMarker, BsonConstants.TYPE_SYMBOL);
+		_writeString(symbol.getSymbol());
+		flushBuffer();
+	}
+
+	/**
+	 * Write a BSON string structure (a null terminated string prependend by the length of the string)
+	 *
+	 * @param string The string to write
+	 * @return The number of bytes written, including the terminating null byte and the size of the string
+	 */
+	protected int _writeString(String string) {
+		//reserve space for the string size
+		int p = _buffer.size();
+		_buffer.putInt(0);
+
+		//write string
+		int l = _writeCString(string);
+
+		//write string size
+		_buffer.putInt(p, l);
+		return l + 4;
+	}
+
+	/**
+	 * Write a BSON cstring structure (a null terminated string)
+	 *
+	 * @param string The string to write
+	 * @return The number of bytes written, including the terminating null byte
+	 */
+	protected int _writeCString(String string) {
+		int l = _buffer.putUTF8(string);
+		_buffer.putByte(BsonConstants.END_OF_STRING);
+		return l + 1;
 	}
 }

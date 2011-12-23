@@ -14,31 +14,30 @@
 
 package de.undercouch.bson4jackson;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Pattern;
 
+import de.undercouch.bson4jackson.types.JavaScript;
+import de.undercouch.bson4jackson.types.ObjectId;
+import de.undercouch.bson4jackson.types.Timestamp;
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
+import org.bson.types.BSONTimestamp;
+import org.bson.types.Code;
+import org.bson.types.CodeWScope;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
-import de.undercouch.bson4jackson.uuid.BsonUuidModule;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests {@link BsonGenerator}
@@ -72,16 +71,8 @@ public class BsonGeneratorTest {
 			.multiply(BigInteger.valueOf(Long.MAX_VALUE));
 		data.put("BigInt3", bi3);
 		
-		ObjectMapper om = new ObjectMapper(new BsonFactory());
-		om.writeValue(baos, data);
-		
-		assertEquals(189, baos.size());
-		
-		byte[] r = baos.toByteArray();
-		ByteArrayInputStream bais = new ByteArrayInputStream(r);
-		
-		BSONDecoder decoder = new BSONDecoder();
-		BSONObject obj = decoder.readObject(bais);
+		BSONObject obj = generateAndParse(data);
+
 		assertEquals(5, obj.get("Int32"));
 		assertEquals(true, obj.get("Boolean1"));
 		assertEquals(false, obj.get("Boolean2"));
@@ -190,15 +181,8 @@ public class BsonGeneratorTest {
 		data2.put("data1", data1);
 		data2.put("data3", data3);
 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectMapper om = new ObjectMapper(new BsonFactory());
-		om.writeValue(baos, data2);
-		
-		byte[] r = baos.toByteArray();
-		ByteArrayInputStream bais = new ByteArrayInputStream(r);
-		
-		BSONDecoder decoder = new BSONDecoder();
-		BSONObject obj2 = decoder.readObject(bais);
+		BSONObject obj2 = generateAndParse(data2);
+
 		assertEquals(10L, obj2.get("Int64"));
 		BSONObject obj1 = (BSONObject)obj2.get("data1");
 		assertEquals(5, obj1.get("Int32"));
@@ -226,15 +210,8 @@ public class BsonGeneratorTest {
 		a6.add(data2);
 		data.put("Arr3", a6);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectMapper om = new ObjectMapper(new BsonFactory());
-		om.writeValue(baos, data);
-		
-		byte[] r = baos.toByteArray();
-		ByteArrayInputStream bais = new ByteArrayInputStream(r);
-		
-		BSONDecoder decoder = new BSONDecoder();
-		BSONObject obj = decoder.readObject(bais);
+		BSONObject obj = generateAndParse(data);
+
 		assertEquals(5, obj.get("Int32"));
 		List<String> o = (List<String>)obj.get("Arr");
 		assertEquals(3, o.size());
@@ -275,19 +252,115 @@ public class BsonGeneratorTest {
 		UUID uuid = UUID.randomUUID();
 		data.put("Uuid", uuid);
 
+		BSONObject obj = generateAndParse(data);
+
+		assertEquals(5, obj.get("Int32"));
+		assertNotNull(obj.get("Uuid"));
+		assertEquals(UUID.class, obj.get("Uuid").getClass());
+		assertEquals(uuid, obj.get("Uuid"));
+	}
+
+	@Test
+	public void dates() throws Exception {
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		Date date = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		data.put("date", date);
+		data.put("calendar", calendar);
+
+		BSONObject obj = generateAndParse(data);
+
+		assertEquals(date, obj.get("date"));
+		assertEquals(date, obj.get("calendar"));
+	}
+
+	@Test
+	public void objectIds() throws Exception {
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		ObjectId objectId = new ObjectId((int) (System.currentTimeMillis() / 1000), new Random().nextInt(), 100);
+		data.put("_id", objectId);
+
+		BSONObject obj = generateAndParse(data);
+
+		org.bson.types.ObjectId result = (org.bson.types.ObjectId) obj.get("_id");
+		assertNotNull(result);
+		assertEquals(objectId.getTime(), result.getTimeSecond());
+		assertEquals(objectId.getMachine(), result.getMachine());
+		assertEquals(objectId.getInc(), result.getInc());
+	}
+
+	@Test
+	public void patterns() throws Exception {
+		Pattern pattern = Pattern.compile("a.*a", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		data.put("pattern", pattern);
+
+		BSONObject obj = generateAndParse(data);
+
+		Pattern result = (Pattern) obj.get("pattern");
+		assertNotNull(result);
+		assertEquals(pattern.pattern(), result.pattern());
+		assertEquals(pattern.flags(), result.flags());
+	}
+
+	@Test
+	public void timestamps() throws Exception {
+		Timestamp timestamp = new Timestamp(100, 200);
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		data.put("timestamp", timestamp);
+
+		BSONObject obj = generateAndParse(data);
+
+		BSONTimestamp result = (BSONTimestamp) obj.get("timestamp");
+		assertNotNull(result);
+		assertEquals(timestamp.getInc(), result.getInc());
+		assertEquals(timestamp.getTime(), result.getTime());
+	}
+
+	@Test
+	public void javascript() throws Exception {
+		JavaScript javaScript = new JavaScript("a < 100");
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		data.put("javaScript", javaScript);
+
+		BSONObject obj = generateAndParse(data);
+
+		Code result = (Code) obj.get("javaScript");
+		assertNotNull(result);
+		assertEquals(javaScript.getCode(), result.getCode());
+	}
+
+	@Test
+	public void javascriptWithScope() throws Exception {
+		Map<String, Object> scope = new LinkedHashMap<String, Object>();
+		scope.put("a", 99);
+		scope.put("b", 80);
+		JavaScript javaScript = new JavaScript("a < 100", scope);
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		data.put("javaScript", javaScript);
+
+		BSONObject obj = generateAndParse(data);
+
+		CodeWScope result = (CodeWScope) obj.get("javaScript");
+		assertNotNull(result);
+		assertEquals(javaScript.getCode(), result.getCode());
+		Map<String, Object> returnedScope = result.getScope().toMap();
+		assertEquals(returnedScope, scope);
+	}
+
+	private BSONObject generateAndParse(Map<String, Object> data) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectMapper om = new ObjectMapper(new BsonFactory());
-		om.registerModule(new BsonUuidModule());
+		om.registerModule(new BsonModule());
 		om.writeValue(baos, data);
 
 		byte[] r = baos.toByteArray();
 		ByteArrayInputStream bais = new ByteArrayInputStream(r);
 
 		BSONDecoder decoder = new BSONDecoder();
-		BSONObject obj = decoder.readObject(bais);
-		assertEquals(5, obj.get("Int32"));
-		assertNotNull(obj.get("Uuid"));
-		assertEquals(UUID.class, obj.get("Uuid").getClass());
-		assertEquals(uuid, obj.get("Uuid"));
+		return decoder.readObject(bais);
 	}
+
+
 }
