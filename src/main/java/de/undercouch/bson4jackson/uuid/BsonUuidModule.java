@@ -16,6 +16,7 @@ package de.undercouch.bson4jackson.uuid;
 
 import java.util.UUID;
 
+import de.undercouch.bson4jackson.serializers.BsonUuidSerializer;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.module.SimpleModule;
 
@@ -24,7 +25,9 @@ import org.codehaus.jackson.map.module.SimpleModule;
  * with the UUID sub-type. Register with an ObjectMapper instance to enable this
  * functionality.
  * @author Ed Anuff
+ * @deprecated Use {@link de.undercouch.bson4jackson.BsonModule} instead to get all the custom serializers BSON requires
  */
+@Deprecated
 public class BsonUuidModule extends SimpleModule {
 	/**
 	 * Default constructor
