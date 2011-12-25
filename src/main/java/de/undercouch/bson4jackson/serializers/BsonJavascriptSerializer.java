@@ -14,12 +14,11 @@
 
 package de.undercouch.bson4jackson.serializers;
 
+import com.fasterxml.jackson.databind.SerializerProvider;
 import de.undercouch.bson4jackson.BsonGenerator;
 import de.undercouch.bson4jackson.types.JavaScript;
-import org.codehaus.jackson.map.SerializerProvider;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 /**
  * Serializer for JavaScript

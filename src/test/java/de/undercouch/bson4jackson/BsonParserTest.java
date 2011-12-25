@@ -29,6 +29,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.JsonNode;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
@@ -37,10 +41,6 @@ import org.bson.types.Binary;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
 import org.bson.types.Symbol;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonToken;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import de.undercouch.bson4jackson.types.JavaScript;
@@ -211,10 +211,10 @@ public class BsonParserTest {
 		assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
 		assertEquals("Obj2", dec.getCurrentName());
 		assertEquals(JsonToken.START_OBJECT, dec.nextToken());
-		JsonNode obj2 = dec.readValueAsTree(); 
+		JsonNode obj2 = dec.readValueAsTree();
 		assertEquals(1, obj2.size());
 		assertNotNull(obj2.get("Int64"));
-		assertEquals(10L, obj2.get("Int64").getValueAsLong());
+		assertEquals(10L, obj2.get("Int64").getLongValue());
 		
 		assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
 		assertEquals("Obj3", dec.getCurrentName());

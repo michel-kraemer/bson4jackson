@@ -14,26 +14,33 @@
 
 package de.undercouch.bson4jackson.uuid;
 
-import java.util.UUID;
-
-import de.undercouch.bson4jackson.serializers.BsonUuidSerializer;
-import org.codehaus.jackson.Version;
-import org.codehaus.jackson.map.module.SimpleModule;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.Module;
+import de.undercouch.bson4jackson.serializers.BsonSerializers;
 
 /**
  * Module which registers a serializer that writes UUIDs as BSON binary fields
  * with the UUID sub-type. Register with an ObjectMapper instance to enable this
  * functionality.
+ *
  * @author Ed Anuff
  * @deprecated Use {@link de.undercouch.bson4jackson.BsonModule} instead to get all the custom serializers BSON requires
  */
 @Deprecated
-public class BsonUuidModule extends SimpleModule {
-	/**
-	 * Default constructor
-	 */
-	public BsonUuidModule() {
-		super("BsonUuidModule", new Version(0, 1, 0, "alpha"));
-		addSerializer(UUID.class, new BsonUuidSerializer());
+public class BsonUuidModule extends Module {
+
+	@Override
+	public String getModuleName() {
+		return "BsonUuidModule";
+	}
+
+	@Override
+	public Version version() {
+		return new Version(0, 1, 0, "alpha");
+	}
+
+	@Override
+	public void setupModule(SetupContext context) {
+		context.addSerializers(new BsonSerializers());
 	}
 }
