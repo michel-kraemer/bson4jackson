@@ -14,18 +14,9 @@
 
 package de.undercouch.bson4jackson;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.Module;
 import de.undercouch.bson4jackson.serializers.*;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
-import org.codehaus.jackson.Version;
-import org.codehaus.jackson.map.module.SimpleModule;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 /**
  * Module that configures Jackson to be able to correctly handle all BSON types
@@ -33,16 +24,20 @@ import java.util.regex.Pattern;
  * @author James Roper
  * @since 1.3
  */
-public class BsonModule extends SimpleModule {
-	public BsonModule() {
-		super("BsonModule", new Version(1, 3, 0, ""));
-		addSerializer(UUID.class, new BsonUuidSerializer());
-		addSerializer(Date.class, new BsonDateSerializer());
-		addSerializer(Calendar.class, new BsonCalendarSerializer());
-		addSerializer(ObjectId.class, new BsonObjectIdSerializer());
-		addSerializer(Pattern.class, new BsonRegexSerializer());
-		addSerializer(JavaScript.class, new BsonJavaScriptSerializer());
-		addSerializer(Timestamp.class, new BsonTimestampSerializer());
-		addSerializer(Symbol.class, new BsonSymbolSerializer());
+public class BsonModule extends Module {
+
+	@Override
+	public String getModuleName() {
+		return "BsonModule";
+	}
+
+	@Override
+	public Version version() {
+		return new Version(2, 0, 0, "");
+	}
+
+	@Override
+	public void setupModule(SetupContext context) {
+		context.addSerializers(new BsonSerializers());
 	}
 }
