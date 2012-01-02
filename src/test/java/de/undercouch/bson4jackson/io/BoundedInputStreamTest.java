@@ -105,6 +105,29 @@ public class BoundedInputStreamTest {
 		assertEquals(-1, bais.read());
 	}
 
+	@Test
+	public void testLessBytesThanRequestedRead() throws Exception {
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes) {
+			boolean first = true;
+			@Override
+			public int read(byte[] b, int off, int len) {
+				if (len > 2) {
+					return super.read(b, off, len - 1);
+				} else {
+					return super.read(b, off, len);
+				}
+			}
+		};
+		BoundedInputStream is = new BoundedInputStream(bais, 4);
+		byte[] buf = new byte[3];
+		assertEquals(2, is.read(buf));
+		assertArrayEquals(bytes, buf, 0, 2);
+		assertEquals(2, is.read(buf));
+		assertArrayEquals(bytes, buf, 2, 2);
+		assertEquals(-1, is.read(buf));
+		assertEquals(-1, bais.read());
+	}
+
 	private static void assertArrayEquals(byte[] expected, byte[] actual, int off, int len) {
 		for (int i = 0; i < len; i++) {
 			assertEquals("element [" + i + "] not matching", expected[i + off], actual[i]);
