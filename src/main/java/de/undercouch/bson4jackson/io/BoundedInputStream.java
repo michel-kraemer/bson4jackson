@@ -69,7 +69,7 @@ public class BoundedInputStream extends FilterInputStream {
 			if (read == -1) {
 				eof = true;
 			} else {
-				count += len;
+				count += read;
 			}
 			return read;
 		}
