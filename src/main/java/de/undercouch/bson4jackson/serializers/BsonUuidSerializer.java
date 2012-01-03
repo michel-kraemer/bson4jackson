@@ -17,9 +17,6 @@ package de.undercouch.bson4jackson.serializers;
 import java.io.IOException;
 import java.util.UUID;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.SerializerProvider;
 
 import de.undercouch.bson4jackson.BsonConstants;

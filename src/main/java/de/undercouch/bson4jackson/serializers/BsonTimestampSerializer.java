@@ -19,7 +19,6 @@ import de.undercouch.bson4jackson.types.Timestamp;
 import org.codehaus.jackson.map.SerializerProvider;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 /**
  * Serializer for MongoDB Timestamps

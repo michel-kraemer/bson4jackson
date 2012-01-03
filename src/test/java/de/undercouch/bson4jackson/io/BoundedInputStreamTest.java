@@ -108,7 +108,6 @@ public class BoundedInputStreamTest {
 	@Test
 	public void testLessBytesThanRequestedRead() throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes) {
-			boolean first = true;
 			@Override
 			public int read(byte[] b, int off, int len) {
 				if (len > 2) {

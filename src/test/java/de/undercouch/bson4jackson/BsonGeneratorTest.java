@@ -46,8 +46,6 @@ import static org.junit.Assert.*;
 public class BsonGeneratorTest {
 	@Test
 	public void generatePrimitives() throws Exception {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("Int32", 5);
 		data.put("Boolean1", true);
@@ -345,7 +343,7 @@ public class BsonGeneratorTest {
 		CodeWScope result = (CodeWScope) obj.get("javaScript");
 		assertNotNull(result);
 		assertEquals(javaScript.getCode(), result.getCode());
-		Map<String, Object> returnedScope = result.getScope().toMap();
+		Map<?, ?> returnedScope = result.getScope().toMap();
 		assertEquals(returnedScope, scope);
 	}
 

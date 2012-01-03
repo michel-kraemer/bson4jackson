@@ -19,7 +19,6 @@ import de.undercouch.bson4jackson.types.Symbol;
 import org.codehaus.jackson.map.SerializerProvider;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 /**
  * Serializer for BSON Symbols
