@@ -3,6 +3,8 @@ require "buildr/bnd"
 repositories.remote << 'http://repo1.maven.org/maven2'
 repositories.remote << Buildr::Bnd.remote_repository
 
+repositories.release_to = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+
 JACKSON = 'org.codehaus.jackson:jackson-core-asl:jar:1.7.4'
 JACKSON_MAPPER = 'org.codehaus.jackson:jackson-mapper-asl:jar:1.7.4'
 MONGODB = 'org.mongodb:mongo-java-driver:jar:2.5.3'
@@ -23,6 +25,10 @@ define 'bson4jackson' do
   package(:bundle).pom.from create_pom(package(:bundle), compile.dependencies)
   package :sources
   package :javadoc
+  
+  # sign artifacts before uploading
+  packages.each { |p| sign_artifact(p) }
+  sign_artifact(package(:bundle).pom)
 end
 
 def create_pom(pkg, deps)
@@ -72,4 +78,13 @@ def create_pom(pkg, deps)
      end
    end
  end
+end
+
+def sign_artifact(p)
+  artifact = Buildr.artifact(p.to_spec_hash.merge(:type => "#{p.type}.asc"))
+  asc = file(p.to_s + '.asc') do
+    sh %{gpg -ab "#{p.to_s}"}
+  end
+  artifact.from asc
+  task(:upload).enhance [ artifact.upload_task ]
 end
