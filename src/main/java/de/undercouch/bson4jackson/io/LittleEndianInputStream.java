@@ -69,7 +69,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	
 	/**
 	 * The decoder used in {@link #readUTF(int)}. Will be created
-	 * lazily in {@link #getUTF8Decoder()}
+	 * lazily in {@link #createOrReuseUTF8Decoder()}
 	 */
 	private static CharsetDecoder _utf8Decoder;
 	
@@ -94,11 +94,15 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	}
 	
 	/**
+	 * Creates a UTF-8 decoder or reuses an instance already created before.
+	 * Calls {@link CharsetDecoder#reset()} on the reused instance.
 	 * @return the lazily created UTF-8 decoder
 	 */
-	private static CharsetDecoder getUTF8Decoder() {
+	private static CharsetDecoder createOrReuseUTF8Decoder() {
 		if (_utf8Decoder == null) {
 			_utf8Decoder = getUTF8Charset().newDecoder();
+		} else {
+			_utf8Decoder.reset();
 		}
 		return _utf8Decoder;
 	}
@@ -280,7 +284,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		ByteBuffer utf8buf = _staticBuffers.byteBuffer(UTF8_BUFFER, 1024 * 8);
 		byte[] rawUtf8Buf = utf8buf.array();
 
-		CharsetDecoder dec = getUTF8Decoder();
+		CharsetDecoder dec = createOrReuseUTF8Decoder();
 		int expectedLen = (len > 0 ? (int)(dec.averageCharsPerByte() * len) + 1 : 1024);
 		CharBuffer cb = _staticBuffers.charBuffer(UTF8_BUFFER, expectedLen);
 		try {

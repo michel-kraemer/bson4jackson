@@ -86,6 +86,23 @@ public class BsonParserTest {
 		assertEquals(1234L, data.get("Int64"));
 	}
 	
+	/**
+	 * Tests reading a very large string. Refers issue #18
+	 * @throws Exception if something went wrong
+	 * @author endasb
+	 */
+	@Test
+	public void parseBigString() throws Exception {
+		BSONObject o = new BasicBSONObject();
+		StringBuilder bigStr = new StringBuilder();
+		for (int i = 0; i < 80000; i++) {
+			bigStr.append("abc");
+		}
+		o.put("String", bigStr.toString());
+		Map<?, ?> data = parseBsonObject(o);
+		assertEquals(240000, data.get("String").toString().length());
+	}
+	
 	@Test
 	public void parseBig() throws Exception {
 		BSONObject o = new BasicBSONObject();
