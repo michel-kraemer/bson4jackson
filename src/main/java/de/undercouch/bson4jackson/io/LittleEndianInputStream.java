@@ -68,10 +68,21 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	private static Charset _utf8;
 	
 	/**
-	 * The decoder used in {@link #readUTF(int)}. Will be created
-	 * lazily in {@link #createOrReuseUTF8Decoder()}
+	 * The decoder used in {@link #readUTF(int)}. Static field so it can
+	 * be reused. Thread local to eliminate multi-threading issues (see issue #19).
 	 */
-	private static CharsetDecoder _utf8Decoder;
+	private static final ThreadLocal<CharsetDecoder> _utf8Decoder = new ThreadLocal<CharsetDecoder>() {
+		@Override
+		protected CharsetDecoder initialValue() {
+			return getUTF8Charset().newDecoder();
+		}
+
+		@Override
+		public CharsetDecoder get() {
+			//reset decoder every time it is requested (see issue #18)
+			return super.get().reset();
+		}
+	};
 	
 	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)
@@ -91,20 +102,6 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 			_utf8 = Charset.forName("UTF-8");
 		}
 		return _utf8;
-	}
-	
-	/**
-	 * Creates a UTF-8 decoder or reuses an instance already created before.
-	 * Calls {@link CharsetDecoder#reset()} on the reused instance.
-	 * @return the lazily created UTF-8 decoder
-	 */
-	private static CharsetDecoder createOrReuseUTF8Decoder() {
-		if (_utf8Decoder == null) {
-			_utf8Decoder = getUTF8Charset().newDecoder();
-		} else {
-			_utf8Decoder.reset();
-		}
-		return _utf8Decoder;
 	}
 
 	@Override
@@ -284,7 +281,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		ByteBuffer utf8buf = _staticBuffers.byteBuffer(UTF8_BUFFER, 1024 * 8);
 		byte[] rawUtf8Buf = utf8buf.array();
 
-		CharsetDecoder dec = createOrReuseUTF8Decoder();
+		CharsetDecoder dec = _utf8Decoder.get();
 		int expectedLen = (len > 0 ? (int)(dec.averageCharsPerByte() * len) + 1 : 1024);
 		CharBuffer cb = _staticBuffers.charBuffer(UTF8_BUFFER, expectedLen);
 		try {

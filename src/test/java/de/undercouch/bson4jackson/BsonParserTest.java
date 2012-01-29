@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.bson.BSONEncoder;
@@ -103,6 +105,50 @@ public class BsonParserTest {
 		assertEquals(240000, data.get("String").toString().length());
 	}
 	
+	/**
+	 * Tests reading a very large string using multiple threads. Refers
+	 * issue #19. Does not fail reproducibly, but with very high probability.
+	 * You may have to run unit tests several times though to really rule out
+	 * multi-threading issues.
+	 * @throws Exception if something went wrong
+	 * @author endasb
+	 */
+	@Test
+	public void parseBigStringInThreads() throws Exception {
+		final BSONObject o = new BasicBSONObject();
+		final AtomicInteger fails = new AtomicInteger(0);
+		StringBuilder bigStr = new StringBuilder();
+		for (int i = 0; i < 80000; i++) {
+			bigStr.append("abc");
+		}
+		o.put("String", bigStr.toString());
+
+		ArrayList<Thread> threads = new ArrayList<Thread>();
+		for (int i = 0; i < 50; i++) {
+			threads.add(new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Map<?, ?> data = parseBsonObject(o);
+						data = parseBsonObject(o);
+						assertNotNull(data);
+					} catch (Exception e) {
+						fail("Threading issue " + fails.incrementAndGet());
+					}
+				}
+			}));
+		}
+		for (Thread thread:threads) {
+			thread.start();
+		}
+
+		for (Thread thread:threads) {
+			thread.join();
+		}
+
+		assertEquals(0, fails.get());
+	}
+
 	@Test
 	public void parseBig() throws Exception {
 		BSONObject o = new BasicBSONObject();
