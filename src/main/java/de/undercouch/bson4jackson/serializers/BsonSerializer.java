@@ -14,14 +14,15 @@
 
 package de.undercouch.bson4jackson.serializers;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import de.undercouch.bson4jackson.BsonGenerator;
 
-import java.io.IOException;
+import de.undercouch.bson4jackson.BsonGenerator;
 
 /**
  * Base class for BSON serializers
@@ -41,10 +42,10 @@ public abstract class BsonSerializer<T> extends JsonSerializer<T> {
 	/**
 	 * Serialize the given object using the given BsonGenerator
 	 *
-	 * @param t				  The object to serialize
-	 * @param bsonGenerator	  The generator to serialize to
+	 * @param t The object to serialize
+	 * @param bsonGenerator The generator to serialize to
 	 * @param serializerProvider The serialization provider
-	 * @throws IOException			 If an error occurred writing to the stream
+	 * @throws IOException If an error occurred writing to the stream
 	 * @throws JsonProcessingException If a JSON error occurred
 	 */
 	public abstract void serialize(T t, BsonGenerator bsonGenerator, SerializerProvider serializerProvider)

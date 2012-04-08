@@ -32,13 +32,13 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
+
 import de.undercouch.bson4jackson.io.ByteOrderUtil;
+import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
 import de.undercouch.bson4jackson.types.Timestamp;
-
-import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
 
 /**
  * Writes BSON code to the provided output stream

@@ -14,20 +14,27 @@
 
 package de.undercouch.bson4jackson;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Timestamp;
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
 import org.bson.types.BSONTimestamp;
@@ -35,9 +42,13 @@ import org.bson.types.Code;
 import org.bson.types.CodeWScope;
 import org.junit.Test;
 
-import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.junit.Assert.*;
+import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+import de.undercouch.bson4jackson.types.JavaScript;
+import de.undercouch.bson4jackson.types.ObjectId;
+import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Tests {@link BsonGenerator}
@@ -359,6 +370,4 @@ public class BsonGeneratorTest {
 		BSONDecoder decoder = new BSONDecoder();
 		return decoder.readObject(bais);
 	}
-
-
 }

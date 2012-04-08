@@ -14,15 +14,20 @@
 
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.io.IOContext;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.io.IOContext;
 
 /**
  * Factory for {@link BsonGenerator} and {@link BsonParser}
@@ -160,8 +165,6 @@ public class BsonFactory extends JsonFactory {
     	return g;
     }
 
-
-
     @Override
     public BsonParser createJsonParser(InputStream in) throws IOException {
 		return _createJsonParser(in, _createContext(in, false));
@@ -171,11 +174,11 @@ public class BsonFactory extends JsonFactory {
     protected BsonParser _createJsonParser(InputStream in, IOContext ctxt)
     	throws IOException, JsonParseException {
 		BsonParser p = new BsonParser(ctxt, _parserFeatures, _bsonParserFeatures, in);
-		 ObjectCodec codec = getCodec();
-		 if (codec != null) {
-			 p.setCodec(codec);
-		 }
-		 return p;
+		ObjectCodec codec = getCodec();
+		if (codec != null) {
+			p.setCodec(codec);
+		}
+		return p;
      }
 
     @Override

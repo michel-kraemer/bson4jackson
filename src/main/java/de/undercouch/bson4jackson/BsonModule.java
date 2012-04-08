@@ -16,7 +16,8 @@ package de.undercouch.bson4jackson;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
-import de.undercouch.bson4jackson.serializers.*;
+
+import de.undercouch.bson4jackson.serializers.BsonSerializers;
 
 /**
  * Module that configures Jackson to be able to correctly handle all BSON types
@@ -25,7 +26,6 @@ import de.undercouch.bson4jackson.serializers.*;
  * @since 1.3
  */
 public class BsonModule extends Module {
-
 	@Override
 	public String getModuleName() {
 		return "BsonModule";
@@ -33,7 +33,7 @@ public class BsonModule extends Module {
 
 	@Override
 	public Version version() {
-		return new Version(2, 0, 0, "");
+		return new Version(2, 0, 0, "", "de.undercouch", "bson4jackson");
 	}
 
 	@Override

@@ -15,11 +15,13 @@ import de.undercouch.bson4jackson.types.Timestamp;
 /**
  * Bson Serializers
  *
- * @author jroper
+ * @author James Roper
  * @since 2.0
  */
 public class BsonSerializers extends SimpleSerializers {
-
+	/**
+	 * Default constructor
+	 */
 	public BsonSerializers() {
 		addSerializer(UUID.class, new BsonUuidSerializer());
 		addSerializer(Date.class, new BsonDateSerializer());

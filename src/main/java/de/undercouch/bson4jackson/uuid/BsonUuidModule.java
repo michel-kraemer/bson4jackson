@@ -16,6 +16,7 @@ package de.undercouch.bson4jackson.uuid;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
+
 import de.undercouch.bson4jackson.serializers.BsonSerializers;
 
 /**
@@ -24,7 +25,9 @@ import de.undercouch.bson4jackson.serializers.BsonSerializers;
  * functionality.
  *
  * @author Ed Anuff
- * @deprecated Use {@link de.undercouch.bson4jackson.BsonModule} instead to get all the custom serializers BSON requires
+ * @deprecated Use {@link de.undercouch.bson4jackson.BsonModule} instead to get
+ * all the custom serializers BSON requires. This class will be removed
+ * in bson4jackson 2.1 or later.
  */
 @Deprecated
 public class BsonUuidModule extends Module {

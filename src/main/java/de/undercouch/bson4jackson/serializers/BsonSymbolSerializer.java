@@ -14,11 +14,12 @@
 
 package de.undercouch.bson4jackson.serializers;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.SerializerProvider;
+
 import de.undercouch.bson4jackson.BsonGenerator;
 import de.undercouch.bson4jackson.types.Symbol;
-
-import java.io.IOException;
 
 /**
  * Serializer for BSON Symbols

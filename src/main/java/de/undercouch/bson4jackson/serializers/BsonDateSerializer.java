@@ -14,14 +14,15 @@
 
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.databind.SerializerProvider;
-import de.undercouch.bson4jackson.BsonGenerator;
-
 import java.io.IOException;
 import java.util.Date;
 
+import com.fasterxml.jackson.databind.SerializerProvider;
+
+import de.undercouch.bson4jackson.BsonGenerator;
+
 /**
- * Serialiszs dates as BSON date type objects
+ * Serializes dates as BSON date type objects
  *
  * @author James Roper
  * @since 1.3

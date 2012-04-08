@@ -14,11 +14,12 @@
 
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.databind.SerializerProvider;
-import de.undercouch.bson4jackson.BsonGenerator;
-
 import java.io.IOException;
 import java.util.Calendar;
+
+import com.fasterxml.jackson.databind.SerializerProvider;
+
+import de.undercouch.bson4jackson.BsonGenerator;
 
 /**
  * Serializes calendars as BSON date type objects
