@@ -29,16 +29,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.codehaus.jackson.Base64Variant;
-import org.codehaus.jackson.JsonLocation;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonStreamContext;
-import org.codehaus.jackson.JsonToken;
-import org.codehaus.jackson.ObjectCodec;
-import org.codehaus.jackson.impl.JsonParserMinimalBase;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.base.ParserBase;
 
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.json.JsonReadContext;
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.undercouch.bson4jackson.io.BoundedInputStream;
 import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.CountingInputStream;
@@ -53,7 +49,7 @@ import de.undercouch.bson4jackson.types.Timestamp;
  * Reads a BSON document from the provided input stream
  * @author Michel Kraemer
  */
-public class BsonParser extends JsonParserMinimalBase {
+public class BsonParser extends ParserBase {
 	/**
 	 * Defines toggable features
 	 */
@@ -116,14 +112,15 @@ public class BsonParser extends JsonParserMinimalBase {
 
 	/**
 	 * Constructs a new parser
+	 * @param ctxt the Jackson IO context
 	 * @param jsonFeatures bit flag composed of bits that indicate which
-	 * {@link org.codehaus.jackson.JsonParser.Feature}s are enabled.
+	 * {@link com.fasterxml.jackson.core.JsonParser.Feature}s are enabled.
 	 * @param bsonFeatures bit flag composed of bits that indicate which
 	 * {@link Feature}s are enabled.
 	 * @param in the input stream to parse.
 	 */
-	public BsonParser(int jsonFeatures, int bsonFeatures, InputStream in) {
-		super(jsonFeatures);
+	public BsonParser(IOContext ctxt, int jsonFeatures, int bsonFeatures, InputStream in) {
+		super(ctxt, jsonFeatures);
 		_bsonFeatures = bsonFeatures;
 		_rawInputStream = in;
 		//only initialize streams here if document length isn't going to be honored
@@ -586,7 +583,7 @@ public class BsonParser extends JsonParserMinimalBase {
 	}
 
 	@Override
-	public JsonStreamContext getParsingContext() {
+	public JsonReadContext getParsingContext() {
 		//this parser does not use JsonStreamContext
 		return null;
 	}
@@ -729,6 +726,22 @@ public class BsonParser extends JsonParserMinimalBase {
 	@Override
 	protected void _handleEOF() throws JsonParseException {
 		_reportInvalidEOF();		
+	}
+
+	@Override
+	protected boolean loadMore() throws IOException {
+		// We don't actually use this
+		return true;
+	}
+
+	@Override
+	protected void _finishString() throws IOException, JsonParseException {
+		// Not used
+	}
+
+	@Override
+	protected void _closeInput() throws IOException {
+		_rawInputStream.close();
 	}
 
 	/**

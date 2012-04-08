@@ -5,15 +5,16 @@ repositories.remote << Buildr::Bnd.remote_repository
 
 repositories.release_to = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
 
-JACKSON = 'org.codehaus.jackson:jackson-core-asl:jar:1.7.4'
-JACKSON_MAPPER = 'org.codehaus.jackson:jackson-mapper-asl:jar:1.7.4'
+JACKSON = 'com.fasterxml.jackson.core:jackson-core:jar:2.0.0-SNAPSHOT'
+JACKSON_ANNOTATIONS = 'com.fasterxml.jackson.core:jackson-annotations:jar:2.0.0-SNAPSHOT'
+JACKSON_DATABIND = 'com.fasterxml.jackson.core:jackson-databind:jar:2.0.0-SNAPSHOT'
 MONGODB = 'org.mongodb:mongo-java-driver:jar:2.5.3'
 
 define 'bson4jackson' do
-  project.version = '1.3.0'
+  project.version = '2.0.0-SNAPSHOT'
   project.group = 'de.undercouch'
   
-  compile.with JACKSON, JACKSON_MAPPER
+  compile.with JACKSON, JACKSON_ANNOTATIONS, JACKSON_DATABIND
   test.with MONGODB
   
   package(:bundle).tap do |bnd|

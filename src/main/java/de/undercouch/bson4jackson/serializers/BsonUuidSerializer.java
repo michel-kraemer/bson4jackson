@@ -17,7 +17,7 @@ package de.undercouch.bson4jackson.serializers;
 import java.io.IOException;
 import java.util.UUID;
 
-import org.codehaus.jackson.map.SerializerProvider;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonGenerator;

@@ -26,25 +26,25 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.Base64Variant;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.base.GeneratorBase;
+import com.fasterxml.jackson.core.json.JsonWriteContext;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
 import de.undercouch.bson4jackson.types.Timestamp;
-import org.codehaus.jackson.Base64Variant;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.impl.JsonGeneratorBase;
-import org.codehaus.jackson.impl.JsonWriteContext;
 
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
-import org.codehaus.jackson.map.SerializerProvider;
 
 /**
  * Writes BSON code to the provided output stream
  * @author Michel Kraemer
  */
-public class BsonGenerator extends JsonGeneratorBase {
+public class BsonGenerator extends GeneratorBase {
 	/**
      * Defines toggable features
      */
@@ -138,7 +138,7 @@ public class BsonGenerator extends JsonGeneratorBase {
 	/**
 	 * Creates a new generator
 	 * @param jsonFeatures bit flag composed of bits that indicate which
-     * {@link org.codehaus.jackson.JsonGenerator.Feature}s are enabled.
+     * {@link com.fasterxml.jackson.core.JsonGenerator.Feature}s are enabled.
      * @param bsonFeatures bit flag composed of bits that indicate which
 	 * {@link Feature}s are enabled.
 	 * @param out the output stream to write to
