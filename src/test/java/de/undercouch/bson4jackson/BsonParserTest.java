@@ -31,9 +31,9 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.JsonNode;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
@@ -159,8 +159,8 @@ public class BsonParserTest {
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		ObjectMapper mapper = new ObjectMapper(new BsonFactory());
-		mapper.configure(DeserializationConfig.Feature.USE_BIG_DECIMAL_FOR_FLOATS, true);
-		mapper.configure(DeserializationConfig.Feature.USE_BIG_INTEGER_FOR_INTS, true);
+		mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
+		mapper.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
 		Map<?, ?> data = mapper.readValue(bais, Map.class);
 		assertEquals(BigDecimal.class, data.get("Double").getClass());
 		assertEquals(BigInteger.class, data.get("Int32").getClass());
@@ -277,7 +277,7 @@ public class BsonParserTest {
 		JsonNode obj2 = dec.readValueAsTree();
 		assertEquals(1, obj2.size());
 		assertNotNull(obj2.get("Int64"));
-		assertEquals(10L, obj2.get("Int64").getLongValue());
+		assertEquals(10L, obj2.get("Int64").longValue());
 		
 		assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
 		assertEquals("Obj3", dec.getCurrentName());
