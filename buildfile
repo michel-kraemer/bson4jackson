@@ -11,7 +11,7 @@ JACKSON_DATABIND = 'com.fasterxml.jackson.core:jackson-databind:jar:2.0.0'
 MONGODB = 'org.mongodb:mongo-java-driver:jar:2.5.3'
 
 define 'bson4jackson' do
-  project.version = '2.0.0-SNAPSHOT'
+  project.version = '2.0.0'
   project.group = 'de.undercouch'
   
   compile.with JACKSON, JACKSON_ANNOTATIONS, JACKSON_DATABIND
