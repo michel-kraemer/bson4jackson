@@ -16,7 +16,7 @@ Usage
 The bson4jackson library integrates completely into Jackson. Please have
 a look at the `Jackson wiki <http://wiki.fasterxml.com/JacksonDocumentation>`_
 for a complete description. For more information you may also have a
-look at the `bson4jackson tutorial <http://www.michel-kraemer.de/en/binary-json-with-bson4jackson>`_.
+look at the `bson4jackson tutorial <http://www.michel-kraemer.com/binary-json-with-bson4jackson>`_.
 
 The BSON specification defines some additional types not available in
 the original JSON specification. These types are mapped to simple
@@ -34,24 +34,27 @@ You may also use `Maven <http://maven.apache.org/>`_ to download bson4jackson::
     <dependency>
       <groupId>de.undercouch</groupId>
       <artifactId>bson4jackson</artifactId>
-      <version>1.3.0</version>
+      <version>2.0.0</version>
     </dependency>
   </dependencies>
 
 If you're using `sbt <http://code.google.com/p/simple-build-tool/>`_,
 you may add the following line to your project::
 
-  val bson4jackson = "de.undercouch" % "bson4jackson" % "1.3.0"
+  val bson4jackson = "de.undercouch" % "bson4jackson" % "2.0.0"
 
 For `buildr <http://buildr.apache.org/>`_ use the following snippet::
 
-  compile.with 'de.undercouch:bson4jackson:jar:1.3.0'
+  compile.with 'de.undercouch:bson4jackson:jar:2.0.0'
 
 Compatibility
 -------------
 
-bson4jackson is compatible to Jackson 1.7 and higher. It has already been
-tested successfully with Jackson 1.8 and 1.9.
+bson4jackson 2.x is compatible to Jackson 2.0 and higher.
+
+If you're looking for a version compatible to Jackson 1.x, please use
+bson4jackson 1.3.0. It's the last version for the 1.x branch.
+bson4jackson 1.3.0 is compatible to Jackson 1.7 up to 1.9.
 
 License
 -------
