@@ -1,0 +1,2 @@
+install: "gem install buildr"
+script: "buildr test"

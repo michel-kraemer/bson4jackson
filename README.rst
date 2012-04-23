@@ -71,6 +71,10 @@ limitations under the License.
 Compiling
 ---------
 
+.. image:: https://secure.travis-ci.org/michel-kraemer/bson4jackson.png?branch=master
+   :alt: Build Status
+   :target: http://travis-ci.org/michel-kraemer/bson4jackson
+
 You need buildr in order to compile the bson4jackson library. Please follow
 the `instructions on the buildr website <http://buildr.apache.org/installing.html>`_.
 
