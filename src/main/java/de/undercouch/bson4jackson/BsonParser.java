@@ -21,11 +21,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayDeque;
 import java.util.Date;
-import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -113,7 +112,7 @@ public class BsonParser extends ParserBase {
 	 * A stack of {@link Context} objects describing the current
 	 * parser state.
 	 */
-	private Deque<Context> _contexts = new ArrayDeque<Context>();
+	private Stack<Context> _contexts = new Stack<Context>();
 
 	/**
 	 * Constructs a new parser
