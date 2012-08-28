@@ -22,6 +22,7 @@ import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.util.Date;
 import java.util.Map;
+import java.util.Stack;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.Base64Variant;
