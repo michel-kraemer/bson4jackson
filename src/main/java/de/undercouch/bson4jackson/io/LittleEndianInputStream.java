@@ -63,29 +63,6 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	private final StaticBuffers _staticBuffers;
 	
 	/**
-	 * The character set used in {@link #readUTF(int)}. Will be
-	 * created lazily in {@link #getUTF8Charset()}
-	 */
-	private static Charset _utf8;
-	
-	/**
-	 * The decoder used in {@link #readUTF(int)}. Static field so it can
-	 * be reused. Thread local to eliminate multi-threading issues (see issue #19).
-	 */
-	private static final ThreadLocal<CharsetDecoder> _utf8Decoder = new ThreadLocal<CharsetDecoder>() {
-		@Override
-		protected CharsetDecoder initialValue() {
-			return getUTF8Charset().newDecoder();
-		}
-
-		@Override
-		public CharsetDecoder get() {
-			//reset decoder every time it is requested (see issue #18)
-			return super.get().reset();
-		}
-	};
-	
-	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)
 	 */
 	public LittleEndianInputStream(InputStream in) {
@@ -95,16 +72,6 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		_staticBuffers = StaticBuffers.getInstance();
 	}
 	
-	/**
-	 * @return the lazily created UTF-8 character set
-	 */
-	private static Charset getUTF8Charset() {
-		if (_utf8 == null) {
-			_utf8 = Charset.forName("UTF-8");
-		}
-		return _utf8;
-	}
-
 	@Override
 	public void readFully(byte[] b) throws IOException {
 		readFully(b, 0, b.length);
@@ -282,7 +249,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		ByteBuffer utf8buf = _staticBuffers.byteBuffer(UTF8_BUFFER, 1024 * 8);
 		byte[] rawUtf8Buf = utf8buf.array();
 
-		CharsetDecoder dec = _utf8Decoder.get();
+		CharsetDecoder dec = Charset.forName("UTF-8").newDecoder();
 		int expectedLen = (len > 0 ? (int)(dec.averageCharsPerByte() * len) + 1 : 1024);
 		CharBuffer cb = _staticBuffers.charBuffer(UTF8_BUFFER, expectedLen);
 		try {
