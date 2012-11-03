@@ -32,77 +32,97 @@ public class BoundedInputStreamTest {
 	public void testReadWhenBoundSmaller() throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		BoundedInputStream is = new BoundedInputStream(bais, 3);
-		assertEquals(10, is.read());
-		assertEquals(20, is.read());
-		assertEquals(30, is.read());
-		assertEquals(-1, is.read());
-		assertEquals(-1, is.read());
-		assertEquals(40, bais.read());
+		try {
+			assertEquals(10, is.read());
+			assertEquals(20, is.read());
+			assertEquals(30, is.read());
+			assertEquals(-1, is.read());
+			assertEquals(-1, is.read());
+			assertEquals(40, bais.read());
+		} finally {
+			is.close();
+		}
 	}
 
 	@Test
 	public void testReadWhenBoundLarger() throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		BoundedInputStream is = new BoundedInputStream(bais, 5);
-		assertEquals(10, is.read());
-		assertEquals(20, is.read());
-		assertEquals(30, is.read());
-		assertEquals(40, is.read());
-		assertEquals(-1, is.read());
-		assertEquals(-1, is.read());
-		assertEquals(-1, bais.read());
+		try {
+			assertEquals(10, is.read());
+			assertEquals(20, is.read());
+			assertEquals(30, is.read());
+			assertEquals(40, is.read());
+			assertEquals(-1, is.read());
+			assertEquals(-1, is.read());
+			assertEquals(-1, bais.read());
+		} finally {
+			is.close();
+		}
 	}
 
 	@Test
 	public void testReadLargeBufferWhenBoundSmaller() throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		BoundedInputStream is = new BoundedInputStream(bais, 3);
-
-		byte[] buf = new byte[10];
-		assertEquals(3, is.read(buf));
-		assertArrayEquals(bytes, buf, 0, 3);
-		assertEquals(-1, is.read(buf));
-		assertEquals(40, bais.read());
+		try {
+			byte[] buf = new byte[10];
+			assertEquals(3, is.read(buf));
+			assertArrayEquals(bytes, buf, 0, 3);
+			assertEquals(-1, is.read(buf));
+			assertEquals(40, bais.read());
+		} finally {
+			is.close();
+		}
 	}
 
 	@Test
 	public void testReadSmallBufferWhenBoundSmaller() throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		BoundedInputStream is = new BoundedInputStream(bais, 3);
-
-		byte[] buf = new byte[2];
-		assertEquals(2, is.read(buf));
-		assertArrayEquals(bytes, buf, 0, 2);
-		assertEquals(1, is.read(buf));
-		assertArrayEquals(bytes, buf, 2, 1);
-		assertEquals(-1, is.read(buf));
-		assertEquals(40, bais.read());
+		try {
+			byte[] buf = new byte[2];
+			assertEquals(2, is.read(buf));
+			assertArrayEquals(bytes, buf, 0, 2);
+			assertEquals(1, is.read(buf));
+			assertArrayEquals(bytes, buf, 2, 1);
+			assertEquals(-1, is.read(buf));
+			assertEquals(40, bais.read());
+		} finally {
+			is.close();
+		}
 	}
 
 	@Test
 	public void testReadLargeBufferWhenBoundLarger() throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		BoundedInputStream is = new BoundedInputStream(bais, 5);
-
-		byte[] buf = new byte[10];
-		assertEquals(4, is.read(buf));
-		assertArrayEquals(bytes, buf, 0, 4);
-		assertEquals(-1, is.read(buf));
-		assertEquals(-1, bais.read());
+		try {
+			byte[] buf = new byte[10];
+			assertEquals(4, is.read(buf));
+			assertArrayEquals(bytes, buf, 0, 4);
+			assertEquals(-1, is.read(buf));
+			assertEquals(-1, bais.read());
+		} finally {
+			is.close();
+		}
 	}
 
 	@Test
 	public void testReadSmallBufferWhenBoundLarger() throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		BoundedInputStream is = new BoundedInputStream(bais, 5);
-
-		byte[] buf = new byte[2];
-		assertEquals(2, is.read(buf));
-		assertArrayEquals(bytes, buf, 0, 2);
-		assertEquals(2, is.read(buf));
-		assertArrayEquals(bytes, buf, 2, 2);
-		assertEquals(-1, is.read(buf));
-		assertEquals(-1, bais.read());
+		try {
+			byte[] buf = new byte[2];
+			assertEquals(2, is.read(buf));
+			assertArrayEquals(bytes, buf, 0, 2);
+			assertEquals(2, is.read(buf));
+			assertArrayEquals(bytes, buf, 2, 2);
+			assertEquals(-1, is.read(buf));
+			assertEquals(-1, bais.read());
+		} finally {
+			is.close();
+		}
 	}
 
 	@Test
@@ -118,13 +138,17 @@ public class BoundedInputStreamTest {
 			}
 		};
 		BoundedInputStream is = new BoundedInputStream(bais, 4);
-		byte[] buf = new byte[3];
-		assertEquals(2, is.read(buf));
-		assertArrayEquals(bytes, buf, 0, 2);
-		assertEquals(2, is.read(buf));
-		assertArrayEquals(bytes, buf, 2, 2);
-		assertEquals(-1, is.read(buf));
-		assertEquals(-1, bais.read());
+		try {
+			byte[] buf = new byte[3];
+			assertEquals(2, is.read(buf));
+			assertArrayEquals(bytes, buf, 0, 2);
+			assertEquals(2, is.read(buf));
+			assertArrayEquals(bytes, buf, 2, 2);
+			assertEquals(-1, is.read(buf));
+			assertEquals(-1, bais.read());
+		} finally {
+			is.close();
+		}
 	}
 
 	private static void assertArrayEquals(byte[] expected, byte[] actual, int off, int len) {

@@ -128,7 +128,11 @@ public class LittleEndianInputStreamTest {
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		LittleEndianInputStream leis = new LittleEndianInputStream(bais);
-		assertEquals(1234.1234f, leis.readFloat(), 0.00001);
+		try {
+			assertEquals(1234.1234f, leis.readFloat(), 0.00001);
+		} finally {
+			leis.close();
+		}
 	}
 	
 	@Test
@@ -139,29 +143,43 @@ public class LittleEndianInputStreamTest {
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		LittleEndianInputStream leis = new LittleEndianInputStream(bais);
-		assertEquals(1234.1234, leis.readDouble(), 0.00001);
+		try {
+			assertEquals(1234.1234, leis.readDouble(), 0.00001);
+		} finally {
+			leis.close();
+		}
 	}
 	
 	@Test
 	public void readLine() throws Exception {
 		byte[] b = new byte[] { 'H', 'e', 'l', 'l', 'o', '\r',
 				'W', 'o', 'r', 'l', 'd', '\r', '\n' };
+		byte[] b2;
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		LittleEndianInputStream leis = new LittleEndianInputStream(bais);
-		assertEquals("Hello", leis.readLine());
-		assertEquals("World", leis.readLine());
-		assertNull(leis.readLine());
-		
-		byte[] b2 = new byte[1024 * 8];
-		Arrays.fill(b2, (byte)'a');
+		try {
+			assertEquals("Hello", leis.readLine());
+			assertEquals("World", leis.readLine());
+			assertNull(leis.readLine());
+			
+			b2 = new byte[1024 * 8];
+			Arrays.fill(b2, (byte)'a');
+		} finally {
+			leis.close();
+		}
+
 		bais = new ByteArrayInputStream(b2);
 		leis = new LittleEndianInputStream(bais);
-		String s = leis.readLine();
-		assertNotNull(s);
-		byte[] line = s.getBytes();
-		assertEquals(b2.length, line.length);
-		for (int i = 0; i < b2.length; ++i) {
-			assertEquals(b2[i], line[i]);
+		try {
+			String s = leis.readLine();
+			assertNotNull(s);
+			byte[] line = s.getBytes();
+			assertEquals(b2.length, line.length);
+			for (int i = 0; i < b2.length; ++i) {
+				assertEquals(b2[i], line[i]);
+			}
+		} finally {
+			leis.close();
 		}
 	}
 	
