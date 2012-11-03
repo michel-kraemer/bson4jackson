@@ -1,1 +1,1 @@
-script: "./gradlew test"
+script: "chmod 755 gradlew && ./gradlew test"
