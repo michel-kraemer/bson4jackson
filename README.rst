@@ -38,8 +38,15 @@ You may also use `Maven <http://maven.apache.org/>`_ to download bson4jackson::
     </dependency>
   </dependencies>
 
-If you're using `sbt <http://code.google.com/p/simple-build-tool/>`_,
-you may add the following line to your project::
+If you're using `Gradle <http://www.gradle.org/>`_, you may add the
+following snippet to your ``build.gradle``::
+
+  dependencies {
+      compile 'de.undercouch:bson4jackson:2.0.0'
+  }
+
+For `sbt <http://code.google.com/p/simple-build-tool/>`_,
+add the following line to your project::
 
   val bson4jackson = "de.undercouch" % "bson4jackson" % "2.0.0"
 
@@ -75,29 +82,25 @@ Compiling
    :alt: Build Status
    :target: http://travis-ci.org/michel-kraemer/bson4jackson
 
-You need buildr in order to compile the bson4jackson library. Please follow
-the `instructions on the buildr website <http://buildr.apache.org/installing.html>`_.
-
 Execute the following command to compile the library and to run the
 unit tests::
 
-  buildr compile test
+  ./gradlew test
 
-If everything runs successfully, you may create a .jar library::
+The script automatically downloads the correct Gradle version, so you
+won't have to do anything else. If everything runs successfully, you
+may create a .jar library::
 
-  buildr clean package
+  ./gradlew jar
 
-The library will be located under the ``target`` directory.
+The library will be located under the ``build/libs`` directory.
 
 Eclipse
 .......
 
-buildr includes a task that creates the files required to develop
+Gradle includes a task that creates all files required to develop
 bson4jackson in Eclipse. Run the following command::
 
-  buildr eclipse
+  ./gradlew eclipse
 
-Then import the project into your workspace. If Eclipse complains about
-your classpath, make sure the variable ``M2_REPO`` is set to your local
-Maven repository. You can change that variable under
-"Window/Preferences/Java/Build Path/Classpath Variables".
+Then import the project into your workspace.
