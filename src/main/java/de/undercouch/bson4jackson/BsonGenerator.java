@@ -20,9 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
-import java.util.ArrayDeque;
 import java.util.Date;
-import java.util.Deque;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -127,7 +125,7 @@ public class BsonGenerator extends GeneratorBase {
 	/**
 	 * Saves information about documents (the main document and embedded ones)
 	 */
-	protected Deque<DocumentInfo> _documents = new ArrayDeque<DocumentInfo>();
+	protected Stack<DocumentInfo> _documents = new Stack<DocumentInfo>();
 
 	/**
 	 * Indicates that the next object to be encountered is actually embedded inside a value, and not a complete value
