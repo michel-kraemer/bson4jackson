@@ -20,9 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
-import java.util.ArrayDeque;
 import java.util.Date;
-import java.util.Deque;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -79,6 +77,12 @@ public class BsonGenerator extends GeneratorBase {
 	 */
 	private static class DocumentInfo {
 		/**
+		 * Information about the parent document (may be null if this
+		 * document is the top-level one)
+		 */
+		final DocumentInfo parent;
+		
+		/**
 		 * The position of the document's header in the output buffer
 		 */
 		final int headerPos;
@@ -91,11 +95,14 @@ public class BsonGenerator extends GeneratorBase {
 		
 		/**
 		 * Creates a new DocumentInfo object
+		 * @param parent information about the parent document (may be
+		 * null if this document is the top-level one)
 		 * @param headerPos the position of the document's header
 		 * in the output buffer
 		 * @param array true if the document is an array
 		 */
-		public DocumentInfo(int headerPos, boolean array) {
+		public DocumentInfo(DocumentInfo parent, int headerPos, boolean array) {
+			this.parent = parent;
 			this.headerPos = headerPos;
 			this.currentArrayPos = (array ? 0 : -1);
 		}
@@ -127,7 +134,7 @@ public class BsonGenerator extends GeneratorBase {
 	/**
 	 * Saves information about documents (the main document and embedded ones)
 	 */
-	protected Deque<DocumentInfo> _documents = new ArrayDeque<DocumentInfo>();
+	protected DocumentInfo _currentDocument;
 
 	/**
 	 * Indicates that the next object to be encountered is actually embedded inside a value, and not a complete value
@@ -169,7 +176,7 @@ public class BsonGenerator extends GeneratorBase {
 	 * @return true if the generator is currently processing an array
 	 */
 	protected boolean isArray() {
-		return (_documents.isEmpty() ? false : _documents.peek().currentArrayPos >= 0);
+		return (_currentDocument == null ? false : _currentDocument.currentArrayPos >= 0);
 	}
 	
 	/**
@@ -179,12 +186,11 @@ public class BsonGenerator extends GeneratorBase {
 	 * the current document is not an array
 	 */
 	protected int getAndIncCurrentArrayPos() {
-		if (_documents.isEmpty()) {
+		if (_currentDocument == null) {
 			return -1;
 		}
-		DocumentInfo di = _documents.peek();
-		int r = di.currentArrayPos;
-		++di.currentArrayPos;
+		int r = _currentDocument.currentArrayPos;
+		++_currentDocument.currentArrayPos;
 		return r;
 	}
 	
@@ -218,7 +224,7 @@ public class BsonGenerator extends GeneratorBase {
 	public void close() throws IOException {
 		//finish document
 		if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT)) {
-			while (!_documents.isEmpty()) {
+			while (_currentDocument != null) {
 				writeEndObject();
 			}
 		}
@@ -257,7 +263,7 @@ public class BsonGenerator extends GeneratorBase {
 	public void writeStartObject() throws IOException, JsonGenerationException {
 		if (nextObjectIsEmbeddedInValue) {
 			_writeContext = _writeContext.createChildObjectContext();
-			_documents.push(new DocumentInfo(_buffer.size(), false));
+			_currentDocument = new DocumentInfo(_currentDocument, _buffer.size(), false);
 			reserveHeader();
 
 			// We've skipped everything we need to skip, the next object may not be embedded in a value
@@ -276,12 +282,12 @@ public class BsonGenerator extends GeneratorBase {
 	 */
 	protected void _writeStartObject(boolean array) throws IOException {
 		_writeArrayFieldNameIfNeeded();
-		if (!_documents.isEmpty()) {
+		if (_currentDocument != null) {
 			//embedded document/array
 			_buffer.putByte(_typeMarker, (array ? BsonConstants.TYPE_ARRAY :
 				BsonConstants.TYPE_DOCUMENT));
 		}
-		_documents.push(new DocumentInfo(_buffer.size(), array));
+		_currentDocument = new DocumentInfo(_currentDocument, _buffer.size(), array);
 		reserveHeader();
 	}
 
@@ -296,9 +302,10 @@ public class BsonGenerator extends GeneratorBase {
 	}
         
 	private void writeEndObjectInternal() {
-		if (!_documents.isEmpty()) {
+		if (_currentDocument != null) {
 			_buffer.putByte(BsonConstants.TYPE_END);
-			DocumentInfo info = _documents.pop();
+			DocumentInfo info = _currentDocument;
+			_currentDocument = _currentDocument.parent;
 			
 			//re-write header to update document size (only if
 			//streaming is not enabled since in this case the buffer

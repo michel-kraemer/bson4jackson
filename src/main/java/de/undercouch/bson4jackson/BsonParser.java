@@ -21,9 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayDeque;
 import java.util.Date;
-import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -110,10 +108,9 @@ public class BsonParser extends ParserBase {
 	private int _tokenPos;
 	
 	/**
-	 * A stack of {@link Context} objects describing the current
-	 * parser state.
+	 * The current parser state
 	 */
-	private Deque<Context> _contexts = new ArrayDeque<Context>();
+	private Context _currentContext;
 
 	/**
 	 * Constructs a new parser
@@ -167,7 +164,7 @@ public class BsonParser extends ParserBase {
 
 	@Override
 	public JsonToken nextToken() throws IOException, JsonParseException {
-		Context ctx = _contexts.peek();
+		Context ctx = _currentContext;
 		if (_currToken == null && ctx == null) {
 			_currToken = handleNewDocument(false);
 		} else {
@@ -195,7 +192,7 @@ public class BsonParser extends ParserBase {
 					if (ctx.type == BsonConstants.TYPE_END) {
 						//end of document
 						_currToken = (ctx.array ? JsonToken.END_ARRAY : JsonToken.END_OBJECT);
-						_contexts.pop();
+						_currentContext = _currentContext.parent;
 					} else if (ctx.type == BsonConstants.TYPE_UNDEFINED) {
 						//skip field name and then ignore this token
 						skipCString();
@@ -358,7 +355,7 @@ public class BsonParser extends ParserBase {
 			_in.readInt();
 		}
 
-		_contexts.push(new Context(array));
+		_currentContext = new Context(_currentContext, array);
 		return (array ? JsonToken.START_ARRAY : JsonToken.START_OBJECT);
 	}
 	
@@ -566,11 +563,10 @@ public class BsonParser extends ParserBase {
 	 * @throws IOException if there is no context
 	 */
 	protected Context getContext() throws IOException {
-		Context ctx = _contexts.peek();
-		if (ctx == null) {
+		if (_currentContext == null) {
 			throw new IOException("Context unknown");
 		}
-		return ctx;
+		return _currentContext;
 	}
 
 	@Override
@@ -580,11 +576,10 @@ public class BsonParser extends ParserBase {
 
 	@Override
 	public String getCurrentName() throws IOException, JsonParseException {
-		Context ctx = _contexts.peek();
-		if (ctx == null) {
+		if (_currentContext == null) {
 			return null;
 		}
-		return ctx.fieldName;
+		return _currentContext.fieldName;
 	}
 
 	@Override
@@ -605,14 +600,13 @@ public class BsonParser extends ParserBase {
 
 	@Override
 	public String getText() throws IOException, JsonParseException {
-		Context ctx = _contexts.peek();
-		if (ctx == null || ctx.state == State.FIELDNAME) {
+		if (_currentContext == null || _currentContext.state == State.FIELDNAME) {
 			return null;
 		}
-		if (ctx.state == State.VALUE) {
-			return ctx.fieldName;
+		if (_currentContext.state == State.VALUE) {
+			return _currentContext.fieldName;
 		}
-		return (String)ctx.value;
+		return (String)_currentContext.value;
 	}
 
 	@Override
@@ -645,21 +639,20 @@ public class BsonParser extends ParserBase {
 
 	@Override
 	public JsonParser.NumberType getNumberType() throws IOException, JsonParseException {
-		Context ctx = _contexts.peek();
-		if (ctx == null) {
+		if (_currentContext == null) {
 			return null;
 		}
-		if (ctx.value instanceof Integer) {
+		if (_currentContext.value instanceof Integer) {
 			return NumberType.INT;
-		} else if (ctx.value instanceof Long) {
+		} else if (_currentContext.value instanceof Long) {
 			return NumberType.LONG;
-		} else if (ctx.value instanceof BigInteger) {
+		} else if (_currentContext.value instanceof BigInteger) {
 			return NumberType.BIG_INTEGER;
-		} else if (ctx.value instanceof Float) {
+		} else if (_currentContext.value instanceof Float) {
 			return NumberType.FLOAT;
-		} else if (ctx.value instanceof Double) {
+		} else if (_currentContext.value instanceof Double) {
 			return NumberType.DOUBLE;
-		} else if (ctx.value instanceof BigDecimal) {
+		} else if (_currentContext.value instanceof BigDecimal) {
 			return NumberType.BIG_DECIMAL;
 		}
 		return null;
@@ -724,8 +717,7 @@ public class BsonParser extends ParserBase {
 	
 	@Override
 	public Object getEmbeddedObject() throws IOException, JsonParseException {
-		Context ctx = _contexts.peek();
-		return (ctx != null ? ctx.value : null);
+		return (_currentContext != null ? _currentContext.value : null);
 	}
 
 	@Override
@@ -764,6 +756,11 @@ public class BsonParser extends ParserBase {
 	 */
 	private static class Context {
 		/**
+		 * The parent context (may be null if the context is the top-level one)
+		 */
+		final Context parent;
+		
+		/**
 		 * True if the document currently being parsed is an array
 		 */
 		final boolean array;
@@ -788,7 +785,8 @@ public class BsonParser extends ParserBase {
 		 */
 		State state = State.FIELDNAME;
 		
-		public Context(boolean array) {
+		public Context(Context parent, boolean array) {
+			this.parent = parent;
 			this.array = array;
 		}
 		
