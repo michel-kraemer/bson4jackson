@@ -606,7 +606,7 @@ public class BsonParser extends ParserBase {
 		if (_currentContext.state == State.VALUE) {
 			return _currentContext.fieldName;
 		}
-		return (String)_currentContext.value;
+		return String.valueOf(_currentContext.value);
 	}
 
 	@Override

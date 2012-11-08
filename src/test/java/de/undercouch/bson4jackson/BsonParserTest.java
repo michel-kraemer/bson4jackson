@@ -362,7 +362,6 @@ public class BsonParserTest {
 
 	/**
 	 * Make sure we honor the length of the document if requested
-	 *
 	 * @throws Exception if something went wrong
 	 */
 	@Test
@@ -387,5 +386,39 @@ public class BsonParserTest {
 		// Now check that we can read the extra string we put at the end
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		assertEquals("Hello world!", reader.readLine());
+	}
+	
+	/**
+	 * Checks if the parser returns a textual representation of arbitrary
+	 * tokens. See issue #23.
+	 * @throws Exception if something went wrong
+	 */
+	@Test
+	public void parseAsText() throws Exception {
+		BSONObject o = new BasicBSONObject();
+		o.put("Float", 5.0f);
+		o.put("Int32", 1234);
+		BSONEncoder enc = new BSONEncoder();
+		byte[] b = enc.encode(o);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(b);
+		BsonFactory fac = new BsonFactory();
+		BsonParser dec = fac.createJsonParser(bais);
+		
+		assertEquals(JsonToken.START_OBJECT, dec.nextToken());
+		
+		assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
+		assertEquals("Float", dec.getCurrentName());
+		assertEquals(JsonToken.VALUE_NUMBER_FLOAT, dec.nextToken());
+		assertEquals(5.0f, dec.getFloatValue(), 0.00001);
+		assertEquals("5.0", dec.getText());
+		
+		assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
+		assertEquals("Int32", dec.getCurrentName());
+		assertEquals(JsonToken.VALUE_NUMBER_INT, dec.nextToken());
+		assertEquals(1234, dec.getIntValue());
+		assertEquals("1234", dec.getText());
+		
+		assertEquals(JsonToken.END_OBJECT, dec.nextToken());
 	}
 }
