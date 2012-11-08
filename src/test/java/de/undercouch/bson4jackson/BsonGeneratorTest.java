@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
+import org.bson.BasicBSONDecoder;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
@@ -123,7 +124,7 @@ public class BsonGeneratorTest {
 	
 	private void assertRaw(byte[] r) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(r);
-		BSONDecoder decoder = new BSONDecoder();
+		BSONDecoder decoder = new BasicBSONDecoder();
 		BSONObject obj = decoder.readObject(bais);
 		byte[] o = (byte[])obj.get("Test");
 		CharBuffer buf = ByteBuffer.wrap(o).order(ByteOrder.LITTLE_ENDIAN).asCharBuffer();
@@ -170,7 +171,7 @@ public class BsonGeneratorTest {
 		
 		byte[] r = baos.toByteArray();
 		ByteArrayInputStream bais = new ByteArrayInputStream(r);
-		BSONDecoder decoder = new BSONDecoder();
+		BSONDecoder decoder = new BasicBSONDecoder();
 		BSONObject obj = decoder.readObject(bais);
 		byte[] o = (byte[])obj.get("Test");
 		assertEquals(2, o.length);
@@ -247,7 +248,7 @@ public class BsonGeneratorTest {
 		gen.close();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		BSONDecoder decoder = new BSONDecoder();
+		BSONDecoder decoder = new BasicBSONDecoder();
 		BSONObject obj = decoder.readObject(bais);
 		String s = (String)obj.get("a\u20AC\u00A2\u00A2bb");
 		assertEquals("a\u20AC\u00A2\u00A2bb", s);
@@ -367,7 +368,7 @@ public class BsonGeneratorTest {
 		byte[] r = baos.toByteArray();
 		ByteArrayInputStream bais = new ByteArrayInputStream(r);
 
-		BSONDecoder decoder = new BSONDecoder();
+		BSONDecoder decoder = new BasicBSONDecoder();
 		return decoder.readObject(bais);
 	}
 }

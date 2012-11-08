@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
+import org.bson.BasicBSONEncoder;
 import org.bson.BasicBSONObject;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
@@ -61,7 +62,7 @@ import de.undercouch.bson4jackson.types.Timestamp;
  */
 public class BsonParserTest {
 	private Map<?, ?> parseBsonObject(BSONObject o) throws IOException {
-		BSONEncoder enc = new BSONEncoder();
+		BSONEncoder enc = new BasicBSONEncoder();
 		byte[] b = enc.encode(o);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
@@ -160,7 +161,7 @@ public class BsonParserTest {
 		BSONObject o = new BasicBSONObject();
 		o.put("Double", 5.0);
 		o.put("Int32", 1234);
-		BSONEncoder enc = new BSONEncoder();
+		BSONEncoder enc = new BasicBSONEncoder();
 		byte[] b = enc.encode(o);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
@@ -199,7 +200,7 @@ public class BsonParserTest {
 		BSONObject o = new BasicBSONObject();
 		o.put("Undefined", new Object());
 		o.put("Int32", 5);
-		BSONEncoder enc = new BSONEncoder() {
+		BSONEncoder enc = new BasicBSONEncoder() {
 			@Override
 			protected boolean putSpecial(String name, Object o) {
 				putUndefined(name);
@@ -265,7 +266,7 @@ public class BsonParserTest {
 		o1.put("Obj2", o2);
 		o1.put("Obj3", o3);
 		
-		BSONEncoder enc = new BSONEncoder();
+		BSONEncoder enc = new BasicBSONEncoder();
 		byte[] b = enc.encode(o1);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
@@ -398,7 +399,7 @@ public class BsonParserTest {
 		BSONObject o = new BasicBSONObject();
 		o.put("Float", 5.0f);
 		o.put("Int32", 1234);
-		BSONEncoder enc = new BSONEncoder();
+		BSONEncoder enc = new BasicBSONEncoder();
 		byte[] b = enc.encode(o);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
