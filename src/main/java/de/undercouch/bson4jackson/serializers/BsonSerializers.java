@@ -19,6 +19,8 @@ import de.undercouch.bson4jackson.types.Timestamp;
  * @since 2.0
  */
 public class BsonSerializers extends SimpleSerializers {
+	private static final long serialVersionUID = -1327629614239143170L;
+
 	/**
 	 * Default constructor
 	 */

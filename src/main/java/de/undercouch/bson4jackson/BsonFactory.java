@@ -34,6 +34,8 @@ import com.fasterxml.jackson.core.io.IOContext;
  * @author Michel Kraemer
  */
 public class BsonFactory extends JsonFactory {
+	private static final long serialVersionUID = 1991836957699496674L;
+
 	/**
 	 * The BSON generator features enabled by default
 	 */
