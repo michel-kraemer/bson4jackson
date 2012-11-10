@@ -56,12 +56,8 @@ task packageSources(type: Jar) {
 // define artifacts for upload
 artifacts {
     archives jar
-    archives(packageJavadoc) {
-        type = 'javadoc'
-    }
-    archives(packageSources) {
-        type = 'sources'
-    }
+    archives packageJavadoc
+    archives packageSources
 }
 
 // sign all artifacts
