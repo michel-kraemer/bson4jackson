@@ -15,6 +15,7 @@
 package de.undercouch.bson4jackson;
 
 import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -166,7 +167,12 @@ public class BsonParser extends ParserBase {
 	public JsonToken nextToken() throws IOException, JsonParseException {
 		Context ctx = _currentContext;
 		if (_currToken == null && ctx == null) {
-			_currToken = handleNewDocument(false);
+			try {
+				_currToken = handleNewDocument(false);
+			} catch (EOFException e) {
+				//there is nothing more to read. indicate EOF
+				return null;
+			}
 		} else {
 			_tokenPos = _counter.getPosition();
 			if (ctx == null) {
@@ -326,7 +332,7 @@ public class BsonParser extends ParserBase {
 	 */
 	protected JsonToken handleNewDocument(boolean array) throws IOException {
 		if (_in == null) {
-			//this means Feature.HONOR_DOCUMENT_LENGTH is enabled, and w
+			//this means Feature.HONOR_DOCUMENT_LENGTH is enabled, and we
 			//haven't yet started reading. Read the first int to find out the
 			//length of the document.
 			byte[] buf = new byte[Integer.SIZE / Byte.SIZE];

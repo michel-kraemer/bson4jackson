@@ -50,6 +50,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.undercouch.bson4jackson.types.JavaScript;
@@ -421,5 +422,33 @@ public class BsonParserTest {
 		assertEquals("1234", dec.getText());
 		
 		assertEquals(JsonToken.END_OBJECT, dec.nextToken());
+	}
+	
+	/**
+	 * Tests if a simple BSON file can be read successfully
+	 */
+	@Test
+	public void readBSONFile() throws Exception {
+		InputStream is = getClass().getResourceAsStream("test.bson");
+		try {
+			ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+			MappingIterator<BSONObject> iterator =
+					mapper.reader(BasicBSONObject.class).readValues(is);
+
+			BSONObject o = null;
+			while (iterator.hasNext()) {
+				assertNull(o);
+				BSONObject object = iterator.next();
+				assertNotNull(object);
+				o = object;
+			}
+			
+			assertEquals("Hello world", o.get("message"));
+			assertEquals(10.0, o.get("size"));
+			assertTrue(o.keySet().contains("_id"));
+			assertEquals(3, o.keySet().size());
+		} finally {
+			is.close();
+		}
 	}
 }
