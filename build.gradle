@@ -19,7 +19,7 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:[2.0.0,3.0.0)'
     
     testCompile 'junit:junit:4.10'
-    testCompile 'org.mongodb:mongo-java-driver:2.9.3'
+    testCompile 'org.mongodb:mongo-java-driver:2.11.0'
 }
 
 jar {
