@@ -72,9 +72,9 @@ Here's the compatibility matrix for the current library versions:
 -------------------- --------------- --------------- ---------------
  bson4jackson 2.2.x        Yes             Yes             Yes
 -------------------- --------------- --------------- ---------------
- bson4jackson 2.1.x        Yes             Yes             No
+ bson4jackson 2.1.x        No              Yes             Yes
 -------------------- --------------- --------------- ---------------
- bson4jackson 2.0.x        Yes             No              No
+ bson4jackson 2.0.x        No              No              Yes
 ==================== =============== =============== ===============
 
 If you're looking for a version compatible to Jackson 1.x, please use
