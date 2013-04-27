@@ -15,17 +15,18 @@
 package de.undercouch.bson4jackson;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URL;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.io.IOContext;
 
@@ -151,64 +152,220 @@ public class BsonFactory extends JsonFactory {
 	public final boolean isEnabled(BsonParser.Feature f) {
 		return (_bsonParserFeatures & f.getMask()) != 0;
 	}
-
+	
 	@Override
-    public BsonGenerator createJsonGenerator(OutputStream out, JsonEncoding enc)
-    	throws IOException {
-    	return createJsonGenerator(out);
+	protected BsonGenerator _createGenerator(Writer out, IOContext ctxt) {
+		throw new UnsupportedOperationException("Can not create writer for non-byte-based target");
+	}
+	
+	@Override
+	protected BsonGenerator _createJsonGenerator(Writer out, IOContext ctxt) {
+		return _createGenerator(out, ctxt);
+	}
+	
+	@Override
+	protected BsonParser _createJsonParser(byte[] data, int offset, int len, IOContext ctxt) {
+        return _createParser(data, offset, len, ctxt);
     }
-    
-    public BsonGenerator createJsonGenerator(OutputStream out) throws IOException {
-    	BsonGenerator g = new BsonGenerator(_generatorFeatures, _bsonGeneratorFeatures, out);
-    	ObjectCodec codec = getCodec();
-    	if (codec != null) {
-    		g.setCodec(codec);
-    	}
-    	return g;
+	
+	@Override
+	protected BsonParser _createJsonParser(InputStream in, IOContext ctxt) {
+        return _createParser(in, ctxt);
     }
-
-    @Override
-    public BsonParser createJsonParser(InputStream in) throws IOException {
-		return _createJsonParser(in, _createContext(in, false));
+	
+	@Override
+	protected BsonParser _createJsonParser(Reader r, IOContext ctxt) {
+        return _createParser(r, ctxt);
     }
-
-    @Override
-    protected BsonParser _createJsonParser(InputStream in, IOContext ctxt)
-    	throws IOException, JsonParseException {
+	
+	@Override
+	protected BsonParser _createParser(byte[] data, int offset, int len, IOContext ctxt) {
+		return _createParser(new ByteArrayInputStream(data, offset, len), ctxt);
+	}
+	
+	@Override
+	protected BsonParser _createParser(InputStream in, IOContext ctxt) {
 		BsonParser p = new BsonParser(ctxt, _parserFeatures, _bsonParserFeatures, in);
 		ObjectCodec codec = getCodec();
 		if (codec != null) {
 			p.setCodec(codec);
 		}
 		return p;
-     }
+	}
+	
+	@Override
+	protected BsonParser _createParser(Reader r, IOContext ctxt) {
+		throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
+	}
+	
+	@Override
+	protected BsonGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
+		return createGenerator(out);
+	}
+	
+	@Override
+	protected BsonGenerator _createUTF8JsonGenerator(OutputStream out, IOContext ctxt) throws IOException {
+		return _createUTF8Generator(out, ctxt);
+	}
+	
+	@Override
+	protected Writer _createWriter(OutputStream out, JsonEncoding enc, IOContext ctxt)
+			throws IOException {
+		throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
+	}
+	
+	@Override
+	public BsonGenerator createGenerator(File f, JsonEncoding enc) throws IOException {
+		OutputStream out = new FileOutputStream(f);
+		IOContext ctxt = _createContext(out, true);
+		ctxt.setEncoding(enc);
+		if (enc == JsonEncoding.UTF8 && _outputDecorator != null) {
+			out = _outputDecorator.decorate(ctxt, out);
+		}
+		return createGenerator(out, enc);
+	}
+	
+	@Override
+	public BsonGenerator createGenerator(OutputStream out) throws IOException {
+		return createGenerator(out, JsonEncoding.UTF8);
+	}
+	
+	@Override
+	public BsonGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException {
+		IOContext ctxt = _createContext(out, true);
+		ctxt.setEncoding(enc);
+		if (enc == JsonEncoding.UTF8 && _outputDecorator != null) {
+			out = _outputDecorator.decorate(ctxt, out);
+		}
+		BsonGenerator g = new BsonGenerator(_generatorFeatures, _bsonGeneratorFeatures, out);
+    	ObjectCodec codec = getCodec();
+    	if (codec != null) {
+    		g.setCodec(codec);
+    	}
+    	return g;
+	}
+	
+	@Override
+	public BsonGenerator createGenerator(Writer writer) {
+		throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
+	}
+	
+	@Override
+	public BsonGenerator createJsonGenerator(File f, JsonEncoding enc) throws IOException {
+		return createGenerator(f, enc);
+	}
+	
+	@Override
+	public BsonGenerator createJsonGenerator(OutputStream out) throws IOException {
+		return createGenerator(out);
+	}
+	
+	@Override
+	public BsonGenerator createJsonGenerator(OutputStream out, JsonEncoding enc) throws IOException {
+		return createGenerator(out, enc);
+	}
+	
+	@Override
+	public BsonGenerator createJsonGenerator(Writer out) {
+		return createGenerator(out);
+	}
+	
+	@Override
+	public BsonParser createJsonParser(byte[] data) throws IOException {
+		return createParser(data);
+	}
+	
+	@Override
+	public BsonParser createJsonParser(byte[] data, int offset, int len) throws IOException {
+		return createParser(data, offset, len);
+	}
+	
+	@Override
+	public BsonParser createJsonParser(File f) throws IOException {
+		return createParser(f);
+	}
+	
+	@Override
+	public BsonParser createJsonParser(InputStream in) throws IOException {
+		return createParser(in);
+	}
+	
+	@Override
+	public BsonParser createJsonParser(Reader r) {
+		return createParser(r);
+	}
+	
+	@Override
+	public BsonParser createJsonParser(String content) {
+		return createParser(content);
+	}
 
-    @Override
-    protected JsonParser _createJsonParser(Reader r, IOContext ctxt)
-    	throws IOException, JsonParseException {
-    	throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
+	@Override
+	public BsonParser createJsonParser(URL url) throws IOException {
+		return createParser(url);
+	}
+	
+	@Override
+	public BsonParser createParser(byte[] data) throws IOException {
+		IOContext ctxt = _createContext(data, true);
+        if (_inputDecorator != null) {
+            InputStream in = _inputDecorator.decorate(ctxt, data, 0, data.length);
+            if (in != null) {
+                return _createParser(in, ctxt);
+            }
+        }
+        return _createParser(data, 0, data.length, ctxt);
+	}
+	
+	@Override
+	public BsonParser createParser(byte[] data, int offset, int len) throws IOException {
+		IOContext ctxt = _createContext(data, true);
+        if (_inputDecorator != null) {
+            InputStream in = _inputDecorator.decorate(ctxt, data, offset, len);
+            if (in != null) {
+                return _createParser(in, ctxt);
+            }
+        }
+        return _createParser(data, offset, len, ctxt);
+	}
+	
+	@SuppressWarnings("resource")
+	@Override
+	public BsonParser createParser(File f) throws IOException {
+        IOContext ctxt = _createContext(f, true);
+        InputStream in = new FileInputStream(f);
+        if (_inputDecorator != null) {
+            in = _inputDecorator.decorate(ctxt, in);
+        }
+        return _createParser(in, ctxt);
     }
-    
-    @Override
-    protected JsonParser _createJsonParser(byte[] data, int offset, int len, IOContext ctxt)
-    	throws IOException, JsonParseException {
-    	return _createJsonParser(new ByteArrayInputStream(data, offset, len), ctxt);
+	
+	@Override
+	public BsonParser createParser(InputStream in) throws IOException {
+        IOContext ctxt = _createContext(in, false);
+        if (_inputDecorator != null) {
+            in = _inputDecorator.decorate(ctxt, in);
+        }
+        return _createParser(in, ctxt);
     }
-    
-    @Override
-    protected JsonGenerator _createUTF8JsonGenerator(OutputStream out, IOContext ctxt) throws IOException {
-    	return createJsonGenerator(out, ctxt.getEncoding());
-    }
-    
-    @Override
-    protected JsonGenerator _createJsonGenerator(Writer out, IOContext ctxt)
-    	throws IOException {
-    	throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
-    }
-    
-    @Override
-    protected Writer _createWriter(OutputStream out, JsonEncoding enc, IOContext ctxt)
-    	throws IOException {
-    	throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
+	
+	@Override
+	public BsonParser createParser(Reader r) {
+		throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
+	}
+	
+	@Override
+	public BsonParser createParser(String content) {
+		throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
+	}
+	
+	@Override
+	public BsonParser createParser(URL url) throws IOException {
+        IOContext ctxt = _createContext(url, true);
+        InputStream in = _optimizedStreamFromURL(url);
+        if (_inputDecorator != null) {
+            in = _inputDecorator.decorate(ctxt, in);
+        }
+        return _createParser(in, ctxt);
     }
 }

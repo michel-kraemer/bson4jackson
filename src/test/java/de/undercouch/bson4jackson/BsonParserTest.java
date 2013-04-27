@@ -275,7 +275,7 @@ public class BsonParserTest {
 		ObjectMapper mapper = new ObjectMapper(fac);
 		fac.setCodec(mapper);
 		
-		BsonParser dec = fac.createJsonParser(bais);
+		BsonParser dec = fac.createParser(bais);
 		
 		assertEquals(JsonToken.START_OBJECT, dec.nextToken());
 		
@@ -346,7 +346,7 @@ public class BsonParserTest {
 	public void parseBeyondEnd() throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		BsonFactory bsonFactory = new BsonFactory();
-		BsonGenerator generator = bsonFactory.createJsonGenerator(out);
+		BsonGenerator generator = bsonFactory.createGenerator(out);
 		generator.writeStartObject();
 		generator.writeStringField("myField", "myValue");
 		generator.writeEndObject();
@@ -371,7 +371,7 @@ public class BsonParserTest {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		BsonFactory bsonFactory = new BsonFactory();
 		bsonFactory.enable(BsonParser.Feature.HONOR_DOCUMENT_LENGTH);
-		BsonGenerator generator = bsonFactory.createJsonGenerator(out);
+		BsonGenerator generator = bsonFactory.createGenerator(out);
 		generator.writeStartObject();
 		generator.writeStringField("myField", "myValue");
 		generator.writeEndObject();
@@ -405,7 +405,7 @@ public class BsonParserTest {
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		BsonFactory fac = new BsonFactory();
-		BsonParser dec = fac.createJsonParser(bais);
+		BsonParser dec = fac.createParser(bais);
 		
 		assertEquals(JsonToken.START_OBJECT, dec.nextToken());
 		

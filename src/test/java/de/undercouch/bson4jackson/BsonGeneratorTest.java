@@ -101,7 +101,7 @@ public class BsonGeneratorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		BsonFactory fac = new BsonFactory();
 		fac.enable(BsonGenerator.Feature.ENABLE_STREAMING);
-		BsonGenerator gen = fac.createJsonGenerator(baos);
+		BsonGenerator gen = fac.createGenerator(baos);
 		byte[] dummy = new byte[DynamicOutputBuffer.DEFAULT_BUFFER_SIZE * 3 / 2];
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
