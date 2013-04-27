@@ -57,7 +57,25 @@ For `buildr <http://buildr.apache.org/>`_ use the following snippet::
 Compatibility
 -------------
 
-bson4jackson 2.x is compatible to Jackson 2.0 and higher.
+bson4jackson 2.x is compatible to Jackson 2.x and higher. Due to some
+compatibility issues both libraries' major and minor version numbers
+have to match. That means you have to use at least bson4jackson 2.1
+if you use Jackson 2.1, bson4jackson 2.2 if you use Jackson 2.2, etc.
+I will try to keep bson4jackson up to date. If there is a compatibility
+issue I will update bson4jackon, usually within a couple of days after
+the new Jackson version has been released.
+
+Here's the compatibility matrix for the current library versions:
+
+==================== =============== =============== ===============
+ Library              Jackson 2.2.x   Jackson 2.1.x   Jackson 2.0.x
+-------------------- --------------- --------------- ---------------
+ bson4jackson 2.2.x        Yes             Yes             Yes
+-------------------- --------------- --------------- ---------------
+ bson4jackson 2.1.x        Yes             Yes             No
+-------------------- --------------- --------------- ---------------
+ bson4jackson 2.0.x        Yes             No              No
+==================== =============== =============== ===============
 
 If you're looking for a version compatible to Jackson 1.x, please use
 bson4jackson 1.3.0. It's the last version for the 1.x branch.
