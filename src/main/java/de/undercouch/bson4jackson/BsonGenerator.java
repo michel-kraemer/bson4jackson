@@ -14,6 +14,19 @@
 
 package de.undercouch.bson4jackson;
 
+import com.fasterxml.jackson.core.Base64Variant;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.base.GeneratorBase;
+import com.fasterxml.jackson.core.json.JsonWriteContext;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import de.undercouch.bson4jackson.io.ByteOrderUtil;
+import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+import de.undercouch.bson4jackson.types.JavaScript;
+import de.undercouch.bson4jackson.types.ObjectId;
+import de.undercouch.bson4jackson.types.Symbol;
+import de.undercouch.bson4jackson.types.Timestamp;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -23,20 +36,6 @@ import java.nio.CharBuffer;
 import java.util.Date;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.base.GeneratorBase;
-import com.fasterxml.jackson.core.json.JsonWriteContext;
-import com.fasterxml.jackson.databind.SerializerProvider;
-
-import de.undercouch.bson4jackson.io.ByteOrderUtil;
-import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Writes BSON code to the provided output stream
@@ -85,13 +84,13 @@ public class BsonGenerator extends GeneratorBase {
 		/**
 		 * The position of the document's header in the output buffer
 		 */
-		final int headerPos;
+		final long headerPos;
 		
 		/**
 		 * The current position in the array or -1 if the
 		 * document is no array
 		 */
-		int currentArrayPos;
+        long currentArrayPos;
 		
 		/**
 		 * Creates a new DocumentInfo object
@@ -101,7 +100,7 @@ public class BsonGenerator extends GeneratorBase {
 		 * in the output buffer
 		 * @param array true if the document is an array
 		 */
-		public DocumentInfo(DocumentInfo parent, int headerPos, boolean array) {
+		public DocumentInfo(DocumentInfo parent, long headerPos, boolean array) {
 			this.parent = parent;
 			this.headerPos = headerPos;
 			this.currentArrayPos = (array ? 0 : -1);
@@ -129,7 +128,7 @@ public class BsonGenerator extends GeneratorBase {
 	/**
 	 * Saves the position of the type marker for the object currently begin written
 	 */
-	protected int _typeMarker = 0;
+	protected long _typeMarker = 0;
 	
 	/**
 	 * Saves information about documents (the main document and embedded ones)
@@ -185,11 +184,11 @@ public class BsonGenerator extends GeneratorBase {
 	 * @return the position (before it has been increased) or -1 if
 	 * the current document is not an array
 	 */
-	protected int getAndIncCurrentArrayPos() {
+	protected long getAndIncCurrentArrayPos() {
 		if (_currentDocument == null) {
 			return -1;
 		}
-		int r = _currentDocument.currentArrayPos;
+        long r = _currentDocument.currentArrayPos;
 		++_currentDocument.currentArrayPos;
 		return r;
 	}
@@ -206,8 +205,8 @@ public class BsonGenerator extends GeneratorBase {
 	 * given position. Does not increase the buffer's write position. 
 	 * @param pos the position where to write the header
 	 */
-	protected void putHeader(int pos) {
-		_buffer.putInt(pos, _buffer.size() - pos);
+	protected void putHeader(long pos) {
+		_buffer.putInt(pos, (int) (_buffer.size() - pos));
 	}
 	
 	@Override
@@ -324,7 +323,7 @@ public class BsonGenerator extends GeneratorBase {
 	 */
 	protected void _writeArrayFieldNameIfNeeded() throws IOException {
 		if (isArray()) {
-			int p = getAndIncCurrentArrayPos();
+            long p = getAndIncCurrentArrayPos();
 			_writeFieldName(String.valueOf(p));
 		}
 	}
@@ -555,7 +554,7 @@ public class BsonGenerator extends GeneratorBase {
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_STRING);
 		
 		//reserve space for the string size
-		int p = _buffer.size();
+        long p = _buffer.size();
 		_buffer.putInt(0);
 		
 		//write string
@@ -679,7 +678,7 @@ public class BsonGenerator extends GeneratorBase {
 		} else {
 			_buffer.putByte(_typeMarker, BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE);
 			// reserve space for the entire structure size
-			int p = _buffer.size();
+			long p = _buffer.size();
 			_buffer.putInt(0);
 
 			// write the code
@@ -690,7 +689,7 @@ public class BsonGenerator extends GeneratorBase {
 			provider.findValueSerializer(Map.class, null).serialize(javaScript.getScope(), this, provider);
 			// write the length
 			if (!isEnabled(Feature.ENABLE_STREAMING)) {
-				int l = _buffer.size() - p + 4;
+				int l = (int) (_buffer.size() - p + 4);
 				_buffer.putInt(p, l);
 			}
 		}
@@ -719,7 +718,7 @@ public class BsonGenerator extends GeneratorBase {
 	 */
 	protected int _writeString(String string) {
 		//reserve space for the string size
-		int p = _buffer.size();
+        long p = _buffer.size();
 		_buffer.putInt(0);
 
 		//write string

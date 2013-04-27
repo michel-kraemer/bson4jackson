@@ -27,7 +27,7 @@ public class CountingInputStream extends FilterInputStream {
 	/**
 	 * The current buffer position
 	 */
-	private int _pos;
+	private long _pos;
 	
 	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)
@@ -39,7 +39,7 @@ public class CountingInputStream extends FilterInputStream {
 	/**
 	 * @return the number of bytes read or skipped
 	 */
-	public int getPosition() {
+	public long getPosition() {
 		return _pos;
 	}
 

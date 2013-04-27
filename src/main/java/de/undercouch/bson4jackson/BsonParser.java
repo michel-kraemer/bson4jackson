@@ -14,6 +14,17 @@
 
 package de.undercouch.bson4jackson;
 
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.base.ParserBase;
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.json.JsonReadContext;
+import com.fasterxml.jackson.core.type.TypeReference;
+import de.undercouch.bson4jackson.io.*;
+import de.undercouch.bson4jackson.types.JavaScript;
+import de.undercouch.bson4jackson.types.ObjectId;
+import de.undercouch.bson4jackson.types.Symbol;
+import de.undercouch.bson4jackson.types.Timestamp;
+
 import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -27,27 +38,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.base.ParserBase;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.json.JsonReadContext;
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import de.undercouch.bson4jackson.io.BoundedInputStream;
-import de.undercouch.bson4jackson.io.ByteOrderUtil;
-import de.undercouch.bson4jackson.io.CountingInputStream;
-import de.undercouch.bson4jackson.io.LittleEndianInputStream;
-import de.undercouch.bson4jackson.io.StaticBufferedInputStream;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Reads a BSON document from the provided input stream
@@ -106,7 +96,7 @@ public class BsonParser extends ParserBase {
 	/**
 	 * The position of the current token
 	 */
-	private int _tokenPos;
+	private long _tokenPos;
 	
 	/**
 	 * The current parser state
