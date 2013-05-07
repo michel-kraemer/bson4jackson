@@ -13,13 +13,17 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(Compile) { 
+    options.compilerArgs << "-Xlint" 
+} 
+
 dependencies {
-    compile 'com.fasterxml.jackson.core:jackson-core:2.1.4'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.1.4'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.1.4'
-    
-    testCompile 'junit:junit:4.10'
-    testCompile 'org.mongodb:mongo-java-driver:2.11.0'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.2.1'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.2.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.2.1'
+
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.mongodb:mongo-java-driver:2.11.1'
 }
 
 jar {
