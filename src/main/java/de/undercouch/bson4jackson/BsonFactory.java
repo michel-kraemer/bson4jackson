@@ -158,22 +158,26 @@ public class BsonFactory extends JsonFactory {
 		throw new UnsupportedOperationException("Can not create writer for non-byte-based target");
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	protected BsonGenerator _createJsonGenerator(Writer out, IOContext ctxt) {
 		return _createGenerator(out, ctxt);
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	protected BsonParser _createJsonParser(byte[] data, int offset, int len, IOContext ctxt) {
         return _createParser(data, offset, len, ctxt);
     }
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	protected BsonParser _createJsonParser(InputStream in, IOContext ctxt) {
         return _createParser(in, ctxt);
     }
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	protected BsonParser _createJsonParser(Reader r, IOContext ctxt) {
         return _createParser(r, ctxt);
     }
@@ -203,7 +207,8 @@ public class BsonFactory extends JsonFactory {
 		return createGenerator(out);
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	protected BsonGenerator _createUTF8JsonGenerator(OutputStream out, IOContext ctxt) throws IOException {
 		return _createUTF8Generator(out, ctxt);
 	}
@@ -250,57 +255,68 @@ public class BsonFactory extends JsonFactory {
 		throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
 	}
 	
-	@Override  @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonGenerator createJsonGenerator(File f, JsonEncoding enc) throws IOException {
 		return createGenerator(f, enc);
 	}
 	
-	@Override  @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonGenerator createJsonGenerator(OutputStream out) throws IOException {
 		return createGenerator(out);
 	}
 	
-	@Override  @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonGenerator createJsonGenerator(OutputStream out, JsonEncoding enc) throws IOException {
 		return createGenerator(out, enc);
 	}
 	
-	@Override  @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonGenerator createJsonGenerator(Writer out) {
 		return createGenerator(out);
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(byte[] data) throws IOException {
 		return createParser(data);
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(byte[] data, int offset, int len) throws IOException {
 		return createParser(data, offset, len);
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(File f) throws IOException {
 		return createParser(f);
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(InputStream in) throws IOException {
 		return createParser(in);
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(Reader r) {
 		return createParser(r);
 	}
 	
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(String content) {
 		return createParser(content);
 	}
 
-	@Override @SuppressWarnings("deprecation")
+	@Override
+	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(URL url) throws IOException {
 		return createParser(url);
 	}
