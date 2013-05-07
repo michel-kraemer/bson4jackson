@@ -352,7 +352,7 @@ public class BsonParserTest {
 		generator.writeEndObject();
 		generator.close();
 
-		BsonParser parser = (BsonParser)bsonFactory.createJsonParser(out.toByteArray());
+		BsonParser parser = bsonFactory.createJsonParser(out.toByteArray());
 		//the following loop shall throw no exception and end after 4 iterations
 		int i = 0;
 		while (parser.nextToken() != null) {
