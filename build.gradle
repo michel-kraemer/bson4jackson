@@ -91,7 +91,7 @@ uploadArchives {
                name 'bson4jackson'
                packaging 'jar'
                description 'A pluggable BSON generator and parser for Jackson JSON processor.'
-               url 'http://www.michel-kraemer.de'
+               url 'http://www.michel-kraemer.com'
  
                scm {
                    url 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
