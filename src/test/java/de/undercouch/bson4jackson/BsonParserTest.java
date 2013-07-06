@@ -49,6 +49,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -476,5 +477,45 @@ public class BsonParserTest {
 		assertEquals("first", result[0]);
 		assertEquals("second", result[1]);
 		assertEquals("third", result[2]);
+	}
+	
+	/**
+	 * Tests if an empty root array can be parsed correctly
+	 * @throws Exception if something went wrong
+	 */
+	@Test
+	public void parseEmptyRootArray() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		BsonFactory bsonFactory = new BsonFactory();
+		BsonGenerator generator = bsonFactory.createGenerator(out);
+		generator.writeStartArray();
+		generator.writeEndArray();
+		generator.close();
+
+		InputStream is = new ByteArrayInputStream(out.toByteArray());
+		ObjectMapper mapper = new ObjectMapper(bsonFactory);
+		bsonFactory.setCodec(mapper);
+		String[] result = mapper.readValue(is, String[].class);
+		assertEquals(0, result.length);
+	}
+	
+	/**
+	 * Tests if a root object is not accidentally parsed as an array
+	 * @throws Exception if something went wrong
+	 */
+	@Test(expected = JsonMappingException.class)
+	public void parseRootObjectAsArray() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		BsonFactory bsonFactory = new BsonFactory();
+		BsonGenerator generator = bsonFactory.createGenerator(out);
+		generator.writeStartObject();
+		generator.writeStringField("myField", "myValue");
+		generator.writeEndObject();
+		generator.close();
+
+		InputStream is = new ByteArrayInputStream(out.toByteArray());
+		ObjectMapper mapper = new ObjectMapper(bsonFactory);
+		bsonFactory.setCodec(mapper);
+		mapper.readValue(is, String[].class);
 	}
 }
