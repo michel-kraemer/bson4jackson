@@ -144,6 +144,65 @@ public class BsonParser extends ParserBase {
 	protected boolean isEnabled(Feature f) {
 		return (_bsonFeatures & f.getMask()) != 0;
 	}
+	
+	@Override
+	public boolean isExpectedStartArrayToken() {
+		JsonToken t = _currToken;
+		if (t == JsonToken.START_OBJECT) {
+			//FIX FOR ISSUE #31:
+			//if this method is called, this usually means the caller wants
+			//to parse an array (i.e. this method is called by array
+			//deserializers such as StringArrayDeserializer. If we're currently
+			//at the start of an object, check if this object might as well
+			//be an array (it's just a quick sanity check).
+			boolean isarray;
+			if (_in.markSupported()) {
+				_in.mark(3);
+				try {
+					//check the first key in the object. if it is '0' this
+					//could indeed be an array
+					
+					//read type
+					byte tpe = _in.readByte();
+					if (tpe != BsonConstants.TYPE_END) {
+						//read key (CString)
+						if (_in.readByte() == '0' && _in.readByte() == '\0') {
+							//the object could indeed be an array!
+							isarray = true;
+						} else {
+							//the first key was not '0'. this can't be an array!
+							isarray = false;
+						}
+					} else {
+						//object is empty. it could be an empty array.
+						isarray = true;
+					}
+				} catch (IOException e) {
+					//we cannot check. just assume it would work. the caller
+					//should know what he does.
+					isarray = true;
+				} finally {
+					try {
+						_in.reset();
+					} catch (IOException re) {
+						throw new IllegalStateException("Could not reset input stream", re);
+					}
+				}
+			} else {
+				//we cannot check. just assume it would work. the caller
+				//should know what he does.
+				isarray = true;
+			}
+			
+			if (isarray) {
+				//replace START_OBJECT token by START_ARRAY, update current context
+				_currToken = JsonToken.START_ARRAY;
+				_currentContext = _currentContext.copy(_currentContext.parent, true);
+				return true;
+			}
+		}
+		return super.isExpectedStartArrayToken();
+	}
 
 	@Override
 	public ObjectCodec getCodec() {
@@ -801,6 +860,23 @@ public class BsonParser extends ParserBase {
 			fieldName = null;
 			value = null;
 			state = State.FIELDNAME;
+		}
+		
+		/**
+		 * Creates a copy of this context, but sets new values for
+		 * {@link #parent} and {@link #array}
+		 * @param parent the new context's parent
+		 * @param array true if the document being parsed under the new
+		 * context is an array
+		 * @return the new context
+		 */
+		public Context copy(Context parent, boolean array) {
+			Context r = new Context(parent, array);
+			r.type = type;
+			r.fieldName = fieldName;
+			r.value = value;
+			r.state = state;
+			return r;
 		}
 	}
 	

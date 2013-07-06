@@ -30,6 +30,11 @@ public class CountingInputStream extends FilterInputStream {
 	private int _pos;
 	
 	/**
+	 * The position in the buffer the last time {@link #mark(int)} was called
+	 */
+	private int _markpos = -1;
+	
+	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)
 	 */
 	public CountingInputStream(InputStream in) {
@@ -77,5 +82,17 @@ public class CountingInputStream extends FilterInputStream {
 			_pos += r;
 		}
 		return r;
+	}
+	
+	@Override
+	public synchronized void mark(int readlimit) {
+		_markpos = _pos;
+		super.mark(readlimit);
+	}
+	
+	@Override
+	public synchronized void reset() throws IOException {
+		super.reset();
+		_pos = _markpos;
 	}
 }

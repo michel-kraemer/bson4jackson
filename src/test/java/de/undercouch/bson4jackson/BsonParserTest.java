@@ -426,6 +426,7 @@ public class BsonParserTest {
 	
 	/**
 	 * Tests if a simple BSON file can be read successfully
+	 * @throws Exception if something went wrong
 	 */
 	@Test
 	public void readBSONFile() throws Exception {
@@ -450,5 +451,30 @@ public class BsonParserTest {
 		} finally {
 			is.close();
 		}
+	}
+	
+	/**
+	 * Tests if a root-level array can be read correctly. Fixes issue #31
+	 * @throws Exception if something went wrong
+	 */
+	@Test
+	public void parseRootArray() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		BsonFactory bsonFactory = new BsonFactory();
+		BsonGenerator generator = bsonFactory.createGenerator(out);
+		generator.writeStartArray();
+		generator.writeString("first");
+		generator.writeString("second");
+		generator.writeString("third");
+		generator.writeEndArray();
+		generator.close();
+
+		InputStream is = new ByteArrayInputStream(out.toByteArray());
+		ObjectMapper mapper = new ObjectMapper(bsonFactory);
+		bsonFactory.setCodec(mapper);
+		String[] result = mapper.readValue(is, String[].class);
+		assertEquals("first", result[0]);
+		assertEquals("second", result[1]);
+		assertEquals("third", result[2]);
 	}
 }
