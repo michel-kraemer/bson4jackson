@@ -96,7 +96,7 @@ public class DynamicOutputBuffer {
 	/**
 	 * The current write position
 	 */
-	private int _position;
+	private long _position;
 	
 	/**
 	 * The position of the first byte that has not been already
@@ -104,12 +104,12 @@ public class DynamicOutputBuffer {
 	 * a position before this first byte is invalid and causes
 	 * a {@link IndexOutOfBoundsException} to be thrown.
 	 */
-	private int _flushPosition;
+	private long _flushPosition;
 	
 	/**
 	 * The current buffer size (changes dynamically)
 	 */
-	private int _size;
+	private long _size;
 	
 	/**
 	 * A linked list of internal buffers
@@ -254,8 +254,8 @@ public class DynamicOutputBuffer {
 	 * @param position the position
 	 * @return the buffer at the requested position
 	 */
-	private ByteBuffer getBuffer(int position) {
-		int n = position / _bufferSize;
+	private ByteBuffer getBuffer(long position) {
+		int n = (int) (position / _bufferSize);
 		while (n >= _buffers.size()) {
 			addNewBuffer();
 		}
@@ -268,7 +268,7 @@ public class DynamicOutputBuffer {
 	 * internal buffers.
 	 * @param size the minimum buffer size
 	 */
-	private void adaptSize(int size) {
+	private void adaptSize(long size) {
 		if (size > _size) {
 			_size = size;
 		}
@@ -297,7 +297,7 @@ public class DynamicOutputBuffer {
 	/**
 	 * @return the current buffer size (changes dynamically)
 	 */
-	public int size() {
+	public long size() {
 		return _size;
 	}
 	
@@ -347,10 +347,10 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the byte
 	 * @param b the byte to put
 	 */
-	public void putByte(int pos, byte b) {
+	public void putByte(long pos, byte b) {
 		adaptSize(pos + 1);
 		ByteBuffer bb = getBuffer(pos);
-		int i = pos % _bufferSize;
+		int i = (int) (pos % _bufferSize);
 		bb.put(i, b);
 	}
 	
@@ -360,14 +360,14 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the bytes
 	 * @param bs an array of bytes to put
 	 */
-	public void putBytes(int pos, byte... bs) {
+	public void putBytes(long pos, byte... bs) {
 		adaptSize(pos + bs.length);
 		ByteBuffer bb = null;
 		int i = _bufferSize;
 		for (byte b : bs) {
 			if (i == _bufferSize) {
 				bb = getBuffer(pos);
-				i = pos % _bufferSize;
+				i = (int) (pos % _bufferSize);
 			}
 			bb.put(i, b);
 			++i;
@@ -391,10 +391,10 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the integer
 	 * @param i the integer to put
 	 */
-	public void putInt(int pos, int i) {
+	public void putInt(long pos, int i) {
 		adaptSize(pos + 4);
 		ByteBuffer bb = getBuffer(pos);
-		int index = pos % _bufferSize;
+		int index = (int) (pos % _bufferSize);
 		if (bb.limit() - index >= 4) {
 			bb.putInt(index, i);
 		} else {
@@ -427,10 +427,10 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the integer
 	 * @param l the 64-bit integer to put
 	 */
-	public void putLong(int pos, long l) {
+	public void putLong(long pos, long l) {
 		adaptSize(pos + 8);
 		ByteBuffer bb = getBuffer(pos);
-		int index = pos % _bufferSize;
+		int index = (int) (pos % _bufferSize);
 		if (bb.limit() - index >= 8) {
 			bb.putLong(index, l);
 		} else {
@@ -467,7 +467,7 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the float
 	 * @param f the float to put
 	 */
-	public void putFloat(int pos, float f) {
+	public void putFloat(long pos, float f) {
 		putInt(pos, Float.floatToRawIntBits(f));
 	}
 	
@@ -487,7 +487,7 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the double
 	 * @param d the double to put
 	 */
-	public void putDouble(int pos, double d) {
+	public void putDouble(long pos, double d) {
 		putLong(pos, Double.doubleToRawLongBits(d));
 	}
 	
@@ -507,7 +507,7 @@ public class DynamicOutputBuffer {
 	 * @param pos the position where to put the character sequence
 	 * @param s the character sequence to put
 	 */
-	public void putString(int pos, CharSequence s) {
+	public void putString(long pos, CharSequence s) {
 		for (int i = 0; i < s.length(); ++i) {
 			char c = s.charAt(i);
 			byte b0 = (byte)c;
@@ -540,15 +540,15 @@ public class DynamicOutputBuffer {
 	 * @param s the string to put
 	 * @return the number of UTF-8 bytes put
 	 */
-	public int putUTF8(int pos, String s) {
+	public int putUTF8(long pos, String s) {
 		ByteBuffer minibb = null;
 		
 		CharsetEncoder enc = getUTF8Encoder();
 		CharBuffer in = CharBuffer.wrap(s);
-		
-		int pos2 = pos;
+
+        long pos2 = pos;
 		ByteBuffer bb = getBuffer(pos2);
-		int index = pos2 % _bufferSize;
+		int index = (int) (pos2 % _bufferSize);
 		bb.position(index);
 		
 		while (in.remaining() > 0) {
@@ -576,7 +576,7 @@ public class DynamicOutputBuffer {
 					index = 0;
 				} else {
 					bb = getBuffer(pos2);
-					index = pos2 % _bufferSize;
+					index = (int) (pos2 % _bufferSize);
 					bb.position(index);
 				}
 			} else if (res.isError()) {
@@ -589,7 +589,7 @@ public class DynamicOutputBuffer {
 		}
 		
 		adaptSize(pos2);
-		return pos2 - pos;
+		return (int) (pos2 - pos);
 	}
 	
 	/**
@@ -600,8 +600,8 @@ public class DynamicOutputBuffer {
 	 * @throws IOException if the buffer could not be flushed
 	 */
 	public void flushTo(OutputStream out) throws IOException {
-		int n1 = _flushPosition / _bufferSize;
-		int n2 = _position / _bufferSize;
+        int n1 = (int) (_flushPosition / _bufferSize);
+        int n2 = (int) (_position / _bufferSize);
 		if (n1 < n2) {
 			flushTo(Channels.newChannel(out));
 		}
@@ -619,8 +619,8 @@ public class DynamicOutputBuffer {
 	 * @throws IOException if the buffer could not be flushed
 	 */
 	public void flushTo(WritableByteChannel out) throws IOException {
-		int n1 = _flushPosition / _bufferSize;
-		int n2 = _position / _bufferSize;
+		int n1 = (int) (_flushPosition / _bufferSize);
+		int n2 = (int) (_position / _bufferSize);
 		while (n1 < n2) {
 			ByteBuffer bb = _buffers.get(n1);
 			bb.rewind();
@@ -650,9 +650,9 @@ public class DynamicOutputBuffer {
 	 * @throws IOException if the buffer could not be written
 	 */
 	public void writeTo(WritableByteChannel out) throws IOException {
-		int n1 = _flushPosition / _bufferSize;
+		int n1 = (int) (_flushPosition / _bufferSize);
 		int n2 = _buffers.size();
-		int toWrite = _size - _flushPosition;
+		int toWrite = (int) (_size - _flushPosition);
 		while (n1 < n2) {
 			int curWrite = Math.min(toWrite, _bufferSize);
 			ByteBuffer bb = _buffers.get(n1);
