@@ -46,7 +46,7 @@ public class CountingInputStream extends FilterInputStream {
 	@Override
 	public int read() throws IOException {
 		int r = super.read();
-		if (r > 0) {
+		if (r >= 0) {
 			++_pos;
 		}
 		return r;
