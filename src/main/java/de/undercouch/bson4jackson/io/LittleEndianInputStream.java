@@ -58,18 +58,12 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	private CharBuffer _lineBuffer;
 	
 	/**
-	 * Used to create re-usable buffers
-	 */
-	private final StaticBuffers _staticBuffers;
-	
-	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)
 	 */
 	public LittleEndianInputStream(InputStream in) {
 		super(in);
 		_rawBuf = new byte[8];
 		_buf = ByteBuffer.wrap(_rawBuf).order(ByteOrder.LITTLE_ENDIAN);
-		_staticBuffers = StaticBuffers.getInstance();
 	}
 	
 	@Override
@@ -246,12 +240,14 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	 * has been read
 	 */
 	public String readUTF(DataInput input, int len) throws IOException {
-		ByteBuffer utf8buf = _staticBuffers.byteBuffer(UTF8_BUFFER, 1024 * 8);
+		StaticBuffers staticBuffers = StaticBuffers.getInstance();
+		
+		ByteBuffer utf8buf = staticBuffers.byteBuffer(UTF8_BUFFER, 1024 * 8);
 		byte[] rawUtf8Buf = utf8buf.array();
 
 		CharsetDecoder dec = Charset.forName("UTF-8").newDecoder();
 		int expectedLen = (len > 0 ? (int)(dec.averageCharsPerByte() * len) + 1 : 1024);
-		CharBuffer cb = _staticBuffers.charBuffer(UTF8_BUFFER, expectedLen);
+		CharBuffer cb = staticBuffers.charBuffer(UTF8_BUFFER, expectedLen);
 		try {
 			while (len != 0 || utf8buf.position() > 0) {
 				//read as much as possible
@@ -287,7 +283,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 					utf8buf.compact();
 					
 					//create a new char buffer with the same key
-					CharBuffer newBuf = _staticBuffers.charBuffer(UTF8_BUFFER,
+					CharBuffer newBuf = staticBuffers.charBuffer(UTF8_BUFFER,
 							cb.capacity() + 1024);
 					
 					cb.flip();
@@ -298,8 +294,8 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 				}
 			}
 		} finally {
-			_staticBuffers.releaseCharBuffer(UTF8_BUFFER, cb);
-			_staticBuffers.releaseByteBuffer(UTF8_BUFFER, utf8buf);
+			staticBuffers.releaseCharBuffer(UTF8_BUFFER, cb);
+			staticBuffers.releaseByteBuffer(UTF8_BUFFER, utf8buf);
 		}
 		
 		cb.flip();
