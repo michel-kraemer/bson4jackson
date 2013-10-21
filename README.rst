@@ -3,7 +3,7 @@ BSON for Jackson
 ================
 
 This library adds support for `BSON <http://bsonspec.org>`_ to the
-`Jackson JSON processor <http://jackson.codehaus.org/>`_.
+`Jackson JSON processor <https://github.com/FasterXML/jackson>`_.
 
 BSON is a binary representation of `JSON <http://json.org/>`_. It has
 gained prominence by its usage as the main exchange and persistence
