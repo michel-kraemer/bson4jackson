@@ -26,7 +26,7 @@ Download
 --------
 
 bson4jackson binaries are available from the
-`GitHub Download page <https://github.com/michel-kraemer/bson4jackson/downloads>`_.
+`GitHub Releases page <https://github.com/michel-kraemer/bson4jackson/releases>`_.
 
 You may also use `Maven <http://maven.apache.org/>`_ to download bson4jackson::
 
