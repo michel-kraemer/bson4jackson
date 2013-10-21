@@ -34,7 +34,7 @@ You may also use `Maven <http://maven.apache.org/>`_ to download bson4jackson::
     <dependency>
       <groupId>de.undercouch</groupId>
       <artifactId>bson4jackson</artifactId>
-      <version>2.2.0</version>
+      <version>2.2.3</version>
     </dependency>
   </dependencies>
 
@@ -42,17 +42,17 @@ If you're using `Gradle <http://www.gradle.org/>`_, you may add the
 following snippet to your ``build.gradle``::
 
   dependencies {
-      compile 'de.undercouch:bson4jackson:2.2.0'
+      compile 'de.undercouch:bson4jackson:2.2.3'
   }
 
 For `sbt <http://code.google.com/p/simple-build-tool/>`_,
 add the following line to your project::
 
-  val bson4jackson = "de.undercouch" % "bson4jackson" % "2.2.0"
+  val bson4jackson = "de.undercouch" % "bson4jackson" % "2.2.3"
 
 For `buildr <http://buildr.apache.org/>`_ use the following snippet::
 
-  compile.with 'de.undercouch:bson4jackson:jar:2.2.0'
+  compile.with 'de.undercouch:bson4jackson:jar:2.2.3'
 
 Compatibility
 -------------
