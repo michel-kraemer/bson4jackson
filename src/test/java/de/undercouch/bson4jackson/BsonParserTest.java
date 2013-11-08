@@ -63,6 +63,13 @@ import de.undercouch.bson4jackson.types.Timestamp;
  * @author Michel Kraemer
  */
 public class BsonParserTest {
+	/**
+	 * Simple test class for {@link BsonParserTest#parseRootObjectArray()}
+	 */
+	public static class SimpleClass {
+		public String name;
+	}
+
 	private Map<?, ?> parseBsonObject(BSONObject o) throws IOException {
 		BSONEncoder enc = new BasicBSONEncoder();
 		byte[] b = enc.encode(o);
@@ -517,5 +524,33 @@ public class BsonParserTest {
 		ObjectMapper mapper = new ObjectMapper(bsonFactory);
 		bsonFactory.setCodec(mapper);
 		mapper.readValue(is, String[].class);
+	}
+	
+	/**
+	 * Creates a root array consisting of two simple objects and tries to
+	 * deserialize them
+	 * @throws Exception if something goes wrong
+	 */
+	@Test
+	public void parseRootObjectArray() throws Exception {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		BsonFactory bsonFactory = new BsonFactory();
+		BsonGenerator generator = bsonFactory.createGenerator(out);
+		generator.writeStartArray();
+		generator.writeStartObject();
+		generator.writeStringField("name", "test");
+		generator.writeEndObject();
+		generator.writeStartObject();
+		generator.writeStringField("name", "test2");
+		generator.writeEndObject();
+		generator.writeEndArray();
+		generator.close();
+		
+		InputStream is = new ByteArrayInputStream(out.toByteArray());
+		ObjectMapper mapper = new ObjectMapper(bsonFactory);
+		bsonFactory.setCodec(mapper);
+		SimpleClass[] result = mapper.readValue(is, SimpleClass[].class);
+		assertEquals("test", ((SimpleClass)result[0]).name);
+		assertEquals("test2", ((SimpleClass)result[1]).name);
 	}
 }
