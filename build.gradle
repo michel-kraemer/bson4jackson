@@ -4,7 +4,7 @@ apply plugin: 'signing'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-version = '2.2.3'
+version = '2.3.0'
 group = 'de.undercouch'
 sourceCompatibility = '1.6'
 targetCompatibility = '1.6'
@@ -18,9 +18,9 @@ tasks.withType(Compile) {
 } 
 
 dependencies {
-    compile 'com.fasterxml.jackson.core:jackson-core:2.2.3'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.2.3'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.2.3'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.3.0'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.3.0'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.3.0'
 
     testCompile 'junit:junit:4.11'
     testCompile 'org.mongodb:mongo-java-driver:2.11.2'
