@@ -550,7 +550,7 @@ public class BsonParserTest {
 		ObjectMapper mapper = new ObjectMapper(bsonFactory);
 		bsonFactory.setCodec(mapper);
 		SimpleClass[] result = mapper.readValue(is, SimpleClass[].class);
-		assertEquals("test", ((SimpleClass)result[0]).name);
-		assertEquals("test2", ((SimpleClass)result[1]).name);
+		assertEquals("test", result[0].name);
+		assertEquals("test2", result[1].name);
 	}
 }
