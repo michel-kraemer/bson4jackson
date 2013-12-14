@@ -266,7 +266,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 					int r = Math.min(len, utf8buf.remaining());
 					input.readFully(rawUtf8Buf, utf8buf.position(), r);
 					len -= r;
-					utf8buf.limit(r);
+					utf8buf.limit(utf8buf.position() + r);
 					utf8buf.rewind();
 				} else {
 					utf8buf.flip();
