@@ -60,8 +60,18 @@ public class BsonGenerator extends GeneratorBase {
 		 * ignores the total number of bytes anyway (like {@link BsonParser}
 		 * or <code>org.bson.BSONDecoder</code> from the MongoDB Java Driver
 		 * do) then this feature will be very useful.</p>
+		 * <p>This feature is disabled by default.</p>
 		 */
-		ENABLE_STREAMING;
+		ENABLE_STREAMING,
+		
+		/**
+		 * <p>Forces {@link BigDecimal}s to be written as {@link String}s.
+		 * The BSON format supports IEEE 754 doubles only (64 bits). You
+		 * may want to enable this feature if you want to serialize numbers
+		 * that require more bits or a higher accuracy.</p>
+		 * <p>This feature is disabled by default.</p>
+		 */
+		WRITE_BIGDECIMALS_AS_STRINGS;
 		
 		/**
 		 * @return the bit mask that identifies this feature
@@ -509,6 +519,11 @@ public class BsonGenerator extends GeneratorBase {
 	@Override
 	public void writeNumber(BigDecimal dec) throws IOException,
 			JsonGenerationException {
+		if (isEnabled(Feature.ENABLE_STREAMING)) {
+			writeString(dec.toString());
+			return;
+		}
+		
 		float f = dec.floatValue();
 		if (!Float.isInfinite(f)) {
 			writeNumber(f);
