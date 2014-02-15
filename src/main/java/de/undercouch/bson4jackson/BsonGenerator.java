@@ -519,7 +519,7 @@ public class BsonGenerator extends GeneratorBase {
 	@Override
 	public void writeNumber(BigDecimal dec) throws IOException,
 			JsonGenerationException {
-		if (isEnabled(Feature.ENABLE_STREAMING)) {
+		if (isEnabled(Feature.WRITE_BIGDECIMALS_AS_STRINGS)) {
 			writeString(dec.toString());
 			return;
 		}

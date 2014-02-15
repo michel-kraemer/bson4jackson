@@ -15,11 +15,13 @@
 package de.undercouch.bson4jackson;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -359,9 +361,16 @@ public class BsonGeneratorTest {
 		assertEquals(returnedScope, scope);
 	}
 
-	private BSONObject generateAndParse(Map<String, Object> data) throws Exception {
+	private BSONObject generateAndParse(Map<String, Object> data,
+			BsonGenerator.Feature... featuresToEnable) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectMapper om = new ObjectMapper(new BsonFactory());
+		BsonFactory bsonFactory = new BsonFactory();
+		if (featuresToEnable != null) {
+			for (BsonGenerator.Feature fe : featuresToEnable) {
+				bsonFactory.enable(fe);
+			}
+		}
+		ObjectMapper om = new ObjectMapper(bsonFactory);
 		om.registerModule(new BsonModule());
 		om.writeValue(baos, data);
 
@@ -370,5 +379,28 @@ public class BsonGeneratorTest {
 
 		BSONDecoder decoder = new BasicBSONDecoder();
 		return decoder.readObject(bais);
+	}
+	
+	@Test
+	public void writeBigDecimalsAsStrings() throws Exception {
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		data.put("big", new BigDecimal("0.3"));
+
+		BSONObject obj = generateAndParse(data);
+
+		Double result = (Double)obj.get("big");
+		
+		//BigDecimal("0.3") does not equal 0.3!
+		assertEquals(Double.valueOf(0.3), result, 0.000001);
+		assertFalse(Double.valueOf(0.3).equals(result));
+		
+		data = new LinkedHashMap<String, Object>();
+		data.put("big", new BigDecimal("0.3"));
+
+		obj = generateAndParse(data,
+				BsonGenerator.Feature.WRITE_BIGDECIMALS_AS_STRINGS);
+
+		String strResult = (String)obj.get("big");
+		assertEquals("0.3", strResult);
 	}
 }
