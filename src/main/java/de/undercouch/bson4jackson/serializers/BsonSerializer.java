@@ -33,7 +33,7 @@ public abstract class BsonSerializer<T> extends JsonSerializer<T> {
 	@Override
 	public void serialize(T t, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
 		if (!(jsonGenerator instanceof BsonGenerator)) {
-			throw new JsonGenerationException("BsonDateSerializer can " +
+			throw new JsonGenerationException("BsonSerializer can " +
 					"only be used with BsonGenerator");
 		}
 		serialize(t, (BsonGenerator) jsonGenerator, serializerProvider);
