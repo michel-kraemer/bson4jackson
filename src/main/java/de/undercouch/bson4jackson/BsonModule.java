@@ -17,6 +17,7 @@ package de.undercouch.bson4jackson;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 
+import de.undercouch.bson4jackson.deserializers.BsonDeserializers;
 import de.undercouch.bson4jackson.serializers.BsonSerializers;
 
 /**
@@ -39,5 +40,6 @@ public class BsonModule extends Module {
 	@Override
 	public void setupModule(SetupContext context) {
 		context.addSerializers(new BsonSerializers());
+		context.addDeserializers(new BsonDeserializers());
 	}
 }

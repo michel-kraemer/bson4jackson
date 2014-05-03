@@ -646,6 +646,16 @@ public class BsonParser extends ParserBase {
 		}
 		return _currentContext.fieldName;
 	}
+	
+	/**
+	 * @return the BSON type of the current element
+	 */
+	public byte getCurrentBsonType() {
+		if (_currentContext == null) {
+			return BsonConstants.TYPE_UNDEFINED;
+		}
+		return _currentContext.type;
+	}
 
 	@Override
 	public JsonReadContext getParsingContext() {
