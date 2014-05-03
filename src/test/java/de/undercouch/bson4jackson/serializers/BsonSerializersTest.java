@@ -45,18 +45,23 @@ import de.undercouch.bson4jackson.types.Timestamp;
  * @author Michel Kraemer
  */
 public class BsonSerializersTest {
-	private static BSONObject generateAndParse(Map<String, Object> data) throws Exception {
+	private static Object generateAndParse(Object data) throws Exception {
+		Map<String, Object> m = new LinkedHashMap<String, Object>();
+		m.put("data", data);
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
 		ObjectMapper om = new ObjectMapper(new BsonFactory());
 		om.registerModule(new BsonModule());
-		om.writeValue(baos, data);
+		om.writeValue(baos, m);
 
 		byte[] r = baos.toByteArray();
 		ByteArrayInputStream bais = new ByteArrayInputStream(r);
 
 		BSONDecoder decoder = new BasicBSONDecoder();
-		return decoder.readObject(bais);
+		BSONObject bo = decoder.readObject(bais);
+		
+		return bo.get("data");
 	}
 	
 	/**
@@ -65,11 +70,9 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void calendar() throws Exception {
-		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		Calendar cal = Calendar.getInstance();
-		data.put("cal", cal);
-		BSONObject obj = generateAndParse(data);
-		assertEquals(cal.getTime(), obj.get("cal"));
+		Object obj = generateAndParse(cal);
+		assertEquals(cal.getTime(), obj);
 	}
 	
 	/**
@@ -78,11 +81,9 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void date() throws Exception {
-		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		Date date = new Date();
-		data.put("date", date);
-		BSONObject obj = generateAndParse(data);
-		assertEquals(date, obj.get("date"));
+		Object obj = generateAndParse(date);
+		assertEquals(date, obj);
 	}
 	
 	/**
@@ -91,11 +92,9 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void javascript() throws Exception {
-		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		JavaScript js = new JavaScript("code");
-		data.put("js", js);
-		BSONObject obj = generateAndParse(data);
-		assertEquals(js.getCode(), ((Code)obj.get("js")).getCode());
+		Code code = (Code)generateAndParse(js);
+		assertEquals(js.getCode(), code.getCode());
 	}
 	
 	/**
@@ -104,11 +103,8 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void objectId() throws Exception {
-		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		ObjectId id = new ObjectId(1, 2, 3);
-		data.put("id", id);
-		BSONObject obj = generateAndParse(data);
-		org.bson.types.ObjectId roid = (org.bson.types.ObjectId)obj.get("id");
+		org.bson.types.ObjectId roid = (org.bson.types.ObjectId)generateAndParse(id);
 		assertEquals(id.getTime(), roid.getTimeSecond());
 		assertEquals(id.getMachine(), roid.getMachine());
 		assertEquals(id.getInc(), roid.getInc());
@@ -120,11 +116,9 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void regex() throws Exception {
-		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		Pattern pat = Pattern.compile("[a-zA-Z0-9]+");
-		data.put("pat", pat);
-		BSONObject obj = generateAndParse(data);
-		assertEquals(pat.pattern(), ((Pattern)obj.get("pat")).pattern());
+		Pattern obj = (Pattern)generateAndParse(pat);
+		assertEquals(pat.pattern(), obj.pattern());
 	}
 	
 	/**
@@ -133,11 +127,9 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void symbol() throws Exception {
-		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		Symbol sym = new Symbol("symbol");
-		data.put("sym", sym);
-		BSONObject obj = generateAndParse(data);
-		assertEquals(sym, obj.get("sym"));
+		String obj = (String)generateAndParse(sym);
+		assertEquals(sym, obj);
 	}
 	
 	/**
@@ -146,11 +138,8 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void timestamp() throws Exception {
-		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		Timestamp ts = new Timestamp(1, 2);
-		data.put("ts", ts);
-		BSONObject obj = generateAndParse(data);
-		org.bson.types.BSONTimestamp rts = (org.bson.types.BSONTimestamp)obj.get("ts");
+		org.bson.types.BSONTimestamp rts = (org.bson.types.BSONTimestamp)generateAndParse(ts);
 		assertEquals(ts.getTime(), rts.getTime());
 		assertEquals(ts.getInc(), rts.getInc());
 	}
@@ -161,10 +150,8 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void uuid() throws Exception {
-		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		UUID uuid = UUID.randomUUID();
-		data.put("uuid", uuid);
-		BSONObject obj = generateAndParse(data);
-		assertEquals(uuid, obj.get("uuid"));
+		Object obj = generateAndParse(uuid);
+		assertEquals(uuid, obj);
 	}
 }
