@@ -17,13 +17,46 @@ tasks.withType(Compile) {
     options.compilerArgs << "-Xlint" 
 } 
 
-dependencies {
-    compile 'com.fasterxml.jackson.core:jackson-core:2.3.0'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.3.0'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.3.0'
+configurations {
+    integrationTestBase
+    integrationTest21 { extendsFrom integrationTestBase }
+    integrationTest22 { extendsFrom integrationTestBase }
+    integrationTest23 { extendsFrom integrationTestBase }
+    integrationTest24 { extendsFrom integrationTestBase }
+}
 
-    testCompile 'junit:junit:4.11'
-    testCompile 'org.mongodb:mongo-java-driver:2.11.2'
+String jacksonCore = 'com.fasterxml.jackson.core:jackson-core:'
+String jacksonAnnotations = 'com.fasterxml.jackson.core:jackson-annotations:'
+String jacksonDatabind = 'com.fasterxml.jackson.core:jackson-databind:'
+String junit = 'junit:junit:4.11'
+String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:2.11.2'
+
+dependencies {
+    compile jacksonCore + '2.3.0'
+    compile jacksonAnnotations + '2.3.0'
+    compile jacksonDatabind + '2.3.0'
+
+    testCompile junit
+    testCompile mongoDbJavaDriver
+    
+    integrationTestBase junit
+    integrationTestBase mongoDbJavaDriver
+        
+    integrationTest21 jacksonCore + '2.1.0'
+    integrationTest21 jacksonAnnotations + '2.1.0'
+    integrationTest21 jacksonDatabind + '2.1.0'
+    
+    integrationTest22 jacksonCore + '2.2.0'
+    integrationTest22 jacksonAnnotations + '2.2.0'
+    integrationTest22 jacksonDatabind + '2.2.0'
+    
+    integrationTest23 jacksonCore + '2.3.0'
+    integrationTest23 jacksonAnnotations + '2.3.0'
+    integrationTest23 jacksonDatabind + '2.3.0'
+    
+    integrationTest24 jacksonCore + '2.4.0-rc3'
+    integrationTest24 jacksonAnnotations + '2.4.0-rc3'
+    integrationTest24 jacksonDatabind + '2.4.0-rc3'
 }
 
 jar {
@@ -56,6 +89,25 @@ task packageSources(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'
 }
+
+task doIntegrationTest21(type: Test) {
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest21
+}
+
+task doIntegrationTest22(type: Test) {
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest22
+}
+
+task doIntegrationTest23(type: Test) {
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest23
+}
+
+task doIntegrationTest24(type: Test) {
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest24
+}
+
+task integrationTest(dependsOn: [ doIntegrationTest21, doIntegrationTest22,
+        doIntegrationTest23, doIntegrationTest24])
 
 // define artifacts for upload
 artifacts {
