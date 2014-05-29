@@ -158,26 +158,34 @@ public class BsonFactory extends JsonFactory {
 		throw new UnsupportedOperationException("Can not create writer for non-byte-based target");
 	}
 	
-	@Override
-	@SuppressWarnings("deprecation")
+	/**
+	 * @deprecated Removed in Jackson 2.4
+	 */
+	@Deprecated
 	protected BsonGenerator _createJsonGenerator(Writer out, IOContext ctxt) {
 		return _createGenerator(out, ctxt);
 	}
 	
-	@Override
-	@SuppressWarnings("deprecation")
+	/**
+	 * @deprecated Removed in Jackson 2.4
+	 */
+	@Deprecated
 	protected BsonParser _createJsonParser(byte[] data, int offset, int len, IOContext ctxt) {
         return _createParser(data, offset, len, ctxt);
     }
 	
-	@Override
-	@SuppressWarnings("deprecation")
+	/**
+	 * @deprecated Removed in Jackson 2.4
+	 */
+	@Deprecated
 	protected BsonParser _createJsonParser(InputStream in, IOContext ctxt) {
         return _createParser(in, ctxt);
     }
 	
-	@Override
-	@SuppressWarnings("deprecation")
+	/**
+	 * @deprecated Removed in Jackson 2.4
+	 */
+	@Deprecated
 	protected BsonParser _createJsonParser(Reader r, IOContext ctxt) {
         return _createParser(r, ctxt);
     }
@@ -207,8 +215,10 @@ public class BsonFactory extends JsonFactory {
 		return createGenerator(out);
 	}
 	
-	@Override
-	@SuppressWarnings("deprecation")
+	/**
+	 * @deprecated Removed in Jackson 2.4
+	 */
+	@Deprecated
 	protected BsonGenerator _createUTF8JsonGenerator(OutputStream out, IOContext ctxt) throws IOException {
 		return _createUTF8Generator(out, ctxt);
 	}
