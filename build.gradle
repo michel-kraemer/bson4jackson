@@ -109,6 +109,8 @@ task doIntegrationTest24(type: Test) {
 task integrationTest(dependsOn: [ doIntegrationTest21, doIntegrationTest22,
         doIntegrationTest23, doIntegrationTest24])
 
+check.dependsOn integrationTest
+
 // define artifacts for upload
 artifacts {
     archives jar
