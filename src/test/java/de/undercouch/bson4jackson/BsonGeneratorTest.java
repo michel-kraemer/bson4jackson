@@ -431,7 +431,7 @@ public class BsonGeneratorTest {
 		
 		assertEquals(expectedLen, baos.size());
 		
-		//BSON is smaller thank JSON (at least in this case)
+		//BSON is smaller than JSON (at least in this case)
 		assertTrue(baos.size() < jsonString.length());
 	}
 }
