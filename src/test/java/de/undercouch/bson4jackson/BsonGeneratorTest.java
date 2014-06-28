@@ -14,6 +14,7 @@
 
 package de.undercouch.bson4jackson;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -433,5 +434,10 @@ public class BsonGeneratorTest {
 		
 		//BSON is smaller than JSON (at least in this case)
 		assertTrue(baos.size() < jsonString.length());
+		
+		//test if binary data can be parsed
+		BSONObject obj = generateAndParse(data);
+		byte[] objbin = (byte[])obj.get("binary");
+		assertArrayEquals(binary, objbin);
 	}
 }

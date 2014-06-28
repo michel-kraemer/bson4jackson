@@ -47,12 +47,18 @@ import org.bson.types.CodeWScope;
 import org.bson.types.Symbol;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
@@ -69,16 +75,40 @@ public class BsonParserTest {
 	public static class SimpleClass {
 		public String name;
 	}
-
-	private Map<?, ?> parseBsonObject(BSONObject o) throws IOException {
+	
+	/**
+	 * Simple test class for {@link BsonParserTest#parseBinaryObject()}
+	 */
+	public static class BinaryClass {
+		public byte[] barr;
+	}
+	
+	/**
+	 * Simple test class for {@link BsonParserTest#parseObjectId()}
+	 */
+	public static class ObjectIdClass {
+		public org.bson.types.ObjectId oid;
+	}
+	
+	private <T> T parseBsonObject(BSONObject o, Class<T> cls,
+			Module... modules) throws IOException {
 		BSONEncoder enc = new BasicBSONEncoder();
 		byte[] b = enc.encode(o);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		BsonFactory fac = new BsonFactory();
 		ObjectMapper mapper = new ObjectMapper(fac);
+		if (modules != null) {
+			for (Module mod : modules) {
+				mapper.registerModule(mod);
+			}
+		}
 		fac.setCodec(mapper);
-		return mapper.readValue(bais, Map.class);
+		return mapper.readValue(bais, cls);
+	}
+
+	private Map<?, ?> parseBsonObject(BSONObject o) throws IOException {
+		return parseBsonObject(o, Map.class);
 	}
 	
 	@Test
@@ -343,6 +373,16 @@ public class BsonParserTest {
 		assertEquals(new UUID(1L, 2L), data.get("uuid"));
 	}
 	
+	@Test
+	public void parseBinaryObject() throws Exception {
+		byte[] b = new byte[] { 1, 2, 3, 4, 5 };
+		BSONObject o = new BasicBSONObject();
+		o.put("barr", b);
+		
+		BinaryClass data = parseBsonObject(o, BinaryClass.class);
+		assertArrayEquals(b, data.barr);
+	}
+	
 	/**
 	 * Test if {@link BsonParser#nextToken()} returns null if there
 	 * is no more input. Refers issue #10.
@@ -552,5 +592,38 @@ public class BsonParserTest {
 		SimpleClass[] result = mapper.readValue(is, SimpleClass[].class);
 		assertEquals("test", result[0].name);
 		assertEquals("test2", result[1].name);
+	}
+	
+	/**
+	 * Check if org.bson.types.ObjectId can be serialized and deserialized as
+	 * a byte array. See issue #38
+	 * @throws Exception if something goes wrong
+	 */
+	@Test
+	public void parseObjectId() throws Exception {
+		class ObjectIdDeserializer extends StdDeserializer<org.bson.types.ObjectId> {
+			private static final long serialVersionUID = 6934309887169924897L;
+
+			protected ObjectIdDeserializer() {
+				super(org.bson.types.ObjectId.class);
+			}
+
+			@Override
+			public org.bson.types.ObjectId deserialize(JsonParser jp,
+					DeserializationContext ctxt) throws IOException,
+					JsonGenerationException {
+				return new org.bson.types.ObjectId(jp.getBinaryValue());
+			}
+		}
+		
+		org.bson.types.ObjectId oid = new org.bson.types.ObjectId();
+		BSONObject o = new BasicBSONObject();
+		o.put("oid", oid.toByteArray());
+		
+		SimpleModule mod = new SimpleModule();
+		mod.addDeserializer(org.bson.types.ObjectId.class, new ObjectIdDeserializer());
+		
+		ObjectIdClass res = parseBsonObject(o, ObjectIdClass.class, mod);
+		assertEquals(oid, res.oid);
 	}
 }

@@ -787,7 +787,7 @@ public class BsonParser extends ParserBase {
 	@Override
 	public byte[] getBinaryValue(Base64Variant b64variant) throws IOException,
 			JsonParseException {
-		return getText().getBytes();
+		return (byte[])getContext().value;
 	}
 	
 	@Override
