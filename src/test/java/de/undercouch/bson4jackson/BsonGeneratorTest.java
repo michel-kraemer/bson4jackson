@@ -403,4 +403,35 @@ public class BsonGeneratorTest {
 		String strResult = (String)obj.get("big");
 		assertEquals("0.3", strResult);
 	}
+	
+	@Test
+	public void writeBinaryData() throws Exception {
+		byte[] binary = new byte[] { (byte)0x05, (byte)0xff, (byte)0xaf,
+				(byte)0x30, 'A', 'B', 'C', (byte)0x13, (byte)0x80,
+				(byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
+		
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		data.put("binary", binary);
+		
+		//binary data has to be converted to base64 with normal JSON
+		ObjectMapper mapper = new ObjectMapper();
+		String jsonString = mapper.writeValueAsString(data);
+		assertEquals("{\"binary\":\"Bf+vMEFCQxOA/////w==\"}", jsonString);
+		
+		//with BSON we don't have to convert to base64
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BsonFactory bsonFactory = new BsonFactory();
+		ObjectMapper om = new ObjectMapper(bsonFactory);
+		om.writeValue(baos, data);
+		
+		//document header (4 bytes) + type (1 byte) + field_name ("binary", 6 bytes) +
+		//end_of_string (1 byte) + binary_size (4 bytes) + subtype (1 byte) +
+		//binary_data (13 bytes) + end_of_document (1 byte)
+		int expectedLen = 4 + 1 + 6 + 1 + 4 + 1 + 13 + 1;
+		
+		assertEquals(expectedLen, baos.size());
+		
+		//BSON is smaller thank JSON (at least in this case)
+		assertTrue(baos.size() < jsonString.length());
+	}
 }
