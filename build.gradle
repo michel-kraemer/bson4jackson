@@ -13,7 +13,7 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType(Compile) { 
+tasks.withType(JavaCompile) { 
     options.compilerArgs << "-Xlint" 
 } 
 
@@ -75,7 +75,7 @@ jar {
 
 // initialize gradle wrapper
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
+    gradleVersion = '2.0'
 }
 
 // package javadoc into a jar file
