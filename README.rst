@@ -34,7 +34,7 @@ You may also use `Maven <http://maven.apache.org/>`_ to download bson4jackson::
     <dependency>
       <groupId>de.undercouch</groupId>
       <artifactId>bson4jackson</artifactId>
-      <version>2.3.1</version>
+      <version>2.4.0</version>
     </dependency>
   </dependencies>
 
@@ -42,17 +42,17 @@ If you're using `Gradle <http://www.gradle.org/>`_, you may add the
 following snippet to your ``build.gradle``::
 
   dependencies {
-      compile 'de.undercouch:bson4jackson:2.3.1'
+      compile 'de.undercouch:bson4jackson:2.4.0'
   }
 
 For `sbt <http://code.google.com/p/simple-build-tool/>`_,
 add the following line to your project::
 
-  val bson4jackson = "de.undercouch" % "bson4jackson" % "2.3.1"
+  val bson4jackson = "de.undercouch" % "bson4jackson" % "2.4.0"
 
 For `buildr <http://buildr.apache.org/>`_ use the following snippet::
 
-  compile.with 'de.undercouch:bson4jackson:jar:2.3.1'
+  compile.with 'de.undercouch:bson4jackson:jar:2.4.0'
 
 Compatibility
 -------------
@@ -67,15 +67,17 @@ the new Jackson version has been released.
 
 Here's the compatibility matrix for the current library versions:
 
-==================== =============== =============== ===============
- Library              Jackson 2.3.x   Jackson 2.2.x   Jackson 2.1.x
--------------------- --------------- --------------- ---------------
- bson4jackson 2.3.x        Yes             Yes             Yes
--------------------- --------------- --------------- ---------------
- bson4jackson 2.2.x        No              Yes             Yes
--------------------- --------------- --------------- ---------------
- bson4jackson 2.1.x        No              No              Yes
-==================== =============== =============== ===============
+==================== =============== =============== =============== ===============
+ Library              Jackson 2.4.x   Jackson 2.3.x   Jackson 2.2.x   Jackson 2.1.x
+-------------------- --------------- --------------- --------------- ---------------
+ bson4jackson 2.4.x        Yes             Yes             Yes             Yes
+-------------------- --------------- --------------- --------------- ---------------
+ bson4jackson 2.3.x        No              Yes             Yes             Yes
+-------------------- --------------- --------------- --------------- ---------------
+ bson4jackson 2.2.x        No              No              Yes             Yes
+-------------------- --------------- --------------- --------------- ---------------
+ bson4jackson 2.1.x        No              No              No              Yes
+==================== =============== =============== =============== ===============
 
 If you're looking for a version compatible to Jackson 1.x, please use
 bson4jackson 1.3.0. It's the last version for the 1.x branch.

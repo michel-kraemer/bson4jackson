@@ -4,7 +4,7 @@ apply plugin: 'signing'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-version = '2.3.1'
+version = '2.4.0'
 group = 'de.undercouch'
 sourceCompatibility = '1.6'
 targetCompatibility = '1.6'
@@ -32,9 +32,9 @@ String junit = 'junit:junit:4.11'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:2.11.2'
 
 dependencies {
-    compile jacksonCore + '2.3.0'
-    compile jacksonAnnotations + '2.3.0'
-    compile jacksonDatabind + '2.3.0'
+    compile jacksonCore + '2.4.1'
+    compile jacksonAnnotations + '2.4.1'
+    compile jacksonDatabind + '2.4.1'
 
     testCompile junit
     testCompile mongoDbJavaDriver
@@ -54,9 +54,9 @@ dependencies {
     integrationTest23 jacksonAnnotations + '2.3.0'
     integrationTest23 jacksonDatabind + '2.3.0'
     
-    integrationTest24 jacksonCore + '2.4.0-rc3'
-    integrationTest24 jacksonAnnotations + '2.4.0-rc3'
-    integrationTest24 jacksonDatabind + '2.4.0-rc3'
+    integrationTest24 jacksonCore + '2.4.0'
+    integrationTest24 jacksonAnnotations + '2.4.0'
+    integrationTest24 jacksonDatabind + '2.4.0'
 }
 
 jar {
