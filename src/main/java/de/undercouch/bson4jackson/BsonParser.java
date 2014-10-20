@@ -44,6 +44,7 @@ import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.CountingInputStream;
 import de.undercouch.bson4jackson.io.LittleEndianInputStream;
 import de.undercouch.bson4jackson.io.StaticBufferedInputStream;
+import de.undercouch.bson4jackson.io.UnsafeByteArrayInputStream;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
@@ -128,7 +129,11 @@ public class BsonParser extends ParserBase {
 		_rawInputStream = in;
 		//only initialize streams here if document length isn't going to be honored
 		if (!isEnabled(Feature.HONOR_DOCUMENT_LENGTH)) {
-			if (!(in instanceof BufferedInputStream)) {
+			//wrap input stream into high-performance buffered input stream.
+			//even wrap BufferedInputStream and ByteArrayInputStream because
+			//their methods are synchronized. Our StaticBufferedInputStream
+			//is not thread-safe and thus much faster.
+			if (!(in instanceof UnsafeByteArrayInputStream)) {
 				in = new StaticBufferedInputStream(in);
 			}
 			_counter = new CountingInputStream(in);

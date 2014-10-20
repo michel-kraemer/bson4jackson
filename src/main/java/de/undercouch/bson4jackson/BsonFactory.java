@@ -14,7 +14,6 @@
 
 package de.undercouch.bson4jackson;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,6 +28,8 @@ import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.io.IOContext;
+
+import de.undercouch.bson4jackson.io.UnsafeByteArrayInputStream;
 
 /**
  * Factory for {@link BsonGenerator} and {@link BsonParser}
@@ -192,7 +193,7 @@ public class BsonFactory extends JsonFactory {
 	
 	@Override
 	protected BsonParser _createParser(byte[] data, int offset, int len, IOContext ctxt) {
-		return _createParser(new ByteArrayInputStream(data, offset, len), ctxt);
+		return _createParser(new UnsafeByteArrayInputStream(data, offset, len), ctxt);
 	}
 	
 	@Override
