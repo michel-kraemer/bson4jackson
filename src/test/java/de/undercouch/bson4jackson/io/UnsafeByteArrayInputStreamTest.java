@@ -27,7 +27,10 @@ import org.junit.Test;
  * @author Michel Kraemer
  */
 public class UnsafeByteArrayInputStreamTest {
-	private static final byte[] BUF = "abcdefghijklmnopqrstuvwxyz\0\u00ff".getBytes();
+	private static final byte[] BUF = "abcdefghijklmnopqrstuvwxyz\0\0".getBytes();
+	static {
+		BUF[BUF.length - 1] = (byte)0xff;
+	}
 	private UnsafeByteArrayInputStream _in;
 	
 	@Before
@@ -61,7 +64,9 @@ public class UnsafeByteArrayInputStreamTest {
 		
 		byte[] b2 = new byte[10];
 		assertEquals(5, _in.read(b2, 0, 10));
-		assertArrayEquals(Arrays.copyOf("xyz\0\u00ff".getBytes(), 10), b2);
+		byte[] expected = Arrays.copyOf("xyz\0".getBytes(), 10);
+		expected[4] = (byte)0xff;
+		assertArrayEquals(expected, b2);
 		
 		assertEquals(-1, _in.read());
 		assertEquals(-1, _in.read(b2, 0, 10));
@@ -71,7 +76,7 @@ public class UnsafeByteArrayInputStreamTest {
 	public void readFF() {
 		assertEquals(26, _in.skip(26));
 		assertEquals(0, _in.read());
-		assertEquals((byte)0xff, _in.read());
+		assertEquals((byte)0xff, (byte)_in.read());
 	}
 	
 	@Test

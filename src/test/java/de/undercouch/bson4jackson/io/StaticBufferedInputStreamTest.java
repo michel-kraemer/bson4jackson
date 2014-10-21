@@ -30,7 +30,10 @@ import org.junit.Test;
  * @author Michel Kraemer
  */
 public class StaticBufferedInputStreamTest {
-	private static final byte[] BUF = "abcdefghijklmnopqrstuvwxyz\0\u00ff".getBytes();
+	private static final byte[] BUF = "abcdefghijklmnopqrstuvwxyz\0\0".getBytes();
+	static {
+		BUF[BUF.length - 1] = (byte)0xff;
+	}
 	private StaticBufferedInputStream _in;
 	
 	@Before
