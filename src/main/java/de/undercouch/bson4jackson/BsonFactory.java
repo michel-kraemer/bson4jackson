@@ -73,6 +73,26 @@ public class BsonFactory extends JsonFactory {
     public BsonFactory(ObjectCodec oc) {
     	super(oc);
     }
+
+    /**
+     * Constructor used when copy()ing a factory instance.
+     *
+     * @since 2.2.1
+     */
+    protected BsonFactory(BsonFactory src, ObjectCodec codec) {
+        super(src, codec);
+        _bsonGeneratorFeatures = src._bsonGeneratorFeatures;
+        _bsonParserFeatures = src._bsonParserFeatures;
+    }
+
+    /**
+     * @see JsonFactory#copy()
+     */
+    public BsonFactory copy() {
+        _checkInvalidCopy(BsonFactory.class);
+        // as per above, do clear ObjectCodec
+        return new BsonFactory(this, null);
+    }
     
     /**
      * Method for enabling/disabling specified generator features
