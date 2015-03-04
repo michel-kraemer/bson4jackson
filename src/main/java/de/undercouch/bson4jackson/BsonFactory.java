@@ -76,8 +76,11 @@ public class BsonFactory extends JsonFactory {
 
     /**
      * Constructor used when copy()ing a factory instance.
+     * <p/>
+     * Requires Jackson version 2.2.1 or above
      *
-     * @since 2.2.1
+     * @throws java.lang.NoSuchMethodError on versions prior to 2.2.1
+     * @see JsonFactory#JsonFactory(JsonFactory, ObjectCodec)
      */
     protected BsonFactory(BsonFactory src, ObjectCodec codec) {
         super(src, codec);
@@ -86,6 +89,11 @@ public class BsonFactory extends JsonFactory {
     }
 
     /**
+     * Returns a new cloned copy of the factory
+     *
+     * Requires Jackson version 2.2.1 or above
+     *
+     * @throws java.lang.NoSuchMethodError on versions prior to 2.2.1
      * @see JsonFactory#copy()
      */
     public BsonFactory copy() {
@@ -93,7 +101,7 @@ public class BsonFactory extends JsonFactory {
         // as per above, do clear ObjectCodec
         return new BsonFactory(this, null);
     }
-    
+
     /**
      * Method for enabling/disabling specified generator features
      * (check {@link BsonGenerator.Feature} for list of features)
@@ -173,12 +181,12 @@ public class BsonFactory extends JsonFactory {
 	public final boolean isEnabled(BsonParser.Feature f) {
 		return (_bsonParserFeatures & f.getMask()) != 0;
 	}
-	
+
 	@Override
 	protected BsonGenerator _createGenerator(Writer out, IOContext ctxt) {
 		throw new UnsupportedOperationException("Can not create writer for non-byte-based target");
 	}
-	
+
 	/**
 	 * @deprecated Removed in Jackson 2.4
 	 */
@@ -186,7 +194,7 @@ public class BsonFactory extends JsonFactory {
 	protected BsonGenerator _createJsonGenerator(Writer out, IOContext ctxt) {
 		return _createGenerator(out, ctxt);
 	}
-	
+
 	/**
 	 * @deprecated Removed in Jackson 2.4
 	 */
@@ -194,7 +202,7 @@ public class BsonFactory extends JsonFactory {
 	protected BsonParser _createJsonParser(byte[] data, int offset, int len, IOContext ctxt) {
         return _createParser(data, offset, len, ctxt);
     }
-	
+
 	/**
 	 * @deprecated Removed in Jackson 2.4
 	 */
@@ -202,7 +210,7 @@ public class BsonFactory extends JsonFactory {
 	protected BsonParser _createJsonParser(InputStream in, IOContext ctxt) {
         return _createParser(in, ctxt);
     }
-	
+
 	/**
 	 * @deprecated Removed in Jackson 2.4
 	 */
@@ -210,12 +218,12 @@ public class BsonFactory extends JsonFactory {
 	protected BsonParser _createJsonParser(Reader r, IOContext ctxt) {
         return _createParser(r, ctxt);
     }
-	
+
 	@Override
 	protected BsonParser _createParser(byte[] data, int offset, int len, IOContext ctxt) {
 		return _createParser(new UnsafeByteArrayInputStream(data, offset, len), ctxt);
 	}
-	
+
 	@Override
 	protected BsonParser _createParser(InputStream in, IOContext ctxt) {
 		BsonParser p = new BsonParser(ctxt, _parserFeatures, _bsonParserFeatures, in);
@@ -225,17 +233,17 @@ public class BsonFactory extends JsonFactory {
 		}
 		return p;
 	}
-	
+
 	@Override
 	protected BsonParser _createParser(Reader r, IOContext ctxt) {
 		throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
 	}
-	
+
 	@Override
 	protected BsonGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
 		return createGenerator(out);
 	}
-	
+
 	/**
 	 * @deprecated Removed in Jackson 2.4
 	 */
@@ -243,13 +251,13 @@ public class BsonFactory extends JsonFactory {
 	protected BsonGenerator _createUTF8JsonGenerator(OutputStream out, IOContext ctxt) throws IOException {
 		return _createUTF8Generator(out, ctxt);
 	}
-	
+
 	@Override
 	protected Writer _createWriter(OutputStream out, JsonEncoding enc, IOContext ctxt)
 			throws IOException {
 		throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
 	}
-	
+
 	@Override
 	public BsonGenerator createGenerator(File f, JsonEncoding enc) throws IOException {
 		OutputStream out = new FileOutputStream(f);
@@ -260,12 +268,12 @@ public class BsonFactory extends JsonFactory {
 		}
 		return createGenerator(out, enc);
 	}
-	
+
 	@Override
 	public BsonGenerator createGenerator(OutputStream out) throws IOException {
 		return createGenerator(out, JsonEncoding.UTF8);
 	}
-	
+
 	@Override
 	public BsonGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException {
 		IOContext ctxt = _createContext(out, true);
@@ -280,66 +288,66 @@ public class BsonFactory extends JsonFactory {
     	}
     	return g;
 	}
-	
+
 	@Override
 	public BsonGenerator createGenerator(Writer writer) {
 		throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonGenerator createJsonGenerator(File f, JsonEncoding enc) throws IOException {
 		return createGenerator(f, enc);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonGenerator createJsonGenerator(OutputStream out) throws IOException {
 		return createGenerator(out);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonGenerator createJsonGenerator(OutputStream out, JsonEncoding enc) throws IOException {
 		return createGenerator(out, enc);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonGenerator createJsonGenerator(Writer out) {
 		return createGenerator(out);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(byte[] data) throws IOException {
 		return createParser(data);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(byte[] data, int offset, int len) throws IOException {
 		return createParser(data, offset, len);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(File f) throws IOException {
 		return createParser(f);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(InputStream in) throws IOException {
 		return createParser(in);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(Reader r) {
 		return createParser(r);
 	}
-	
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public BsonParser createJsonParser(String content) {
@@ -351,7 +359,7 @@ public class BsonFactory extends JsonFactory {
 	public BsonParser createJsonParser(URL url) throws IOException {
 		return createParser(url);
 	}
-	
+
 	@Override
 	public BsonParser createParser(byte[] data) throws IOException {
 		IOContext ctxt = _createContext(data, true);
@@ -363,7 +371,7 @@ public class BsonFactory extends JsonFactory {
         }
         return _createParser(data, 0, data.length, ctxt);
 	}
-	
+
 	@Override
 	public BsonParser createParser(byte[] data, int offset, int len) throws IOException {
 		IOContext ctxt = _createContext(data, true);
@@ -375,7 +383,7 @@ public class BsonFactory extends JsonFactory {
         }
         return _createParser(data, offset, len, ctxt);
 	}
-	
+
 	@SuppressWarnings("resource")
 	@Override
 	public BsonParser createParser(File f) throws IOException {
@@ -386,7 +394,7 @@ public class BsonFactory extends JsonFactory {
         }
         return _createParser(in, ctxt);
     }
-	
+
 	@Override
 	public BsonParser createParser(InputStream in) throws IOException {
         IOContext ctxt = _createContext(in, false);
@@ -395,17 +403,17 @@ public class BsonFactory extends JsonFactory {
         }
         return _createParser(in, ctxt);
     }
-	
+
 	@Override
 	public BsonParser createParser(Reader r) {
 		throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
 	}
-	
+
 	@Override
 	public BsonParser createParser(String content) {
 		throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
 	}
-	
+
 	@Override
 	public BsonParser createParser(URL url) throws IOException {
         IOContext ctxt = _createContext(url, true);
