@@ -3,6 +3,7 @@ package de.undercouch.bson4jackson;
 import com.fasterxml.jackson.core.JsonFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.*;
 
@@ -19,6 +20,7 @@ public class BsonFactoryTest {
     }
 
     @Test
+    @Category(value = RequiresJackson_v2_3.class)
     public void shouldCreateNewInstanceOnCopy() throws Exception {
         final BsonFactory copy = factory.copy();
 
@@ -26,6 +28,7 @@ public class BsonFactoryTest {
     }
 
     @Test
+    @Category(value = RequiresJackson_v2_3.class)
     public void shouldCopyParserFeaturesOnCopy() throws Exception {
         final BsonParser.Feature feature = BsonParser.Feature.HONOR_DOCUMENT_LENGTH;
         factory.configure(feature, !factory.isEnabled(feature));
@@ -36,6 +39,7 @@ public class BsonFactoryTest {
     }
 
     @Test
+    @Category(value = RequiresJackson_v2_3.class)
     public void shouldCopyGeneratorFeaturesOnCopy() throws Exception {
         final BsonGenerator.Feature feature = BsonGenerator.Feature.ENABLE_STREAMING;
         factory.configure(feature, !factory.isEnabled(feature));
@@ -46,6 +50,7 @@ public class BsonFactoryTest {
     }
 
     @Test
+    @Category(value = RequiresJackson_v2_3.class)
     public void shouldCopySuperClass() throws Exception {
         final JsonFactory.Feature feature = JsonFactory.Feature.CANONICALIZE_FIELD_NAMES;
         factory.configure(feature, !factory.isEnabled(feature));
