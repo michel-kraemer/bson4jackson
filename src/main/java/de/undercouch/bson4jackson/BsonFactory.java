@@ -76,7 +76,7 @@ public class BsonFactory extends JsonFactory {
 
     /**
      * Constructor used when copy()ing a factory instance.
-     * <p/>
+     * <p>
      * Requires Jackson version 2.2.1 or above
      *
      * @throws java.lang.NoSuchMethodError on versions prior to 2.2.1
