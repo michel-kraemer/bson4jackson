@@ -79,8 +79,10 @@ public class BsonFactory extends JsonFactory {
      * <p>
      * Requires Jackson version 2.2.1 or above
      *
-     * @throws java.lang.NoSuchMethodError on versions prior to 2.2.1
+     * @throws java.lang.NoSuchMethodError on jackson versions prior to 2.2.1
      * @see JsonFactory#JsonFactory(JsonFactory, ObjectCodec)
+     *
+     * @since 2.5
      */
     protected BsonFactory(BsonFactory src, ObjectCodec codec) {
         super(src, codec);
@@ -93,8 +95,11 @@ public class BsonFactory extends JsonFactory {
      *
      * Requires Jackson version 2.2.1 or above
      *
+     * @return deep copy of the factory
      * @throws java.lang.NoSuchMethodError on versions prior to 2.2.1
      * @see JsonFactory#copy()
+     *
+     * @since 2.5
      */
     public BsonFactory copy() {
         _checkInvalidCopy(BsonFactory.class);
