@@ -124,3 +124,13 @@ bson4jackson in Eclipse. Run the following command::
   ./gradlew eclipse
 
 Then import the project into your workspace.
+
+IntelliJ
+.......
+
+Gradle includes a task that creates all files required to develop
+bson4jackson in IntelliJ. Run the following command::
+
+  ./gradlew idea
+
+Then import the project into your workspace or open the root bson4jackson.ipr project file.

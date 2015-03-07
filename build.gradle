@@ -3,6 +3,7 @@ apply plugin: 'osgi'
 apply plugin: 'signing'
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'idea'
 
 version = '2.4.0'
 group = 'de.undercouch'
@@ -91,10 +92,18 @@ task packageSources(type: Jar) {
 }
 
 task doIntegrationTest21(type: Test) {
+    useJUnit {
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
+    }
+
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest21
 }
 
 task doIntegrationTest22(type: Test) {
+    useJUnit {
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
+    }
+
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest22
 }
 
