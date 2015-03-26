@@ -24,18 +24,19 @@ configurations {
     integrationTest22 { extendsFrom integrationTestBase }
     integrationTest23 { extendsFrom integrationTestBase }
     integrationTest24 { extendsFrom integrationTestBase }
+    integrationTest25 { extendsFrom integrationTestBase }
 }
 
 String jacksonCore = 'com.fasterxml.jackson.core:jackson-core:'
 String jacksonAnnotations = 'com.fasterxml.jackson.core:jackson-annotations:'
 String jacksonDatabind = 'com.fasterxml.jackson.core:jackson-databind:'
-String junit = 'junit:junit:4.11'
-String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:2.11.2'
+String junit = 'junit:junit:4.12'
+String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:2.13.0'
 
 dependencies {
-    compile jacksonCore + '2.4.1'
-    compile jacksonAnnotations + '2.4.1'
-    compile jacksonDatabind + '2.4.1'
+    compile jacksonCore + '2.5.1'
+    compile jacksonAnnotations + '2.5.1'
+    compile jacksonDatabind + '2.5.1'
 
     testCompile junit
     testCompile mongoDbJavaDriver
@@ -58,6 +59,10 @@ dependencies {
     integrationTest24 jacksonCore + '2.4.0'
     integrationTest24 jacksonAnnotations + '2.4.0'
     integrationTest24 jacksonDatabind + '2.4.0'
+
+    integrationTest24 jacksonCore + '2.5.0'
+    integrationTest24 jacksonAnnotations + '2.5.0'
+    integrationTest24 jacksonDatabind + '2.5.0'
 }
 
 jar {
@@ -115,8 +120,12 @@ task doIntegrationTest24(type: Test) {
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest24
 }
 
+task doIntegrationTest25(type: Test) {
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest25
+}
+
 task integrationTest(dependsOn: [ doIntegrationTest21, doIntegrationTest22,
-        doIntegrationTest23, doIntegrationTest24])
+        doIntegrationTest23, doIntegrationTest24, doIntegrationTest25])
 
 check.dependsOn integrationTest
 
