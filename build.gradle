@@ -34,9 +34,9 @@ String junit = 'junit:junit:4.11'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:2.11.2'
 
 dependencies {
-    compile jacksonCore + '2.5.2'
-    compile jacksonAnnotations + '2.5.2'
-    compile jacksonDatabind + '2.5.2'
+    compile jacksonCore + '2.5.3'
+    compile jacksonAnnotations + '2.5.3'
+    compile jacksonDatabind + '2.5.3'
 
     testCompile junit
     testCompile mongoDbJavaDriver
