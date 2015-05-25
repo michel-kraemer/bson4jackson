@@ -287,11 +287,14 @@ public class BsonFactory extends JsonFactory {
 			out = _outputDecorator.decorate(ctxt, out);
 		}
 		BsonGenerator g = new BsonGenerator(_generatorFeatures, _bsonGeneratorFeatures, out);
-    	ObjectCodec codec = getCodec();
-    	if (codec != null) {
-    		g.setCodec(codec);
-    	}
-    	return g;
+		ObjectCodec codec = getCodec();
+		if (codec != null) {
+			g.setCodec(codec);
+		}
+		if (_characterEscapes != null) {
+			g.setCharacterEscapes(_characterEscapes);
+		}
+		return g;
 	}
 
 	@Override

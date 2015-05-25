@@ -27,7 +27,9 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.core.Base64Variant;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.base.GeneratorBase;
+import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
@@ -153,6 +155,17 @@ public class BsonGenerator extends GeneratorBase {
 	protected boolean nextObjectIsEmbeddedInValue = false;
 
 	/**
+	 * Custom character escapes to use when writing strings (field names and string values)
+	 */
+	protected CharacterEscapes _characterEscapes = null;
+	
+	/**
+	 * Escape codes to use when writing strings (only valid of {@link #_characterEscapes} is not null,
+	 * see {@link #setCharacterEscapes(CharacterEscapes)})
+	 */
+	protected int[] _outputEscapes = null;
+
+	/**
 	 * Creates a new generator
 	 * @param jsonFeatures bit flag composed of bits that indicate which
      * {@link com.fasterxml.jackson.core.JsonGenerator.Feature}s are enabled.
@@ -171,6 +184,22 @@ public class BsonGenerator extends GeneratorBase {
 			//written to the buffer are not too large
 			_buffer.setReuseBuffersCount(2);
 		}
+	}
+	
+	@Override
+	public JsonGenerator setCharacterEscapes(CharacterEscapes esc) {
+		_characterEscapes = esc;
+		if (esc == null) {
+			_outputEscapes = null;
+		} else {
+			_outputEscapes = esc.getEscapeCodesForAscii();
+		}
+		return this;
+	}
+
+	@Override
+	public CharacterEscapes getCharacterEscapes() {
+		return _characterEscapes;
 	}
 	
 	/**
@@ -349,6 +378,9 @@ public class BsonGenerator extends GeneratorBase {
 	}
         
 	private void _writeFieldName(String name) throws IOException, JsonGenerationException {
+		//escape characters if necessary
+		name = escapeCharacters(name);
+		
 		//reserve bytes for the type
 		_typeMarker = _buffer.size();
 		_buffer.putByte((byte)0);
@@ -731,8 +763,9 @@ public class BsonGenerator extends GeneratorBase {
 	 *
 	 * @param string The string to write
 	 * @return The number of bytes written, including the terminating null byte and the size of the string
+	 * @throws IOException If an error occurred in the stream while writing
 	 */
-	protected int _writeString(String string) {
+	protected int _writeString(String string) throws IOException {
 		//reserve space for the string size
 		int p = _buffer.size();
 		_buffer.putInt(0);
@@ -750,10 +783,58 @@ public class BsonGenerator extends GeneratorBase {
 	 *
 	 * @param string The string to write
 	 * @return The number of bytes written, including the terminating null byte
+	 * @throws IOException If an error occurred in the stream while writing 
 	 */
-	protected int _writeCString(String string) {
+	protected int _writeCString(String string) throws IOException {
+		//escape characters if necessary
+		string = escapeCharacters(string);
 		int l = _buffer.putUTF8(string);
 		_buffer.putByte(BsonConstants.END_OF_STRING);
 		return l + 1;
+	}
+	
+	/**
+	 * Escapes the given string according to {@link #_characterEscapes}. If
+	 * there are no character escapes returns the original string.
+	 * @param string the string to escape
+	 * @return the escaped string or the original one if there is nothing to escape
+	 * @throws IOException if an escape sequence could not be retrieved
+	 */
+	protected String escapeCharacters(String string) throws IOException {
+		if (_characterEscapes == null) {
+			//escaping not necessary
+			return string;
+		}
+		
+		StringBuilder sb = null;
+		int lastEscapePos = 0;
+		
+		for (int i = 0; i < string.length(); ++i) {
+			int c = string.charAt(i);
+			if (c <= 0x7F && _outputEscapes[c] == CharacterEscapes.ESCAPE_CUSTOM) {
+				SerializableString escape = _characterEscapes.getEscapeSequence(c);
+				if (escape == null) {
+					_reportError("Invalid custom escape definitions; custom escape "
+							+ "not found for character code 0x" + Integer.toHexString(c) +
+							", although was supposed to have one");
+				}
+				if (sb == null) {
+					sb = new StringBuilder();
+				}
+				if (i > lastEscapePos) {
+					sb.append(string, lastEscapePos, i);
+				}
+				lastEscapePos = i + 1;
+				sb.append(escape.getValue());
+			}
+		}
+		if (sb != null && lastEscapePos < string.length()) {
+			sb.append(string, lastEscapePos, string.length());
+		}
+		
+		if (sb == null) {
+			return string;
+		}
+		return sb.toString();
 	}
 }

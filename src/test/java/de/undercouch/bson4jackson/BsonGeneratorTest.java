@@ -47,6 +47,10 @@ import org.bson.types.CodeWScope;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.SerializableString;
+import com.fasterxml.jackson.core.io.CharacterEscapes;
+import com.fasterxml.jackson.core.io.SerializedString;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
@@ -439,5 +443,142 @@ public class BsonGeneratorTest {
 		BSONObject obj = generateAndParse(data);
 		byte[] objbin = (byte[])obj.get("binary");
 		assertArrayEquals(binary, objbin);
+	}
+	
+	@Test
+	public void characterEscapes() throws Exception {
+		JsonNode node = new ObjectMapper().readTree(
+				"{ \"some.field\": \"some.val\", "
+				+ "\"another\": \"field\", "
+				+ "\".some\": \".field\", "
+				+ "\"some.\": \"field.\" }");
+		ObjectMapper bsonMapper = new ObjectMapper(new BsonFactory());
+		bsonMapper.getFactory().setCharacterEscapes(new CharacterEscapes() {
+			private static final long serialVersionUID = 283833498358662446L;
+
+			@Override
+			public int[] getEscapeCodesForAscii() {
+				int[] escapes = CharacterEscapes.standardAsciiEscapesForJSON();
+				escapes['.'] = CharacterEscapes.ESCAPE_CUSTOM;
+				return escapes;
+			}
+
+			@Override
+			public SerializableString getEscapeSequence(int ch) {
+				switch(ch) {
+				case '.':
+					return new SerializedString("\uff0e");
+				}
+				return null;
+			}
+		});
+
+		byte[] bsonBytes = bsonMapper.writeValueAsBytes(node);
+		
+		byte[] sBytes = new byte[] {
+				//document length
+				0x61, 0x00, 0x00, 0x00,
+				
+				//type = string
+				0x02,
+				
+				//'s'   'o'   'm'   'e'
+				0x73, 0x6f, 0x6d, 0x65,
+				
+				// escape sequence
+				(byte)0xef, (byte)0xbc, (byte)0x8e,
+				
+				//'f'   'i'   'e'   'l'   'd'
+				0x66, 0x69, 0x65, 0x6c, 0x64,
+				
+				// end of string
+				0x00,
+				
+				//string length (0x0b = 10 characters + trailing 0x00)
+				0x0b, 0x00, 0x00, 0x00,
+
+				//'s'   'o'   'm'   'e'
+				0x73, 0x6f, 0x6d, 0x65,
+				
+				//escape sequence
+				(byte)0xef, (byte)0xbc, (byte)0x8e,
+				
+				//'v'   'a'   'l'
+				0x76, 0x61, 0x6c,
+				
+				//end of string
+				0x00,
+				
+				//type = string
+				0x02,
+				
+				//'a'   'n'   'o'   't'   'h'   'e'   'r'
+				0x61, 0x6e, 0x6f, 0x74, 0x68, 0x65, 0x72,
+				
+				//end of string
+				0x00,
+				
+				//string length (5 characters + trailing 0x00)
+				0x06, 0x00, 0x00, 0x00,
+				
+				//'f'   'i'   'e'   'l'   'd'
+				0x66, 0x69, 0x65, 0x6c, 0x64,
+				
+				//end of string
+				0x00,
+				
+				//type = string
+				0x02,
+				
+				//escape sequence
+				(byte)0xef, (byte)0xbc, (byte)0x8e,
+				
+				//'s'   'o'   'm'   'e'
+				0x73, 0x6f, 0x6d, 0x65,
+				
+				//end of string
+				0x00,
+				
+				//string length (8 characters + trailing 0x00)
+				0x09, 0x00, 0x00, 0x00,
+				
+				//escape sequence
+				(byte)0xef, (byte)0xbc, (byte)0x8e,
+				
+				//'f'   'i'   'e'   'l'   'd'
+				0x66, 0x69, 0x65, 0x6c, 0x64,
+				
+				//end of string
+				0x00,
+				
+				//type = string
+				0x02,
+				
+				//'s'   'o'   'm'   'e'
+				0x73, 0x6f, 0x6d, 0x65,
+				
+				//escape sequence
+				(byte)0xef, (byte)0xbc, (byte)0x8e,
+				
+				//end of string
+				0x00,
+				
+				//string length (8 characters + trailing 0x00)
+				0x09, 0x00, 0x00, 0x00,
+				
+				//'f'   'i'   'e'   'l'   'd'
+				0x66, 0x69, 0x65, 0x6c, 0x64,
+				
+				//escape sequence
+				(byte)0xef, (byte)0xbc, (byte)0x8e,
+				
+				//end of string
+				0x00,
+				
+				//end of document
+				0x00
+		};
+		
+		assertArrayEquals(sBytes, bsonBytes);
 	}
 }
