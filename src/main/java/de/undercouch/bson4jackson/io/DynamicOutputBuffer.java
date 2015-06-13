@@ -49,7 +49,7 @@ import java.util.Queue;
  * {@link #writeTo(OutputStream)} and {@link #writeTo(WritableByteChannel)}
  * methods to only write non-flushed buffers. So, this class can be used for
  * streaming by flushing internal buffers from time to time and at the end
- * writing the rest:
+ * writing the rest:</p>
  * <pre>
  * ...
  * buf.flushTo(out);
@@ -59,7 +59,6 @@ import java.util.Queue;
  * buf.flushTo(out);
  * ...
  * buf.writeTo(out);</pre>
- * </p>
  * <p>If flushing is never used a single call to one of the <code>writeTo</code>
  * methods is enough to write the whole buffer.</p>
  * <p>Once the buffer has been written to an output stream or channel, putting
