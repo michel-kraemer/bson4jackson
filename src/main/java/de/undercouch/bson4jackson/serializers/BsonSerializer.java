@@ -26,8 +26,8 @@ import de.undercouch.bson4jackson.BsonGenerator;
 
 /**
  * Base class for BSON serializers
- *
  * @author James Roper
+ * @param <T> the type to serialize
  */
 public abstract class BsonSerializer<T> extends JsonSerializer<T> {
 	@Override

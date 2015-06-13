@@ -89,6 +89,7 @@ public class StaticBuffers {
 	 * @param key the buffer's identifier
 	 * @param minSize the minimum size
 	 * @return the {@link CharBuffer} instance
+	 * @see #byteBuffer(Key, int)
 	 */
 	public CharBuffer charBuffer(Key key, int minSize) {
 		minSize = Math.max(minSize, GLOBAL_MIN_SIZE);
@@ -107,12 +108,21 @@ public class StaticBuffers {
 	 * Marks a buffer a being re-usable.
 	 * @param key the buffer's key
 	 * @param buf the buffer
+	 * @see #releaseByteBuffer(Key, ByteBuffer)
 	 */
 	public void releaseCharBuffer(Key key, CharBuffer buf) {
 		_charBuffers[key.ordinal()] = buf;
 	}
 	
 	/**
+	 * Creates or re-uses a {@link ByteBuffer} that has a minimum size. Calling
+	 * this method multiple times with the same key will always return the
+	 * same buffer, as long as it has the minimum size and is marked to be
+	 * re-used. Buffers that are allowed to be re-used should be released using
+	 * {@link #releaseByteBuffer(Key, ByteBuffer)}.
+	 * @param key the buffer's identifier
+	 * @param minSize the minimum size
+	 * @return the {@link ByteBuffer} instance
 	 * @see #charBuffer(Key, int)
 	 */
 	public ByteBuffer byteBuffer(Key key, int minSize) {
@@ -129,6 +139,9 @@ public class StaticBuffers {
 	}
 	
 	/**
+	 * Marks a buffer a being re-usable.
+	 * @param key the buffer's key
+	 * @param buf the buffer
 	 * @see #releaseCharBuffer(Key, CharBuffer)
 	 */
 	public void releaseByteBuffer(Key key, ByteBuffer buf) {

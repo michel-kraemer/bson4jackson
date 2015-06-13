@@ -75,13 +75,12 @@ public class BsonFactory extends JsonFactory {
     }
 
     /**
-     * Constructor used when copy()ing a factory instance.
-     * <p>
-     * Requires Jackson version 2.2.1 or above
-     *
+     * <p>Constructor used when copy()ing a factory instance.</p>
+     * <p>Requires Jackson version 2.2.1 or above.</p>
+     * @param src the source BsonFactor to copy
+     * @param codec the codec to copy
      * @throws java.lang.NoSuchMethodError on jackson versions prior to 2.2.1
      * @see JsonFactory#JsonFactory(JsonFactory, ObjectCodec)
-     *
      * @since 2.5
      */
     protected BsonFactory(BsonFactory src, ObjectCodec codec) {
@@ -112,6 +111,7 @@ public class BsonFactory extends JsonFactory {
      * (check {@link BsonGenerator.Feature} for list of features)
      * @param f the feature to enable or disable
      * @param state true if the feature should be enabled, false otherwise
+     * @return this BsonFactory
      */
     public final BsonFactory configure(BsonGenerator.Feature f, boolean state) {
     	if (state) {
@@ -124,6 +124,7 @@ public class BsonFactory extends JsonFactory {
      * Method for enabling specified generator features
      * (check {@link BsonGenerator.Feature} for list of features)
      * @param f the feature to enable
+     * @return this BsonFactory
      */
     public BsonFactory enable(BsonGenerator.Feature f) {
     	_bsonGeneratorFeatures |= f.getMask();
@@ -134,6 +135,7 @@ public class BsonFactory extends JsonFactory {
      * Method for disabling specified generator features
      * (check {@link BsonGenerator.Feature} for list of features)
      * @param f the feature to disable
+     * @return this BsonFactory
      */
     public BsonFactory disable(BsonGenerator.Feature f) {
     	_bsonGeneratorFeatures &= ~f.getMask();
@@ -141,6 +143,8 @@ public class BsonFactory extends JsonFactory {
     }
 
     /**
+     * Checks whether a generator feature is enabled
+	 * @param f the feature to check for
      * @return true if the specified generator feature is enabled
      */
     public final boolean isEnabled(BsonGenerator.Feature f) {
@@ -152,6 +156,7 @@ public class BsonFactory extends JsonFactory {
 	 * (check {@link BsonParser.Feature} for list of features)
 	 * @param f the feature to enable or disable
 	 * @param state true if the feature should be enabled, false otherwise
+	 * @return this BsonFactory
 	 */
 	public final BsonFactory configure(BsonParser.Feature f, boolean state) {
 		if (state) {
@@ -164,6 +169,7 @@ public class BsonFactory extends JsonFactory {
 	 * Method for enabling specified parser features
 	 * (check {@link BsonParser.Feature} for list of features)
 	 * @param f the feature to enable
+	 * @return this BsonFactory
 	 */
 	public BsonFactory enable(BsonParser.Feature f) {
 		_bsonParserFeatures |= f.getMask();
@@ -174,6 +180,7 @@ public class BsonFactory extends JsonFactory {
 	 * Method for disabling specified parser features
 	 * (check {@link BsonParser.Feature} for list of features)
 	 * @param f the feature to disable
+	 * @return this BsonFactory
 	 */
 	public BsonFactory disable(BsonParser.Feature f) {
 		_bsonParserFeatures &= ~f.getMask();
@@ -181,6 +188,8 @@ public class BsonFactory extends JsonFactory {
 	}
 
 	/**
+	 * Checks whether a parser feature is enabled
+	 * @param f the feature to check for
 	 * @return true if the specified parser feature is enabled
 	 */
 	public final boolean isEnabled(BsonParser.Feature f) {
@@ -196,6 +205,7 @@ public class BsonFactory extends JsonFactory {
 	 * @deprecated Removed in Jackson 2.4
 	 */
 	@Deprecated
+	@SuppressWarnings("javadoc")
 	protected BsonGenerator _createJsonGenerator(Writer out, IOContext ctxt) {
 		return _createGenerator(out, ctxt);
 	}
@@ -204,6 +214,7 @@ public class BsonFactory extends JsonFactory {
 	 * @deprecated Removed in Jackson 2.4
 	 */
 	@Deprecated
+	@SuppressWarnings("javadoc")
 	protected BsonParser _createJsonParser(byte[] data, int offset, int len, IOContext ctxt) {
         return _createParser(data, offset, len, ctxt);
     }
@@ -212,6 +223,7 @@ public class BsonFactory extends JsonFactory {
 	 * @deprecated Removed in Jackson 2.4
 	 */
 	@Deprecated
+	@SuppressWarnings("javadoc")
 	protected BsonParser _createJsonParser(InputStream in, IOContext ctxt) {
         return _createParser(in, ctxt);
     }
@@ -220,6 +232,7 @@ public class BsonFactory extends JsonFactory {
 	 * @deprecated Removed in Jackson 2.4
 	 */
 	@Deprecated
+	@SuppressWarnings("javadoc")
 	protected BsonParser _createJsonParser(Reader r, IOContext ctxt) {
         return _createParser(r, ctxt);
     }
@@ -253,6 +266,7 @@ public class BsonFactory extends JsonFactory {
 	 * @deprecated Removed in Jackson 2.4
 	 */
 	@Deprecated
+	@SuppressWarnings("javadoc")
 	protected BsonGenerator _createUTF8JsonGenerator(OutputStream out, IOContext ctxt) throws IOException {
 		return _createUTF8Generator(out, ctxt);
 	}

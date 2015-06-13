@@ -27,6 +27,7 @@ import de.undercouch.bson4jackson.BsonParser;
 /**
  * Base class for BSON deserializers
  * @author Michel Kraemer
+ * @param <T> the type to deserialize
  * @since 2.3.2
  */
 public abstract class BsonDeserializer<T> extends JsonDeserializer<T> {
@@ -46,6 +47,8 @@ public abstract class BsonDeserializer<T> extends JsonDeserializer<T> {
      * @param ctxt context that can be used to access information about
      * this deserialization activity
      * @return the deserialized object
+     * @throws IOException if an I/O error occurred
+	 * @throws JsonProcessingException if parsing failed
      */
     public abstract T deserialize(BsonParser bp, DeserializationContext ctxt)
         throws IOException, JsonProcessingException;
