@@ -481,6 +481,7 @@ public class BsonParserTest {
 		InputStream is = getClass().getResourceAsStream("test.bson");
 		try {
 			ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+			@SuppressWarnings("deprecation")
 			MappingIterator<BSONObject> iterator =
 					mapper.reader(BasicBSONObject.class).readValues(is);
 

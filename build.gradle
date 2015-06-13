@@ -34,9 +34,9 @@ String junit = 'junit:junit:4.11'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:2.11.2'
 
 dependencies {
-    compile jacksonCore + '2.5.3'
-    compile jacksonAnnotations + '2.5.3'
-    compile jacksonDatabind + '2.5.3'
+    compile jacksonCore + '2.6.0-rc2'
+    compile jacksonAnnotations + '2.6.0-rc2'
+    compile jacksonDatabind + '2.6.0-rc2'
 
     testCompile junit
     testCompile mongoDbJavaDriver
@@ -63,6 +63,10 @@ dependencies {
     integrationTest25 jacksonCore + '2.5.0'
     integrationTest25 jacksonAnnotations + '2.5.0'
     integrationTest25 jacksonDatabind + '2.5.0'
+    
+    integrationTest25 jacksonCore + '2.6.0-rc2'
+    integrationTest25 jacksonAnnotations + '2.6.0-rc2'
+    integrationTest25 jacksonDatabind + '2.6.0-rc2'
 }
 
 jar {

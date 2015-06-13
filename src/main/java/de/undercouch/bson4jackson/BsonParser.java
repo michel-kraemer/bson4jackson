@@ -36,7 +36,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.json.JsonReadContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import de.undercouch.bson4jackson.io.BoundedInputStream;
@@ -660,12 +659,6 @@ public class BsonParser extends ParserBase {
 			return BsonConstants.TYPE_UNDEFINED;
 		}
 		return _currentContext.type;
-	}
-
-	@Override
-	public JsonReadContext getParsingContext() {
-		//this parser does not use JsonStreamContext
-		return null;
 	}
 
 	@Override
