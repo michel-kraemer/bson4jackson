@@ -61,4 +61,13 @@ public class Timestamp {
 		Timestamp t = (Timestamp)o;
 		return (_inc == t._inc && _time == t._time);
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + _inc;
+		result = prime * result + _time;
+		return result;
+	}
 }
