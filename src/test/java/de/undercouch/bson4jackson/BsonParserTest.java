@@ -44,6 +44,7 @@ import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
+import org.bson.types.MinKey;
 import org.bson.types.Symbol;
 import org.junit.Test;
 
@@ -626,5 +627,18 @@ public class BsonParserTest {
 		
 		ObjectIdClass res = parseBsonObject(o, ObjectIdClass.class, mod);
 		assertEquals(oid, res.oid);
+	}
+	
+	/**
+	 * Check if a MinKey can be parsed. Refers issue #51
+	 * @throws Exception if something goes wrong
+	 */
+	@Test
+	public void parseMinKey() throws Exception {
+		BSONObject o = new BasicBSONObject();
+		o.put("A", new MinKey());
+		Map<?, ?> data = parseBsonObject(o);
+		assertEquals(1, data.size());
+		assertEquals("MinKey", data.get("A"));
 	}
 }

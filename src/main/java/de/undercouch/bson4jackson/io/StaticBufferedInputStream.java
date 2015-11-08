@@ -123,7 +123,7 @@ public class StaticBufferedInputStream extends InputStream {
 				return -1;
 			}
 		}
-		return _raw[_pos++];
+		return _raw[_pos++] & 0xff;
 	}
 	
 	@Override
