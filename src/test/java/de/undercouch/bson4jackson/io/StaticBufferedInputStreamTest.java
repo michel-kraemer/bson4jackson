@@ -74,7 +74,7 @@ public class StaticBufferedInputStreamTest {
 		assertEquals('u', _in.read());
 		assertEquals(5, _in.read(buf, 0, 5));
 		assertEquals(0, _in.read());
-		assertEquals((byte)0xff, _in.read());
+		assertEquals(((byte)0xff) & 0xff, _in.read());
 		assertEquals(-1, _in.read());
 		assertEquals(-1, _in.read(buf, 0, 10));
 	}
