@@ -75,7 +75,7 @@ public class DynamicOutputBuffer {
 	/**
 	 * A unique key to make the first buffer re-usable
 	 */
-	private static final StaticBuffers.Key BUFFER_KEY = StaticBuffers.Key.BUFFER2;
+	protected static final StaticBuffers.Key BUFFER_KEY = StaticBuffers.Key.BUFFER2;
 	
 	/**
 	 * The default initial buffer size if nothing is specified
@@ -85,17 +85,17 @@ public class DynamicOutputBuffer {
 	/**
 	 * The byte order of this buffer
 	 */
-	private final ByteOrder _order;
+	protected final ByteOrder _order;
 	
 	/**
 	 * The size of each internal buffer (also the initial buffer size)
 	 */
-	private final int _bufferSize;
+	protected final int _bufferSize;
 	
 	/**
 	 * The current write position
 	 */
-	private int _position;
+	protected int _position;
 	
 	/**
 	 * The position of the first byte that has not been already
@@ -103,42 +103,42 @@ public class DynamicOutputBuffer {
 	 * a position before this first byte is invalid and causes
 	 * a {@link IndexOutOfBoundsException} to be thrown.
 	 */
-	private int _flushPosition;
+	protected int _flushPosition;
 	
 	/**
 	 * The current buffer size (changes dynamically)
 	 */
-	private int _size;
+	protected int _size;
 	
 	/**
 	 * A linked list of internal buffers
 	 */
-	private List<ByteBuffer> _buffers = new ArrayList<ByteBuffer>(1);
+	protected List<ByteBuffer> _buffers = new ArrayList<ByteBuffer>(1);
 	
 	/**
 	 * The character set used in {@link #putUTF8(String)}. Will be
 	 * created lazily in {@link #getUTF8Charset()}
 	 */
-	private Charset _utf8;
+	protected Charset _utf8;
 	
 	/**
 	 * The encoder used in {@link #putUTF8(String)}. Will be created
 	 * lazily in {@link #getUTF8Encoder()}
 	 */
-	private CharsetEncoder _utf8Encoder;
+	protected CharsetEncoder _utf8Encoder;
 	
 	/**
 	 * A queue of buffers that have already been flushed and are
 	 * free to reuse.
 	 * @see #_reuseBuffersCount
 	 */
-	private Queue<ByteBuffer> _buffersToReuse;
+	protected Queue<ByteBuffer> _buffersToReuse;
 	
 	/**
 	 * The number of buffers to reuse
 	 * @see #_buffersToReuse
 	 */
-	private int _reuseBuffersCount = 0;
+	protected int _reuseBuffersCount = 0;
 	
 	/**
 	 * Creates a dynamic buffer with BIG_ENDIAN byte order and
@@ -207,7 +207,7 @@ public class DynamicOutputBuffer {
 	 * Allocates a new buffer or attempts to reuse an existing one.
 	 * @return a new buffer with the current buffer size and the current byte order
 	 */
-	private ByteBuffer allocateBuffer() {
+	protected ByteBuffer allocateBuffer() {
 		if (_buffersToReuse != null && !_buffersToReuse.isEmpty()) {
 			ByteBuffer bb = _buffersToReuse.poll();
 			bb.rewind();
@@ -224,7 +224,7 @@ public class DynamicOutputBuffer {
 	 * reuse if this feature is enabled. 
 	 * @param n the number of the buffer to remove
 	 */
-	private void deallocateBuffer(int n) {
+	protected void deallocateBuffer(int n) {
 		ByteBuffer bb = _buffers.set(n, null);
 		if (bb != null && _reuseBuffersCount > 0) {
 			if (_buffersToReuse == null) {
@@ -240,7 +240,7 @@ public class DynamicOutputBuffer {
 	 * Adds a new buffer to the list of internal buffers
 	 * @return the new buffer
 	 */
-	private ByteBuffer addNewBuffer() {
+	protected ByteBuffer addNewBuffer() {
 		ByteBuffer bb = allocateBuffer();
 		_buffers.add(bb);
 		return bb;
@@ -253,7 +253,7 @@ public class DynamicOutputBuffer {
 	 * @param position the position
 	 * @return the buffer at the requested position
 	 */
-	private ByteBuffer getBuffer(int position) {
+	protected ByteBuffer getBuffer(int position) {
 		int n = position / _bufferSize;
 		while (n >= _buffers.size()) {
 			addNewBuffer();
@@ -267,7 +267,7 @@ public class DynamicOutputBuffer {
 	 * internal buffers.
 	 * @param size the minimum buffer size
 	 */
-	private void adaptSize(int size) {
+	protected void adaptSize(int size) {
 		if (size > _size) {
 			_size = size;
 		}
@@ -276,7 +276,7 @@ public class DynamicOutputBuffer {
 	/**
 	 * @return the lazily created UTF-8 character set
 	 */
-	private Charset getUTF8Charset() {
+	protected Charset getUTF8Charset() {
 		if (_utf8 == null) {
 			_utf8 = Charset.forName("UTF-8");;
 		}
@@ -286,7 +286,7 @@ public class DynamicOutputBuffer {
 	/**
 	 * @return the lazily created UTF-8 encoder
 	 */
-	private CharsetEncoder getUTF8Encoder() {
+	protected CharsetEncoder getUTF8Encoder() {
 		if (_utf8Encoder == null) {
 			_utf8Encoder = getUTF8Charset().newEncoder();
 		}

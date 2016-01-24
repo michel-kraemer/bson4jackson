@@ -87,7 +87,7 @@ public class BsonGenerator extends GeneratorBase {
 	 * A structure describing the document currently being generated
 	 * @author Michel Kraemer
 	 */
-	private static class DocumentInfo {
+	protected static class DocumentInfo {
 		/**
 		 * Information about the parent document (may be null if this
 		 * document is the top-level one)
@@ -340,7 +340,7 @@ public class BsonGenerator extends GeneratorBase {
         writeEndObjectInternal();
 	}
         
-	private void writeEndObjectInternal() {
+	protected void writeEndObjectInternal() {
 		if (_currentDocument != null) {
 			_buffer.putByte(BsonConstants.TYPE_END);
 			DocumentInfo info = _currentDocument;
@@ -377,7 +377,7 @@ public class BsonGenerator extends GeneratorBase {
         _writeFieldName(name);
 	}
         
-	private void _writeFieldName(String name) throws IOException, JsonGenerationException {
+	protected void _writeFieldName(String name) throws IOException, JsonGenerationException {
 		//escape characters if necessary
 		name = escapeCharacters(name);
 		

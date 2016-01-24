@@ -24,12 +24,12 @@ public class JavaScript {
 	/**
 	 * The actual code
 	 */
-	private final String _code;
+	protected final String _code;
 	
 	/**
 	 * The scope (may be null)
 	 */
-	private final Map<String, Object> _scope;
+	protected final Map<String, Object> _scope;
 	
 	/**
 	 * Constructs a new JavaScript object 

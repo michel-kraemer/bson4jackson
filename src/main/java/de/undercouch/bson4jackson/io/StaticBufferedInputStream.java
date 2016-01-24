@@ -28,42 +28,42 @@ public class StaticBufferedInputStream extends InputStream {
 	/**
 	 * A unique key for the re-usable buffer
 	 */
-	private static final StaticBuffers.Key BUFFER_KEY = StaticBuffers.Key.BUFFER1;
+	protected static final StaticBuffers.Key BUFFER_KEY = StaticBuffers.Key.BUFFER1;
 	
 	/**
 	 * Provides re-usable buffers
 	 */
-	private final StaticBuffers _staticBuffers;
+	protected final StaticBuffers _staticBuffers;
 	
 	/**
 	 * A re-usable buffer
 	 */
-	private final ByteBuffer _byteBuffer;
+	protected final ByteBuffer _byteBuffer;
 	
 	/**
 	 * The raw re-usable buffer
 	 */
-	private final byte[] _raw;
+	protected final byte[] _raw;
 	
 	/**
 	 * The original unbuffered input stream
 	 */
-	private final InputStream _in;
+	protected final InputStream _in;
 	
 	/**
 	 * The current read position
 	 */
-	private int _pos;
+	protected int _pos;
 	
 	/**
 	 * The number of bytes in the buffer
 	 */
-	private int _count;
+	protected int _count;
 	
 	/**
 	 * The current marked position. -1 means no mark.
 	 */
-	private int _mark = -1;
+	protected int _mark = -1;
 	
 	/**
 	 * Creates a new buffered input stream
@@ -91,7 +91,7 @@ public class StaticBufferedInputStream extends InputStream {
 		super.close();
 	}
 	
-	private void fill() throws IOException {
+	protected void fill() throws IOException {
 		if (_mark < 0) {
 			//there is no mark
 			_pos = 0;

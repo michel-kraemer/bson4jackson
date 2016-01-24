@@ -76,42 +76,42 @@ public class BsonParser extends ParserBase {
 	/**
 	 * The features for this parser
 	 */
-	private int _bsonFeatures;
+	protected int _bsonFeatures;
 
 	/**
 	 * The input stream to read from
 	 */
-	private LittleEndianInputStream _in;
+	protected LittleEndianInputStream _in;
 	
 	/**
 	 * Counts the number of bytes read from {@link #_in}
 	 */
-	private CountingInputStream _counter;
+	protected CountingInputStream _counter;
 
 	/**
 	 * The raw input stream passed in
 	 */
-	private InputStream _rawInputStream;
+	protected InputStream _rawInputStream;
 
 	/**
 	 * True if the parser has been closed
 	 */
-	private boolean _closed;
+	protected boolean _closed;
 	
 	/**
 	 * The ObjectCodec used to parse the Bson object(s)
 	 */
-	private ObjectCodec _codec;
+	protected ObjectCodec _codec;
 	
 	/**
 	 * The position of the current token
 	 */
-	private int _tokenPos;
+	protected int _tokenPos;
 	
 	/**
 	 * The current parser state
 	 */
-	private Context _currentContext;
+	protected Context _currentContext;
 
 	/**
 	 * Constructs a new parser
@@ -818,7 +818,7 @@ public class BsonParser extends ParserBase {
 	 * Specifies what the parser is currently parsing (field name or value) or
 	 * if it is done with the current element
 	 */
-	private enum State {
+	protected enum State {
 		FIELDNAME,
 		VALUE,
 		DONE
@@ -827,7 +827,7 @@ public class BsonParser extends ParserBase {
 	/**
 	 * Information about the element currently begin parsed
 	 */
-	private static class Context {
+	protected static class Context {
 		/**
 		 * The parent context (may be null if the context is the top-level one)
 		 */
@@ -891,7 +891,7 @@ public class BsonParser extends ParserBase {
 	/**
 	 * Extends {@link JsonLocation} to offer a specialized string representation
 	 */
-	private static class BsonLocation extends JsonLocation {
+	protected static class BsonLocation extends JsonLocation {
 		private static final long serialVersionUID = -5441597278886285168L;
 
 		public BsonLocation(Object srcRef, long totalBytes) {

@@ -22,7 +22,7 @@ public class Symbol {
 	/**
 	 * The actual symbol
 	 */
-	private final String _symbol;
+	protected final String _symbol;
 	
 	/**
 	 * Constructs a new symbol

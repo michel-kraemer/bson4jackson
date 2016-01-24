@@ -23,17 +23,17 @@ public class ObjectId {
 	/**
 	 * The timestamp
 	 */
-	private final int _time;
+	protected final int _time;
 	
 	/**
 	 * The machine ID
 	 */
-	private final int _machine;
+	protected final int _machine;
 	
 	/**
 	 * The counter
 	 */
-	private final int _inc;
+	protected final int _inc;
 	
 	/**
 	 * Constructs a new identifier

@@ -40,22 +40,22 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	/**
 	 * A unique key for a buffer used in {@link #readUTF(DataInput, int)}
 	 */
-	private static final StaticBuffers.Key UTF8_BUFFER = StaticBuffers.Key.BUFFER0;
+	protected static final StaticBuffers.Key UTF8_BUFFER = StaticBuffers.Key.BUFFER0;
 	
 	/**
 	 * A small buffer to speed up reading slightly
 	 */
-	private byte[] _rawBuf;
+	protected byte[] _rawBuf;
 	
 	/**
 	 * Wraps around {@link #_rawBuf}
 	 */
-	private ByteBuffer _buf;
+	protected ByteBuffer _buf;
 	
 	/**
 	 * A buffer that will lazily be initialized by {@link #readLine()}
 	 */
-	private CharBuffer _lineBuffer;
+	protected CharBuffer _lineBuffer;
 	
 	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)

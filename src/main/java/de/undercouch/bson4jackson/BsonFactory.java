@@ -41,12 +41,12 @@ public class BsonFactory extends JsonFactory {
 	/**
 	 * The BSON generator features enabled by default
 	 */
-	private static final int DEFAULT_BSON_GENERATOR_FEATURE_FLAGS = 0;
+	protected static final int DEFAULT_BSON_GENERATOR_FEATURE_FLAGS = 0;
 
 	/**
 	 * The BSON parser features enabled by default
 	 */
-	private static final int DEFAULT_BSON_PARSER_FEATURE_FLAGS = 0;
+	protected static final int DEFAULT_BSON_PARSER_FEATURE_FLAGS = 0;
 
 	/**
 	 * The BSON generator features to be enabled when a new

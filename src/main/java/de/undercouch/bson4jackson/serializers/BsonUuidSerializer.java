@@ -40,7 +40,7 @@ public class BsonUuidSerializer extends BsonSerializer<UUID> {
 	 * @param uuid The UUID to convert
 	 * @return a byte array representing the UUID in little endian format
 	 */
-	private static byte[] uuidToLittleEndianBytes(UUID uuid) {
+	protected static byte[] uuidToLittleEndianBytes(UUID uuid) {
 		long msb = uuid.getMostSignificantBits();
 		long lsb = uuid.getLeastSignificantBits();
 		byte[] buffer = new byte[16];

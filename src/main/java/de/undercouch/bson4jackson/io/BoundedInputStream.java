@@ -24,10 +24,10 @@ import java.io.InputStream;
  * @author James Roper
  */
 public class BoundedInputStream extends FilterInputStream {
-	private final int size;
-	private int count = 0;
-	private boolean eof = false;
-	private int mark;
+	protected final int size;
+	protected int count = 0;
+	protected boolean eof = false;
+	protected int mark;
 
 	/**
 	 * Wraps another stream by this one

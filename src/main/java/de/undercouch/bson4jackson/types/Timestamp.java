@@ -22,12 +22,12 @@ public class Timestamp {
 	/**
 	 * The increment
 	 */
-	private final int _inc;
+	protected final int _inc;
 	
 	/**
 	 * The actual timestamp
 	 */
-	private final int _time;
+	protected final int _time;
 	
 	/**
 	 * Constructs a new timestamp object

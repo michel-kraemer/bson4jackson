@@ -27,12 +27,12 @@ public class CountingInputStream extends FilterInputStream {
 	/**
 	 * The current buffer position
 	 */
-	private int _pos;
+	protected int _pos;
 	
 	/**
 	 * The position in the buffer the last time {@link #mark(int)} was called
 	 */
-	private int _markpos = -1;
+	protected int _markpos = -1;
 	
 	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)

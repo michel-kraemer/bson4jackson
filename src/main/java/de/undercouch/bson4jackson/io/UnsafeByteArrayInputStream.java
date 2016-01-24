@@ -25,22 +25,22 @@ public class UnsafeByteArrayInputStream extends InputStream {
 	/**
 	 * The buffer to serve
 	 */
-	private final byte[] _buf;
+	protected final byte[] _buf;
 	
 	/**
 	 * The current position in the buffer
 	 */
-	private int _pos;
+	protected int _pos;
 	
 	/**
 	 * The index one greater than the last byte to serve
 	 */
-	private int _count;
+	protected int _count;
 	
 	/**
 	 * The current marked position
 	 */
-	private int _mark;
+	protected int _mark;
 	
 	/**
 	 * Creates a new stream that serves the whole given array

@@ -51,19 +51,19 @@ public class StaticBuffers {
 	/**
 	 * A thread-local soft reference to the singleton instance of this class
 	 */
-	private static final ThreadLocal<SoftReference<StaticBuffers>> _instance =
+	protected static final ThreadLocal<SoftReference<StaticBuffers>> _instance =
 		new ThreadLocal<SoftReference<StaticBuffers>>();
 	
 	/**
 	 * Maps of already allocated re-usable buffers
 	 */
-	private ByteBuffer[] _byteBuffers = new ByteBuffer[Key.values().length];
-	private CharBuffer[] _charBuffers = new CharBuffer[Key.values().length];
+	protected ByteBuffer[] _byteBuffers = new ByteBuffer[Key.values().length];
+	protected CharBuffer[] _charBuffers = new CharBuffer[Key.values().length];
 	
 	/**
 	 * Hidden constructor
 	 */
-	private StaticBuffers() {
+	protected StaticBuffers() {
 		//nothing to do here
 	}
 	
