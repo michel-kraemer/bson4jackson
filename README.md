@@ -31,7 +31,7 @@ You may also use [Maven](http://maven.apache.org/) to download bson4jackson:
     <dependency>
         <groupId>de.undercouch</groupId>
         <artifactId>bson4jackson</artifactId>
-        <version>2.6.0</version>
+        <version>2.7.0</version>
     </dependency>
 </dependencies>
 ```
@@ -41,7 +41,7 @@ following snippet to your `build.gradle`:
 
 ```gradle
 dependencies {
-    compile 'de.undercouch:bson4jackson:2.6.0'
+    compile 'de.undercouch:bson4jackson:2.7.0'
 }
 ```
 
@@ -49,13 +49,13 @@ For [sbt](http://code.google.com/p/simple-build-tool/),
 add the following line to your project::
 
 ```sbt
-val bson4jackson = "de.undercouch" % "bson4jackson" % "2.6.0"
+val bson4jackson = "de.undercouch" % "bson4jackson" % "2.7.0"
 ```
 
 For [buildr](http://buildr.apache.org/) use the following snippet::
 
 ```ruby
-compile.with 'de.undercouch:bson4jackson:jar:2.6.0'
+compile.with 'de.undercouch:bson4jackson:jar:2.7.0'
 ```
 
 ## Compatibility
