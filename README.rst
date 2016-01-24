@@ -1,6 +1,13 @@
 ================
 BSON for Jackson
 ================
+.. image:: https://maven-badges.herokuapp.com/maven-central/de.undercouch/bson4jackson/badge.svg
+   :alt: Maven Central
+   :target: https://maven-badges.herokuapp.com/maven-central/de.undercouch/bson4jackson/
+.. image:: https://javadoc-emblem.rhcloud.com/doc/de.undercouch/bson4jackson/badge.svg
+   :alt: Javadoc
+   :target: http://www.javadoc.io/doc/de.undercouch/bson4jackson
+
 
 This library adds support for `BSON <http://bsonspec.org>`_ to the
 `Jackson JSON processor <https://github.com/FasterXML/jackson>`_.
