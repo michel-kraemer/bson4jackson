@@ -316,8 +316,11 @@ public class BsonFactory extends JsonFactory {
 		throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
 	}
 
-	@Override
-	@SuppressWarnings("deprecation")
+	/**
+	 * @deprecated Removed in Jackson 2.7
+	 */
+	@Deprecated
+	@SuppressWarnings("javadoc")
 	public BsonGenerator createJsonGenerator(File f, JsonEncoding enc) throws IOException {
 		return createGenerator(f, enc);
 	}

@@ -227,6 +227,7 @@ public class BsonParser extends ParserBase {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public JsonToken nextToken() throws IOException, JsonParseException {
 		Context ctx = _currentContext;
 		if (_currToken == null && ctx == null) {
@@ -468,6 +469,7 @@ public class BsonParser extends ParserBase {
 	 * @return the Java flags
 	 * @throws JsonParseException if the pattern string contains a unsupported flag
 	 */
+	@SuppressWarnings("deprecation")
 	protected int regexStrToFlags(String pattern) throws JsonParseException {
 		int flags = 0;
 		for (int i = 0; i < pattern.length(); ++i) {

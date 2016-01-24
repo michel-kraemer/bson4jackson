@@ -32,6 +32,7 @@ import de.undercouch.bson4jackson.BsonParser;
  */
 public abstract class BsonDeserializer<T> extends JsonDeserializer<T> {
 	@Override
+	@SuppressWarnings("deprecation")
 	public T deserialize(JsonParser jsonParser, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
 		if (!(jsonParser instanceof BsonParser)) {

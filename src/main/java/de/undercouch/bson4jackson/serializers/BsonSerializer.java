@@ -31,6 +31,7 @@ import de.undercouch.bson4jackson.BsonGenerator;
  */
 public abstract class BsonSerializer<T> extends JsonSerializer<T> {
 	@Override
+	@SuppressWarnings("deprecation")
 	public void serialize(T t, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
 		if (!(jsonGenerator instanceof BsonGenerator)) {
 			throw new JsonGenerationException("BsonSerializer can " +

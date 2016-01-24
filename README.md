@@ -70,12 +70,12 @@ the new Jackson version has been released.
 
 Here's the compatibility matrix for the current library versions:
 
-Library                | Jackson 2.6.x | Jackson 2.5.x | Jackson 2.4.x | Jackson 2.3.x | Jackson 2.2.x
+Library                | Jackson 2.7.x | Jackson 2.6.x | Jackson 2.5.x | Jackson 2.4.x | Jackson 2.3.x
 :----------------------|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:
-**bson4jackson 2.6.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes      
-**bson4jackson 2.5.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes      
-**bson4jackson 2.4.x** |      No       |      No       |      Yes      |      Yes      |      Yes      
-**bson4jackson 2.3.x** |      No       |      No       |      No       |      Yes      |      Yes      
+**bson4jackson 2.7.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes
+**bson4jackson 2.6.x** |      No       |      Yes      |      Yes      |      Yes      |      Yes
+**bson4jackson 2.5.x** |      No       |      No       |      Yes      |      Yes      |      Yes
+**bson4jackson 2.4.x** |      No       |      No       |      No       |      Yes      |      Yes
 
 If you're looking for a version compatible to Jackson 1.x, please use
 bson4jackson 1.3.0. It's the last version for the 1.x branch.
