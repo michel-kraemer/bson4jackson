@@ -1,4 +1,6 @@
 # BSON for Jackson [![Build Status](https://travis-ci.org/michel-kraemer/bson4jackson.svg?branch=master)](https://travis-ci.org/michel-kraemer/bson4jackson) [![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.undercouch/bson4jackson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.undercouch/bson4jackson)
+[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/de.undercouch/bson4jackson/badge.svg)](http://www.javadoc.io/doc/de.undercouch/bson4jackson)
 
 This library adds support for [BSON](http://bsonspec.org) to the
 [Jackson JSON processor](https://github.com/FasterXML/jackson).
