@@ -65,7 +65,7 @@ public class UnsafeByteArrayInputStream extends InputStream {
 	
 	@Override
 	public int read() {
-		return (_pos >= _count ? -1 : _buf[_pos++]);
+		return _pos >= _count ? -1 : _buf[_pos++];
 	}
 	
 	@Override
@@ -75,7 +75,7 @@ public class UnsafeByteArrayInputStream extends InputStream {
 		}
 		
 		int avail = _count - _pos;
-		int cnt = (len < avail ? len : avail);
+		int cnt = len < avail ? len : avail;
 		System.arraycopy(_buf, _pos, b, off, cnt);
 		_pos += cnt;
 		return cnt;
