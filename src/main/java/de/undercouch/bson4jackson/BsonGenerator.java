@@ -79,7 +79,7 @@ public class BsonGenerator extends GeneratorBase {
 		 * @return the bit mask that identifies this feature
 		 */
 		public int getMask() {
-			return (1 << ordinal());
+			return 1 << ordinal();
 		}
 	}
 	
@@ -116,7 +116,7 @@ public class BsonGenerator extends GeneratorBase {
 		public DocumentInfo(DocumentInfo parent, int headerPos, boolean array) {
 			this.parent = parent;
 			this.headerPos = headerPos;
-			this.currentArrayPos = (array ? 0 : -1);
+			this.currentArrayPos = array ? 0 : -1;
 		}
 	}
 	
@@ -215,7 +215,7 @@ public class BsonGenerator extends GeneratorBase {
 	 * @return true if the generator is currently processing an array
 	 */
 	protected boolean isArray() {
-		return (_currentDocument == null ? false : _currentDocument.currentArrayPos >= 0);
+		return _currentDocument == null ? false : _currentDocument.currentArrayPos >= 0;
 	}
 	
 	/**
@@ -323,8 +323,8 @@ public class BsonGenerator extends GeneratorBase {
 		_writeArrayFieldNameIfNeeded();
 		if (_currentDocument != null) {
 			//embedded document/array
-			_buffer.putByte(_typeMarker, (array ? BsonConstants.TYPE_ARRAY :
-				BsonConstants.TYPE_DOCUMENT));
+			_buffer.putByte(_typeMarker, array ? BsonConstants.TYPE_ARRAY :
+				BsonConstants.TYPE_DOCUMENT);
 		}
 		_currentDocument = new DocumentInfo(_currentDocument, _buffer.size(), array);
 		reserveHeader();
