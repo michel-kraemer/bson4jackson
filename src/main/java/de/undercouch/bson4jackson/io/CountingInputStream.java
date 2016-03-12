@@ -58,7 +58,7 @@ public class CountingInputStream extends FilterInputStream {
 	}
 	
 	@Override
-	public int read(byte b[]) throws IOException {
+	public int read(byte[] b) throws IOException {
 		int r = super.read(b);
 		if (r > 0) {
 			_pos += r;
@@ -67,7 +67,7 @@ public class CountingInputStream extends FilterInputStream {
 	}
 	
 	@Override
-	public int read(byte b[], int off, int len) throws IOException {
+	public int read(byte[] b, int off, int len) throws IOException {
 		int r = super.read(b, off, len);
 		if (r > 0) {
 			_pos += r;
