@@ -69,7 +69,7 @@ public class BsonParser extends ParserBase {
 		 * @return the bit mask that identifies this feature
 		 */
 		public int getMask() {
-			return (1 << ordinal());
+			return 1 << ordinal();
 		}
 	}
 
@@ -261,7 +261,7 @@ public class BsonParser extends ParserBase {
 					ctx.type = _in.readByte();
 					if (ctx.type == BsonConstants.TYPE_END) {
 						//end of document
-						_currToken = (ctx.array ? JsonToken.END_ARRAY : JsonToken.END_OBJECT);
+						_currToken = ctx.array ? JsonToken.END_ARRAY : JsonToken.END_OBJECT;
 						_currentContext = _currentContext.parent;
 					} else if (ctx.type == BsonConstants.TYPE_UNDEFINED) {
 						//skip field name and then ignore this token
@@ -318,7 +318,7 @@ public class BsonParser extends ParserBase {
 				case BsonConstants.TYPE_BOOLEAN:
 					boolean b = _in.readBoolean();
 					ctx.value = b;
-					_currToken = (b ? JsonToken.VALUE_TRUE : JsonToken.VALUE_FALSE);
+					_currToken = b ? JsonToken.VALUE_TRUE : JsonToken.VALUE_FALSE;
 					break;
 					
 				case BsonConstants.TYPE_DATETIME:
@@ -426,7 +426,7 @@ public class BsonParser extends ParserBase {
 		}
 
 		_currentContext = new Context(_currentContext, array);
-		return (array ? JsonToken.START_ARRAY : JsonToken.START_OBJECT);
+		return array ? JsonToken.START_ARRAY : JsonToken.START_OBJECT;
 	}
 	
 	/**
@@ -792,7 +792,7 @@ public class BsonParser extends ParserBase {
 	
 	@Override
 	public Object getEmbeddedObject() throws IOException, JsonParseException {
-		return (_currentContext != null ? _currentContext.value : null);
+		return _currentContext != null ? _currentContext.value : null;
 	}
 
 	@Override
