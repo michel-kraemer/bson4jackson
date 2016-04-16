@@ -109,6 +109,7 @@ task packageSources(type: Jar) {
 task doIntegrationTest21(type: Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
     }
 
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest21
@@ -117,16 +118,25 @@ task doIntegrationTest21(type: Test) {
 task doIntegrationTest22(type: Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
     }
 
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest22
 }
 
 task doIntegrationTest23(type: Test) {
+    useJUnit {
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
+    }
+
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest23
 }
 
 task doIntegrationTest24(type: Test) {
+    useJUnit {
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
+    }
+
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest24
 }
 

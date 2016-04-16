@@ -45,6 +45,7 @@ import org.bson.types.BSONTimestamp;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.SerializableString;
@@ -457,6 +458,7 @@ public class BsonGeneratorTest {
 	}
 
 	@Test
+	@Category(value = RequiresJackson_v2_5.class)
 	public void writeMultipleObjects() throws Exception {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		BsonFactory bsonFactory = new BsonFactory();
