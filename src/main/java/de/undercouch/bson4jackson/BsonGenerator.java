@@ -251,6 +251,8 @@ public class BsonGenerator extends GeneratorBase {
 	
 	@Override
 	public void flush() throws IOException {
+		_buffer.writeTo(_out);
+		_buffer.clear();
 		_out.flush();
 	}
 
