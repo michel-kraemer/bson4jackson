@@ -38,7 +38,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.*;
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
@@ -51,6 +50,11 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.io.SerializedString;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SequenceWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
 import de.undercouch.bson4jackson.types.JavaScript;
@@ -62,6 +66,14 @@ import de.undercouch.bson4jackson.types.Timestamp;
  * @author Michel Kraemer
  */
 public class BsonGeneratorTest {
+	/**
+	 * Simple dummy object for testing object (de-)serialization.
+	 */
+	private static class TestPojo {
+		public Integer i;
+		public String s;
+	}
+
 	@Test
 	public void generatePrimitives() throws Exception {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
@@ -444,49 +456,41 @@ public class BsonGeneratorTest {
 		assertArrayEquals(binary, objbin);
 	}
 
-
-    /** Simple dummy object for testing object (de-)serialization. */
-    private static class TestPojo
-    {
-        public Integer i;
-        public String s;
-    }
-
-
 	@Test
 	public void writeMultipleObjects() throws Exception {
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		BsonFactory bsonFactory = new BsonFactory();
 
 		// test input 1
-        TestPojo testObjectIn1 = new TestPojo();
-        testObjectIn1.i = 42;
-        testObjectIn1.s = "43";
+		TestPojo testObjectIn1 = new TestPojo();
+		testObjectIn1.i = 42;
+		testObjectIn1.s = "43";
 
-        // test input 2
-        TestPojo testObjectIn2 = new TestPojo();
-        testObjectIn2.i = 44;
-        testObjectIn2.s = "45";
+		// test input 2
+		TestPojo testObjectIn2 = new TestPojo();
+		testObjectIn2.i = 44;
+		testObjectIn2.s = "45";
 
 		// write in non-streaming mode using explicit flush()
-		// we explicitly create a sequence writer for writing out several TestPojo objects in a row
-		// (useful for storage/online communications)
+		// we explicitly create a sequence writer for writing out several
+		// TestPojo objects in a row (useful for storage/online communications)
 		bsonFactory.disable(BsonGenerator.Feature.ENABLE_STREAMING);
 		ObjectMapper mapperExplicit = new ObjectMapper(bsonFactory);
 		mapperExplicit.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
-        ObjectWriter objectWriterExplicit = mapperExplicit.writer();   // use writerFor(TestPojo.class) in Jackson 2.5+
-        SequenceWriter sequenceWriterExplicit = objectWriterExplicit.writeValues(outputStream);
-        sequenceWriterExplicit.write(testObjectIn1);
-        sequenceWriterExplicit.flush();
+		ObjectWriter objectWriterExplicit = mapperExplicit.writer();
+		SequenceWriter sequenceWriterExplicit =
+				objectWriterExplicit.writeValues(outputStream);
+		sequenceWriterExplicit.write(testObjectIn1);
+		sequenceWriterExplicit.flush();
 
 		// were all bytes associated with our top-level object testObjectIn1
 		// successfully written to the output stream?
-        TestPojo testObjectOut1 = mapperExplicit.readValue(outputStream.toByteArray(), TestPojo.class);
-        assertEquals(testObjectOut1.i, testObjectIn1.i);
-        assertEquals(testObjectOut1.s, testObjectIn1.s);
+		TestPojo testObjectOut1 = mapperExplicit.readValue(outputStream.toByteArray(),
+				TestPojo.class);
+		assertEquals(testObjectIn1.i, testObjectOut1.i);
+		assertEquals(testObjectIn1.s, testObjectOut1.s);
 
-        sequenceWriterExplicit.close();
+		sequenceWriterExplicit.close();
 
 		// clear buffer
 		outputStream.reset();
@@ -495,18 +499,19 @@ public class BsonGeneratorTest {
 		bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
 		ObjectMapper mapperImplicit = new ObjectMapper(bsonFactory);
 		mapperImplicit.enable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
-		ObjectWriter objectWriterImplicit = mapperImplicit.writer();   // use writerFor(TestPojo.class) in Jackson 2.5+
-        SequenceWriter sequenceWriterImplicit = objectWriterImplicit.writeValues(outputStream);
-        sequenceWriterImplicit.write(testObjectIn2);
+		ObjectWriter objectWriterImplicit = mapperImplicit.writer();
+		SequenceWriter sequenceWriterImplicit =
+				objectWriterImplicit.writeValues(outputStream);
+		sequenceWriterImplicit.write(testObjectIn2);
 
 		// second object also passed through?
-        TestPojo testObjectOut2 = mapperImplicit.readValue(outputStream.toByteArray(), TestPojo.class);
-		assertEquals(testObjectOut2.i, testObjectIn2.i);
-        assertEquals(testObjectOut2.s, testObjectIn2.s);
+		TestPojo testObjectOut2 = mapperImplicit.readValue(outputStream.toByteArray(),
+				TestPojo.class);
+		assertEquals(testObjectIn2.i, testObjectOut2.i);
+		assertEquals(testObjectIn2.s, testObjectOut2.s);
 
-        sequenceWriterImplicit.close();
+		sequenceWriterImplicit.close();
 	}
-
 
 	@Test
 	public void characterEscapes() throws Exception {
