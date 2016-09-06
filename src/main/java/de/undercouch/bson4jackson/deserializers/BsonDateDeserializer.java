@@ -34,7 +34,7 @@ public class BsonDateDeserializer extends BsonDeserializer<Date> {
 			throws IOException {
 		if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
 				bsonParser.getCurrentBsonType() != BsonConstants.TYPE_DATETIME) {
-			ctxt.mappingException(Date.class);
+			throw ctxt.mappingException(Date.class);
 		}
 		
 		Object obj = bsonParser.getEmbeddedObject();
