@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,8 +19,9 @@ public class Issue67Test {
 	)
 	@JsonSubTypes({
 		@JsonSubTypes.Type(name = "a", value = TypeAsPropertyWithUUIDA.class),
-		@JsonSubTypes.Type(name = "b", value = TypeAsPropertyWithUUIDA.class)
+		@JsonSubTypes.Type(name = "b", value = TypeAsPropertyWithUUIDB.class)
 	})
+	@JsonPropertyOrder({"uuid", "type"})
 	public static abstract class TypeAsPropertyWithUUIDBase {
 		String type;
 		UUID uuid;
