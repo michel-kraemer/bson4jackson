@@ -16,20 +16,44 @@ package de.undercouch.bson4jackson.io;
 
 /**
  * Provides static methods to change the byte order of single values
+ *
  * @author Michel Kraemer
  */
 public class ByteOrderUtil {
-	/**
-	 * Flips the byte order of an integer
-	 * @param i the integer
-	 * @return the flipped integer
-	 */
-	public static int flip(int i) {
-		int result = 0;
-		result |= (i & 0xFF) << 24;
-		result |= (i & 0xFF00) << 8;
-		result |= ((i & 0xFF0000) >> 8) & 0xFF00;
-		result |= ((i & 0xFF000000) >> 24) & 0xFF;
-		return result;
-	}
+    /**
+     * Flips the byte order of an integer
+     *
+     * @param i the integer
+     * @return the flipped integer
+     */
+    public static int flip(int i) {
+        return makeInt(int0(i), int1(i), int2(i), int3(i));
+    }
+
+    public static byte[] reverseByteArray(int i) {
+        return new byte[]{int3(i), int2(i), int1(i), int0(i)};
+    }
+
+    private static int makeInt(final byte b3, final byte b2, final byte b1, final byte b0) {
+        return (((b3) << 24)
+                | ((b2 & 0xff) << 16)
+                | ((b1 & 0xff) << 8)
+                | ((b0 & 0xff)));
+    }
+
+    private static byte int3(final int x) {
+        return (byte) (x >> 24);
+    }
+
+    private static byte int2(final int x) {
+        return (byte) (x >> 16);
+    }
+
+    private static byte int1(final int x) {
+        return (byte) (x >> 8);
+    }
+
+    private static byte int0(final int x) {
+        return (byte) (x);
+    }
 }
