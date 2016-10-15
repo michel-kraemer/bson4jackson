@@ -33,7 +33,6 @@ import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
@@ -242,7 +241,7 @@ public class BsonGenerator extends GeneratorBase {
 	
 	/**
 	 * Writes the BSON document header to the output buffer at the
-	 * given position. Does not increase the buffer's write position. 
+	 * given position. Does not increase the buffer's write position.
 	 * @param pos the position where to write the header
 	 */
 	protected void putHeader(int pos) {
@@ -616,7 +615,7 @@ public class BsonGenerator extends GeneratorBase {
 		//write string size
 		_buffer.putInt(p, length);
 		
-		flushBuffer();		
+		flushBuffer();
 	}
 
 	@Override
@@ -649,13 +648,7 @@ public class BsonGenerator extends GeneratorBase {
 		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write datetime");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_OBJECTID);
-		// ObjectIds have their byte order flipped
-		int time = ByteOrderUtil.flip(objectId.getTime());
-		int machine = ByteOrderUtil.flip(objectId.getMachine());
-		int inc = ByteOrderUtil.flip(objectId.getInc());
-		_buffer.putInt(time);
-		_buffer.putInt(machine);
-		_buffer.putInt(inc);
+		_buffer.putBytes(objectId.toByteArray());
 		flushBuffer();
 	}
 
@@ -785,7 +778,7 @@ public class BsonGenerator extends GeneratorBase {
 	 *
 	 * @param string The string to write
 	 * @return The number of bytes written, including the terminating null byte
-	 * @throws IOException If an error occurred in the stream while writing 
+	 * @throws IOException If an error occurred in the stream while writing
 	 */
 	protected int _writeCString(String string) throws IOException {
 		//escape characters if necessary
