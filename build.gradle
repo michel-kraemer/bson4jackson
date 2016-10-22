@@ -27,6 +27,7 @@ configurations {
     integrationTest25 { extendsFrom integrationTestBase }
     integrationTest26 { extendsFrom integrationTestBase }
     integrationTest27 { extendsFrom integrationTestBase }
+    integrationTest28 { extendsFrom integrationTestBase }
 }
 
 String jacksonCore = 'com.fasterxml.jackson.core:jackson-core:'
@@ -73,6 +74,10 @@ dependencies {
     integrationTest27 jacksonCore + '2.7.0'
     integrationTest27 jacksonAnnotations + '2.7.0'
     integrationTest27 jacksonDatabind + '2.7.0'
+
+    integrationTest28 jacksonCore + '2.8.0'
+    integrationTest28 jacksonAnnotations + '2.8.0'
+    integrationTest28 jacksonDatabind + '2.8.0'
 }
 
 jar {
@@ -162,9 +167,13 @@ task doIntegrationTest27(type: Test) {
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest27
 }
 
+task doIntegrationTest28(type: Test) {
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest28
+}
+
 task integrationTest(dependsOn: [ doIntegrationTest21, doIntegrationTest22,
         doIntegrationTest23, doIntegrationTest24, doIntegrationTest25,
-        doIntegrationTest26, doIntegrationTest27 ])
+        doIntegrationTest26, doIntegrationTest27, doIntegrationTest28 ])
 
 check.dependsOn integrationTest
 
