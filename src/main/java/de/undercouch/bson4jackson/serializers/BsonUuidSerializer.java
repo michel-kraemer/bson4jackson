@@ -1,4 +1,4 @@
-// Copyright 2010-2011 Ed Anuff
+// Copyright 2010-2016 Ed Anuff, Michel Kraemer
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,22 +17,30 @@ package de.undercouch.bson4jackson.serializers;
 import java.io.IOException;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.UUIDSerializer;
 
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonGenerator;
 
 /**
- * Serializer for writing UUIDs as BSON binary fields with UUID subtype. Can
- * only be used in conjunction with the BsonGenerator.
+ * Serializer for writing UUIDs as BSON binary fields with UUID subtype
  * @author Ed Anuff
+ * @author Michel Kraemer
  */
-public class BsonUuidSerializer extends BsonSerializer<UUID> {
+public class BsonUuidSerializer extends JsonSerializer<UUID> {
 	@Override
-	public void serialize(UUID value, BsonGenerator bgen,
+	public void serialize(UUID value, JsonGenerator gen,
 			SerializerProvider provider) throws IOException {
-		bgen.writeBinary(null, BsonConstants.SUBTYPE_UUID,
-				uuidToLittleEndianBytes(value), 0, 16);
+		if (gen instanceof BsonGenerator) {
+			BsonGenerator bgen = (BsonGenerator)gen;
+			bgen.writeBinary(null, BsonConstants.SUBTYPE_UUID,
+					uuidToLittleEndianBytes(value), 0, 16);
+		} else {
+			new UUIDSerializer().serialize(value, gen, provider);
+		}
 	}
 
 	/**

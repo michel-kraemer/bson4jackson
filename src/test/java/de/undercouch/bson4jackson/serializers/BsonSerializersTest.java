@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -29,6 +30,7 @@ import org.bson.BSONDecoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
 import org.bson.types.Code;
+import org.bson.types.CodeWScope;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,6 +97,20 @@ public class BsonSerializersTest {
 		JavaScript js = new JavaScript("code");
 		Code code = (Code)generateAndParse(js);
 		assertEquals(js.getCode(), code.getCode());
+	}
+	
+	/**
+	 * Tests {@link BsonJavaScriptSerializer}
+	 * @throws Exception if something goes wrong
+	 */
+	@Test
+	public void javascriptWithScope() throws Exception {
+		Map<String, Object> scope = new HashMap<>();
+		scope.put("j", 5);
+		JavaScript js = new JavaScript("code", scope);
+		CodeWScope code = (CodeWScope)generateAndParse(js);
+		assertEquals(js.getCode(), code.getCode());
+		assertEquals(js.getScope(), code.getScope());
 	}
 	
 	/**

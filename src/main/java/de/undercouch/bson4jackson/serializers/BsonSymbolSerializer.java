@@ -1,4 +1,4 @@
-// Copyright 2010-2011 James Roper
+// Copyright 2010-2016 James Roper, Michel Kraemer
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@ package de.undercouch.bson4jackson.serializers;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import de.undercouch.bson4jackson.BsonGenerator;
@@ -23,17 +25,21 @@ import de.undercouch.bson4jackson.types.Symbol;
 
 /**
  * Serializer for BSON Symbols
- *
  * @since 1.3
  * @author James Roper
+ * @author Michel Kraemer
  */
-public class BsonSymbolSerializer extends BsonSerializer<Symbol> {
+public class BsonSymbolSerializer extends JsonSerializer<Symbol> {
 	@Override
-	public void serialize(Symbol symbol, BsonGenerator bsonGenerator, SerializerProvider serializerProvider) throws IOException {
-		if (symbol == null) {
-			serializerProvider.defaultSerializeNull(bsonGenerator);
+	public void serialize(Symbol value, JsonGenerator gen,
+			SerializerProvider serializerProvider) throws IOException {
+		if (value == null) {
+			serializerProvider.defaultSerializeNull(gen);
+		} else if (gen instanceof BsonGenerator) {
+			BsonGenerator bgen = (BsonGenerator)gen;
+			bgen.writeSymbol(value);
 		} else {
-			bsonGenerator.writeSymbol(symbol);
+			gen.writeString(value.getSymbol());
 		}
 	}
 }

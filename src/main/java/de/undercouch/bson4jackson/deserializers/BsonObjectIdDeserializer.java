@@ -1,4 +1,4 @@
-// Copyright 2010-2014 Michel Kraemer
+// Copyright 2010-2016 Michel Kraemer
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,46 +15,40 @@
 package de.undercouch.bson4jackson.deserializers;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonParser;
+import de.undercouch.bson4jackson.types.ObjectId;
 
 /**
- * Deserializes BSON date type objects to calendars
+ * Deserializes BSON ObjectId objects
  * @author Michel Kraemer
- * @since 2.3.2
+ * @since 2.8.0
  */
-public class BsonCalendarDeserializer extends JsonDeserializer<Calendar> {
+public class BsonObjectIdDeserializer extends JsonDeserializer<ObjectId> {
 	@Override
-	public Calendar deserialize(JsonParser jp, DeserializationContext ctxt)
+	public ObjectId deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException {
 		if (jp instanceof BsonParser) {
 			BsonParser bsonParser = (BsonParser)jp;
 			if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
-					bsonParser.getCurrentBsonType() != BsonConstants.TYPE_DATETIME) {
-				throw ctxt.mappingException(Date.class);
+					bsonParser.getCurrentBsonType() != BsonConstants.TYPE_OBJECTID) {
+				throw ctxt.mappingException(ObjectId.class);
 			}
-			
-			Object obj = bsonParser.getEmbeddedObject();
-			if (obj == null) {
-				return null;
-			}
-			
-			Calendar cal = Calendar.getInstance();
-			cal.setTime((Date)obj);
-			return cal;
+			return (ObjectId)bsonParser.getEmbeddedObject();
 		} else {
-			Date date = new Date(jp.getLongValue());
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(date);
-			return cal;
+			TreeNode tree = jp.getCodec().readTree(jp);
+			int time = ((ValueNode)tree.get("$time")).asInt();
+			int machine = ((ValueNode)tree.get("$machine")).asInt();
+			int inc = ((ValueNode)tree.get("$inc")).asInt();
+			return new ObjectId(time, machine, inc);
 		}
 	}
 }

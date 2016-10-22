@@ -110,6 +110,7 @@ task doIntegrationTest21(type: Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
 
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest21
@@ -119,6 +120,7 @@ task doIntegrationTest22(type: Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
 
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest22
@@ -127,6 +129,7 @@ task doIntegrationTest22(type: Test) {
 task doIntegrationTest23(type: Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
 
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest23
@@ -135,16 +138,23 @@ task doIntegrationTest23(type: Test) {
 task doIntegrationTest24(type: Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
 
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest24
 }
 
 task doIntegrationTest25(type: Test) {
+    useJUnit {
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
+    }
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest25
 }
 
 task doIntegrationTest26(type: Test) {
+    useJUnit {
+        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
+    }
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest26
 }
 

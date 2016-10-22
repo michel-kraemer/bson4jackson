@@ -1,4 +1,4 @@
-// Copyright 2010-2011 James Roper
+// Copyright 2010-2016 James Roper, Michel Kraemer
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,23 +17,29 @@ package de.undercouch.bson4jackson.serializers;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import de.undercouch.bson4jackson.BsonGenerator;
 
 /**
  * Serializer for regular expression patterns
- *
  * @since 1.3
  * @author James Roper
+ * @author Michel Kraemer
  */
-public class BsonRegexSerializer extends BsonSerializer<Pattern> {
+public class BsonRegexSerializer extends JsonSerializer<Pattern> {
 	@Override
-	public void serialize(Pattern pattern, BsonGenerator bsonGenerator, SerializerProvider serializerProvider) throws IOException {
-		if (pattern == null) {
-			serializerProvider.defaultSerializeNull(bsonGenerator);
+	public void serialize(Pattern value, JsonGenerator gen,
+			SerializerProvider serializerProvider) throws IOException {
+		if (value == null) {
+			serializerProvider.defaultSerializeNull(gen);
+		} else if (gen instanceof BsonGenerator) {
+			BsonGenerator bgen = (BsonGenerator)gen;
+			bgen.writeRegex(value);
 		} else {
-			bsonGenerator.writeRegex(pattern);
+			gen.writeString(value.pattern());
 		}
 	}
 }

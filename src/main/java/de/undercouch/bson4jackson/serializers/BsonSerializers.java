@@ -39,13 +39,13 @@ public class BsonSerializers extends SimpleSerializers {
 	 * Default constructor
 	 */
 	public BsonSerializers() {
-		addSerializer(UUID.class, new BsonUuidSerializer());
 		addSerializer(Date.class, new BsonDateSerializer());
 		addSerializer(Calendar.class, new BsonCalendarSerializer());
+		addSerializer(JavaScript.class, new BsonJavaScriptSerializer());
 		addSerializer(ObjectId.class, new BsonObjectIdSerializer());
 		addSerializer(Pattern.class, new BsonRegexSerializer());
-		addSerializer(JavaScript.class, new BsonJavaScriptSerializer());
-		addSerializer(Timestamp.class, new BsonTimestampSerializer());
 		addSerializer(Symbol.class, new BsonSymbolSerializer());
+		addSerializer(Timestamp.class, new BsonTimestampSerializer());
+		addSerializer(UUID.class, new BsonUuidSerializer());
 	}
 }

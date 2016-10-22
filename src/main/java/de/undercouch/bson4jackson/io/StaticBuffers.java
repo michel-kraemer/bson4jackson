@@ -35,6 +35,7 @@ public class StaticBuffers {
 	/**
 	 * Possible buffer keys
 	 */
+	@SuppressWarnings("javadoc")
 	public static enum Key {
 		BUFFER0,
 		BUFFER1,
