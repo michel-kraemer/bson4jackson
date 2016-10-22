@@ -32,6 +32,7 @@ import de.undercouch.bson4jackson.BsonParser;
  */
 public class BsonDateDeserializer extends JsonDeserializer<Date> {
 	@Override
+	@SuppressWarnings("deprecation")
 	public Date deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException {
 		if (jp instanceof BsonParser) {

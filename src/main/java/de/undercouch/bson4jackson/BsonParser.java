@@ -801,6 +801,7 @@ public class BsonParser extends ParserBase {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected boolean loadMore() throws IOException {
 		// We don't actually use this
 		return true;

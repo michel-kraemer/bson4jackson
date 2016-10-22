@@ -33,6 +33,7 @@ import de.undercouch.bson4jackson.BsonParser;
  */
 public class BsonCalendarDeserializer extends JsonDeserializer<Calendar> {
 	@Override
+	@SuppressWarnings("deprecation")
 	public Calendar deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException {
 		if (jp instanceof BsonParser) {

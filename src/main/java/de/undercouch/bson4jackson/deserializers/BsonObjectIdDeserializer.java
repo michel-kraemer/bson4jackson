@@ -34,6 +34,7 @@ import de.undercouch.bson4jackson.types.ObjectId;
  */
 public class BsonObjectIdDeserializer extends JsonDeserializer<ObjectId> {
 	@Override
+	@SuppressWarnings("deprecation")
 	public ObjectId deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException {
 		if (jp instanceof BsonParser) {

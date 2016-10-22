@@ -36,6 +36,7 @@ import de.undercouch.bson4jackson.types.JavaScript;
  */
 public class BsonJavaScriptDeserializer extends JsonDeserializer<JavaScript> {
 	@Override
+	@SuppressWarnings("deprecation")
 	public JavaScript deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException {
 		if (jp instanceof BsonParser) {

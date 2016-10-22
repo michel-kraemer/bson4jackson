@@ -292,6 +292,7 @@ public class BsonGenerator extends GeneratorBase {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void writeEndArray() throws IOException, JsonGenerationException {
 		if (!_writeContext.inArray()) {
             _reportError("Current context not an ARRAY but " + _writeContext.getTypeDesc());
@@ -333,6 +334,7 @@ public class BsonGenerator extends GeneratorBase {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void writeEndObject() throws IOException, JsonGenerationException {
 		if (!_writeContext.inObject()) {
             _reportError("Current context not an object but " +
