@@ -1,4 +1,4 @@
-// Copyright 2010-2011 Michel Kraemer
+// Copyright 2010-2016 Michel Kraemer
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ public class BsonParserTest {
 	/**
 	 * Simple test class for {@link BsonParserTest#parseRootObjectArray()}
 	 */
+	@SuppressWarnings("javadoc")
 	public static class SimpleClass {
 		public String name;
 	}
@@ -80,6 +81,7 @@ public class BsonParserTest {
 	/**
 	 * Simple test class for {@link BsonParserTest#parseBinaryObject()}
 	 */
+	@SuppressWarnings("javadoc")
 	public static class BinaryClass {
 		public byte[] barr;
 	}
@@ -87,6 +89,7 @@ public class BsonParserTest {
 	/**
 	 * Simple test class for {@link BsonParserTest#parseObjectId()}
 	 */
+	@SuppressWarnings("javadoc")
 	public static class ObjectIdClass {
 		public org.bson.types.ObjectId oid;
 	}
@@ -111,7 +114,11 @@ public class BsonParserTest {
 	private Map<?, ?> parseBsonObject(BSONObject o) throws IOException {
 		return parseBsonObject(o, Map.class);
 	}
-	
+
+	/**
+	 * Test if primitives can be deserialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parsePrimitives() throws Exception {
 		BSONObject o = new BasicBSONObject();
@@ -196,6 +203,10 @@ public class BsonParserTest {
 		assertEquals(0, fails.get());
 	}
 
+	/**
+	 * Test if {@link BigDecimal} objects can be deserialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parseBig() throws Exception {
 		BSONObject o = new BasicBSONObject();
@@ -212,13 +223,19 @@ public class BsonParserTest {
 		assertEquals(BigDecimal.class, data.get("Double").getClass());
 		assertEquals(BigInteger.class, data.get("Int32").getClass());
 	}
-	
+
+	/**
+	 * Test if a complex BSON object containing various values can be
+	 * deserialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parseComplex() throws Exception {
 		BSONObject o = new BasicBSONObject();
 		o.put("Timestamp", new BSONTimestamp(0xAABB, 0xCCDD));
 		o.put("Symbol", new Symbol("Test"));
-		o.put("ObjectId", new org.bson.types.ObjectId(Integer.MAX_VALUE, -2, Integer.MIN_VALUE));
+		o.put("ObjectId", new org.bson.types.ObjectId(
+				Integer.MAX_VALUE, -2, Integer.MIN_VALUE));
 		Pattern p = Pattern.compile(".*", Pattern.CASE_INSENSITIVE |
 				Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNICODE_CASE);
 		o.put("Regex", p);
@@ -234,7 +251,12 @@ public class BsonParserTest {
 		assertEquals(p.flags(), p2.flags());
 		assertEquals(p.pattern(), p2.pattern());
 	}
-	
+
+	/**
+	 * Test if undefined values are deserialized correct (i.e. if they
+	 * are skipped if the object is deserialized into a {@link Map})
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parseUndefined() throws Exception {
 		BSONObject o = new BasicBSONObject();
@@ -254,7 +276,11 @@ public class BsonParserTest {
 		assertEquals(1, data.size());
 		assertEquals(5, data.get("Int32"));
 	}
-	
+
+	/**
+	 * Test if embedded objects can be deserialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parseEmbeddedDocument() throws Exception {
 		BSONObject o1 = new BasicBSONObject();
@@ -272,7 +298,11 @@ public class BsonParserTest {
 		assertEquals(10L, data2.get("Int64"));
 		assertEquals("Hello", data.get("String"));
 	}
-	
+
+	/**
+	 * Test if embedded arrays can be deserialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parseEmbeddedArray() throws Exception {
 		List<Integer> i = new ArrayList<Integer>();
@@ -339,7 +369,11 @@ public class BsonParserTest {
 		
 		assertEquals(JsonToken.END_OBJECT, dec.nextToken());
 	}
-	
+
+	/**
+	 * Test if {@link JavaScript} objects can be deserialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parseCode() throws Exception {
 		BSONObject scope = new BasicBSONObject();
@@ -358,7 +392,11 @@ public class BsonParserTest {
 		Map<String, Object> c1scope = c1.getScope();
 		assertEquals(5, c1scope.get("Int32"));
 	}
-	
+
+	/**
+	 * Test if binary objects can be deserialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parseBinary() throws Exception {
 		byte[] b = new byte[] { 1, 2, 3, 4, 5 };
@@ -373,7 +411,11 @@ public class BsonParserTest {
 		assertArrayEquals(b, (byte[])data.get("b2"));
 		assertEquals(new UUID(1L, 2L), data.get("uuid"));
 	}
-	
+
+	/**
+	 * Test if binary data can be deserialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void parseBinaryObject() throws Exception {
 		byte[] b = new byte[] { 1, 2, 3, 4, 5 };
@@ -402,7 +444,7 @@ public class BsonParserTest {
 		generator.close();
 
 		BsonParser parser = bsonFactory.createJsonParser(out.toByteArray());
-		//the following loop shall throw no exception and end after 4 iterations
+		// the following loop should throw no exception and end after 4 iterations
 		int i = 0;
 		while (parser.nextToken() != null) {
 			++i;

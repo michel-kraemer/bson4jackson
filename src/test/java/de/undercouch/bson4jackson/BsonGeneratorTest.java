@@ -1,4 +1,4 @@
-// Copyright 2010-2011 Michel Kraemer
+// Copyright 2010-2016 Michel Kraemer
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -75,6 +75,10 @@ public class BsonGeneratorTest {
 		public String s;
 	}
 
+	/**
+	 * Test if primitives can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void generatePrimitives() throws Exception {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
@@ -87,15 +91,15 @@ public class BsonGeneratorTest {
 		data.put("Float", 1234.1234f);
 		data.put("Double", 5678.5678);
 		
-		//BigInteger that can be serialized as an Integer
+		// BigInteger that can be serialized as an Integer
 		data.put("BigInt1", BigInteger.valueOf(Integer.MAX_VALUE));
 		
-		//BigInteger that can be serialized as a Long
+		// BigInteger that can be serialized as a Long
 		BigInteger bi2 = BigInteger.valueOf(Integer.MAX_VALUE)
 			.multiply(BigInteger.valueOf(2));
 		data.put("BigInt2", bi2);
 		
-		//BigInteger that will be serialized as a String
+		// BigInteger that will be serialized as a String
 		BigInteger bi3 = BigInteger.valueOf(Long.MAX_VALUE)
 			.multiply(BigInteger.valueOf(Long.MAX_VALUE));
 		data.put("BigInt3", bi3);
@@ -114,7 +118,12 @@ public class BsonGeneratorTest {
 		assertEquals(Long.valueOf(Integer.MAX_VALUE) * 2L, obj.get("BigInt2"));
 		assertEquals(bi3.toString(), obj.get("BigInt3"));
 	}
-	
+
+	/**
+	 * Test if the streaming feature works as expected
+	 * @see BsonGenerator.Feature#ENABLE_STREAMING
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void stream() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -154,10 +163,15 @@ public class BsonGeneratorTest {
 		assertEquals('b', b);
 	}
 	
+	/**
+	 * Test the {@link BsonGenerator#writeRaw(char[], int, int)} method
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void rawChar() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, baos);
+		BsonGenerator gen = new BsonGenerator(
+				JsonGenerator.Feature.collectDefaults(), 0, baos);
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeRaw(new char[] { 'a', 'b' }, 0, 2);
@@ -165,11 +179,16 @@ public class BsonGeneratorTest {
 		gen.close();
 		assertRaw(baos.toByteArray());
 	}
-	
+
+	/**
+	 * Test the {@link BsonGenerator#writeString(String)} method
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void rawString() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, baos);
+		BsonGenerator gen = new BsonGenerator(
+				JsonGenerator.Feature.collectDefaults(), 0, baos);
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeRaw("ab");
@@ -177,11 +196,16 @@ public class BsonGeneratorTest {
 		gen.close();
 		assertRaw(baos.toByteArray());
 	}
-	
+
+	/**
+	 * Test the {@link BsonGenerator#writeBinary(byte[], int, int)} method
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void rawBytes() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, baos);
+		BsonGenerator gen = new BsonGenerator(
+				JsonGenerator.Feature.collectDefaults(), 0, baos);
 		gen.writeStartObject();
 		gen.writeFieldName("Test");
 		gen.writeBinary(new byte[] { (byte)1, (byte)2 });
@@ -197,7 +221,11 @@ public class BsonGeneratorTest {
 		assertEquals((byte)1, o[0]);
 		assertEquals((byte)2, o[1]);
 	}
-	
+
+	/**
+	 * Test if embedded objects can be serialized correctly
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void stackedObjects() throws Exception {
 		Map<String, Object> data1 = new LinkedHashMap<String, Object>();
@@ -218,7 +246,11 @@ public class BsonGeneratorTest {
 		BSONObject obj3 = (BSONObject)obj2.get("data3");
 		assertEquals("Hello", obj3.get("String"));
 	}
-	
+
+	/**
+	 * Test if arrays can be serialized correctly
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	@SuppressWarnings("unchecked")
 	public void arrays() throws Exception {
@@ -255,11 +287,16 @@ public class BsonGeneratorTest {
 		BSONObject b6 = o6.get(0);
 		assertEquals("Hello", b6.get("Str"));
 	}
-	
+
+	/**
+	 * Test if strings containing UTF-8 characters can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void utf8Strings() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		BsonGenerator gen = new BsonGenerator(JsonGenerator.Feature.collectDefaults(), 0, baos);
+		BsonGenerator gen = new BsonGenerator(
+				JsonGenerator.Feature.collectDefaults(), 0, baos);
 		gen.writeStartObject();
 		gen.writeFieldName("a\u20AC\u00A2\u00A2bb");
 		gen.writeString("a\u20AC\u00A2\u00A2bb");
@@ -272,7 +309,11 @@ public class BsonGeneratorTest {
 		String s = (String)obj.get("a\u20AC\u00A2\u00A2bb");
 		assertEquals("a\u20AC\u00A2\u00A2bb", s);
 	}
-	
+
+	/**
+	 * Test if {@link UUID} objects can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void uuids() throws Exception {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
@@ -289,6 +330,10 @@ public class BsonGeneratorTest {
 		assertEquals(uuid, obj.get("Uuid"));
 	}
 
+	/**
+	 * Test if {@link Date} objects can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void dates() throws Exception {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
@@ -304,10 +349,15 @@ public class BsonGeneratorTest {
 		assertEquals(date, obj.get("calendar"));
 	}
 
+	/**
+	 * Test if {@link ObjectId}s can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void objectIds() throws Exception {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
-		ObjectId objectId = new ObjectId((int) (System.currentTimeMillis() / 1000), new Random().nextInt(), 100);
+		ObjectId objectId = new ObjectId((int)(System.currentTimeMillis() / 1000),
+				new Random().nextInt(), 100);
 		data.put("_id", objectId);
 
 		BSONObject obj = generateAndParse(data);
@@ -319,9 +369,14 @@ public class BsonGeneratorTest {
 		assertEquals(objectId.getInc(), result.getInc());
 	}
 
+	/**
+	 * Test if {@link Pattern}s can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void patterns() throws Exception {
-		Pattern pattern = Pattern.compile("a.*a", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+		Pattern pattern = Pattern.compile("a.*a",
+				Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("pattern", pattern);
 
@@ -333,6 +388,10 @@ public class BsonGeneratorTest {
 		assertEquals(pattern.flags(), result.flags());
 	}
 
+	/**
+	 * Test if {@link Timestamp} objects can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void timestamps() throws Exception {
 		Timestamp timestamp = new Timestamp(100, 200);
@@ -347,6 +406,10 @@ public class BsonGeneratorTest {
 		assertEquals(timestamp.getTime(), result.getTime());
 	}
 
+	/**
+	 * Test if {@link JavaScript} objects can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void javascript() throws Exception {
 		JavaScript javaScript = new JavaScript("a < 100");
@@ -360,6 +423,10 @@ public class BsonGeneratorTest {
 		assertEquals(javaScript.getCode(), result.getCode());
 	}
 
+	/**
+	 * Test if {@link JavaScript} objects with a scope can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void javascriptWithScope() throws Exception {
 		Map<String, Object> scope = new LinkedHashMap<String, Object>();
@@ -397,7 +464,11 @@ public class BsonGeneratorTest {
 		BSONDecoder decoder = new BasicBSONDecoder();
 		return decoder.readObject(bais);
 	}
-	
+
+	/**
+	 * Test if {@link BigDecimal} objects can be serialized as {@link String}s
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void writeBigDecimalsAsStrings() throws Exception {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
@@ -420,7 +491,11 @@ public class BsonGeneratorTest {
 		String strResult = (String)obj.get("big");
 		assertEquals("0.3", strResult);
 	}
-	
+
+	/**
+	 * Test if  binary data can be serialized
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void writeBinaryData() throws Exception {
 		byte[] binary = new byte[] { (byte)0x05, (byte)0xff, (byte)0xaf,
@@ -430,33 +505,38 @@ public class BsonGeneratorTest {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("binary", binary);
 		
-		//binary data has to be converted to base64 with normal JSON
+		// binary data has to be converted to base64 with normal JSON
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonString = mapper.writeValueAsString(data);
 		assertEquals("{\"binary\":\"Bf+vMEFCQxOA/////w==\"}", jsonString);
 		
-		//with BSON we don't have to convert to base64
+		// with BSON we don't have to convert to base64
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		BsonFactory bsonFactory = new BsonFactory();
 		ObjectMapper om = new ObjectMapper(bsonFactory);
 		om.writeValue(baos, data);
 		
-		//document header (4 bytes) + type (1 byte) + field_name ("binary", 6 bytes) +
-		//end_of_string (1 byte) + binary_size (4 bytes) + subtype (1 byte) +
-		//binary_data (13 bytes) + end_of_document (1 byte)
+		// document header (4 bytes) + type (1 byte) + field_name ("binary", 6 bytes) +
+		// end_of_string (1 byte) + binary_size (4 bytes) + subtype (1 byte) +
+		// binary_data (13 bytes) + end_of_document (1 byte)
 		int expectedLen = 4 + 1 + 6 + 1 + 4 + 1 + 13 + 1;
 		
 		assertEquals(expectedLen, baos.size());
 		
-		//BSON is smaller than JSON (at least in this case)
+		// BSON is smaller than JSON (at least in this case)
 		assertTrue(baos.size() < jsonString.length());
 		
-		//test if binary data can be parsed
+		// test if binary data can be parsed
 		BSONObject obj = generateAndParse(data);
 		byte[] objbin = (byte[])obj.get("binary");
 		assertArrayEquals(binary, objbin);
 	}
 
+	/**
+	 * Test if multiple objects can be written in sequence using
+	 * {@link SequenceWriter}
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	@Category(value = RequiresJackson_v2_5.class)
 	public void writeMultipleObjects() throws Exception {
@@ -515,6 +595,10 @@ public class BsonGeneratorTest {
 		sequenceWriterImplicit.close();
 	}
 
+	/**
+	 * Test if {@link CharacterEscapes} are supported
+	 * @throws Exception if something goes wrong
+	 */
 	@Test
 	public void characterEscapes() throws Exception {
 		JsonNode node = new ObjectMapper().readTree(

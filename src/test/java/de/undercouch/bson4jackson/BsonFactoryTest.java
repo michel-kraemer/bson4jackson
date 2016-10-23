@@ -1,4 +1,4 @@
-// Copyright 2010-2011 Michel Kraemer
+// Copyright 2010-2016 Michel Kraemer
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
 
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.JsonFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static org.junit.Assert.*;
+import com.fasterxml.jackson.core.JsonFactory;
 
 /**
  * Tests {@link BsonFactory}
@@ -28,48 +30,63 @@ import static org.junit.Assert.*;
 public class BsonFactoryTest {
     private BsonFactory factory;
 
+    /**
+     * Set up the unit tests
+     */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         factory = new BsonFactory();
     }
 
+    /**
+     * {@link BsonFactory#copy()} should create a new instance
+     */
     @Test
     @Category(value = RequiresJackson_v2_3.class)
-    public void shouldCreateNewInstanceOnCopy() throws Exception {
-        final BsonFactory copy = factory.copy();
-
+    public void shouldCreateNewInstanceOnCopy() {
+        BsonFactory copy = factory.copy();
         assertNotSame(factory, copy);
     }
 
+    /**
+     * {@link BsonFactory#copy()} should copy parser features
+     */
     @Test
     @Category(value = RequiresJackson_v2_3.class)
-    public void shouldCopyParserFeaturesOnCopy() throws Exception {
-        final BsonParser.Feature feature = BsonParser.Feature.HONOR_DOCUMENT_LENGTH;
+    public void shouldCopyParserFeaturesOnCopy() {
+        BsonParser.Feature feature = BsonParser.Feature.HONOR_DOCUMENT_LENGTH;
         factory.configure(feature, !factory.isEnabled(feature));
 
-        final BsonFactory copy = factory.copy();
+        BsonFactory copy = factory.copy();
 
         assertEquals(factory.isEnabled(feature), copy.isEnabled(feature));
     }
 
+    /**
+     * {@link BsonFactory#copy()} should copy generator features
+     */
     @Test
     @Category(value = RequiresJackson_v2_3.class)
-    public void shouldCopyGeneratorFeaturesOnCopy() throws Exception {
-        final BsonGenerator.Feature feature = BsonGenerator.Feature.ENABLE_STREAMING;
+    public void shouldCopyGeneratorFeaturesOnCopy() {
+        BsonGenerator.Feature feature = BsonGenerator.Feature.ENABLE_STREAMING;
         factory.configure(feature, !factory.isEnabled(feature));
 
-        final BsonFactory copy = factory.copy();
+        BsonFactory copy = factory.copy();
 
         assertEquals(factory.isEnabled(feature), copy.isEnabled(feature));
     }
 
+    /**
+     * {@link BsonFactory#copy()} should copy features of its superclass
+     * {@link JsonFactory}
+     */
     @Test
     @Category(value = RequiresJackson_v2_3.class)
-    public void shouldCopySuperClass() throws Exception {
-        final JsonFactory.Feature feature = JsonFactory.Feature.CANONICALIZE_FIELD_NAMES;
+    public void shouldCopySuperClass() {
+        JsonFactory.Feature feature = JsonFactory.Feature.CANONICALIZE_FIELD_NAMES;
         factory.configure(feature, !factory.isEnabled(feature));
 
-        final BsonFactory copy = factory.copy();
+        BsonFactory copy = factory.copy();
 
         assertEquals(factory.isEnabled(feature), copy.isEnabled(feature));
     }
