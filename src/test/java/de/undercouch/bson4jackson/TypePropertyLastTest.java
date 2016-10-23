@@ -71,7 +71,8 @@ public class TypePropertyLastTest {
 			scope.put("j", 5);
 			javaScript = new JavaScript("var i;", scope);
 			objectId = new ObjectId(1, 2, 3);
-			pattern = Pattern.compile("[a-zA-Z0-9]+");
+			pattern = Pattern.compile("[a-zA-Z0-9]+",
+					Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 			symbol = new Symbol("foobar");
 			timestamp = new Timestamp(100, 200);
 		}
@@ -191,6 +192,7 @@ public class TypePropertyLastTest {
 		assertEquals(a.getObjectId().getMachine(), v.getObjectId().getMachine());
 		assertEquals(a.getObjectId().getInc(), v.getObjectId().getInc());
 		assertEquals(a.getPattern().pattern(), v.getPattern().pattern());
+		assertEquals(a.getPattern().flags(), v.getPattern().flags());
 		assertEquals(a.getSymbol(), v.getSymbol());
 		assertEquals(a.getTimestamp(), v.getTimestamp());
 	}

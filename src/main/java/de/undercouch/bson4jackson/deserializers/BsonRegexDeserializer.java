@@ -15,6 +15,7 @@
 package de.undercouch.bson4jackson.deserializers;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -25,30 +26,40 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonParser;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
- * Deserializes BSON Timestamp objects
+ * Deserializes BSON Regex objects (Patterns)
  * @author Michel Kraemer
  * @since 2.8.0
  */
-public class BsonTimestampDeserializer extends JsonDeserializer<Timestamp> {
+public class BsonRegexDeserializer extends JsonDeserializer<Pattern> {
 	@Override
 	@SuppressWarnings("deprecation")
-	public Timestamp deserialize(JsonParser jp, DeserializationContext ctxt)
+	public Pattern deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException {
 		if (jp instanceof BsonParser) {
 			BsonParser bsonParser = (BsonParser)jp;
 			if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
-					bsonParser.getCurrentBsonType() != BsonConstants.TYPE_TIMESTAMP) {
-				throw ctxt.mappingException(Timestamp.class);
+					bsonParser.getCurrentBsonType() != BsonConstants.TYPE_REGEX) {
+				throw ctxt.mappingException(Pattern.class);
 			}
-			return (Timestamp)bsonParser.getEmbeddedObject();
+			return (Pattern)bsonParser.getEmbeddedObject();
 		} else {
 			TreeNode tree = jp.getCodec().readTree(jp);
-			int time = ((ValueNode)tree.get("$time")).asInt();
-			int inc = ((ValueNode)tree.get("$inc")).asInt();
-			return new Timestamp(time, inc);
+			
+			String pattern = null;
+			TreeNode patternNode = tree.get("$pattern");
+			if (patternNode instanceof ValueNode) {
+				pattern = ((ValueNode)patternNode).asText();
+			}
+			
+			int flags = 0;
+			TreeNode flagsNode = tree.get("$flags");
+			if (flagsNode instanceof ValueNode) {
+				flags = ((ValueNode)flagsNode).asInt();
+			}
+			
+			return Pattern.compile(pattern, flags);
 		}
 	}
 }

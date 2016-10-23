@@ -16,6 +16,7 @@ package de.undercouch.bson4jackson.deserializers;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 
@@ -39,6 +40,7 @@ public class BsonDeserializers extends SimpleDeserializers {
 		addDeserializer(Calendar.class, new BsonCalendarDeserializer());
 		addDeserializer(JavaScript.class, new BsonJavaScriptDeserializer());
 		addDeserializer(ObjectId.class, new BsonObjectIdDeserializer());
+		addDeserializer(Pattern.class, new BsonRegexDeserializer());
 		addDeserializer(Timestamp.class, new BsonTimestampDeserializer());
 	}
 }

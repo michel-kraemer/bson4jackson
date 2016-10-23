@@ -39,7 +39,10 @@ public class BsonRegexSerializer extends JsonSerializer<Pattern> {
 			BsonGenerator bgen = (BsonGenerator)gen;
 			bgen.writeRegex(value);
 		} else {
-			gen.writeString(value.pattern());
+			gen.writeStartObject();
+			gen.writeStringField("$pattern", value.pattern());
+			gen.writeNumberField("$flags", value.flags());
+			gen.writeEndObject();
 		}
 	}
 }
