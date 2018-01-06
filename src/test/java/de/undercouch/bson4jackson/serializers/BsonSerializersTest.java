@@ -121,9 +121,8 @@ public class BsonSerializersTest {
 	public void objectId() throws Exception {
 		ObjectId id = new ObjectId(1, 2, 3);
 		org.bson.types.ObjectId roid = (org.bson.types.ObjectId)generateAndParse(id);
-		assertEquals(id.getTime(), roid.getTimeSecond());
-		assertEquals(id.getMachine(), roid.getMachine());
-		assertEquals(id.getInc(), roid.getInc());
+		assertEquals(org.bson.types.ObjectId.createFromLegacyFormat(
+				id.getTime(), id.getMachine(), id.getInc()), roid);
 	}
 	
 	/**

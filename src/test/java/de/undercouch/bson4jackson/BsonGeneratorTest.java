@@ -57,7 +57,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import de.undercouch.bson4jackson.BsonGenerator.Feature;
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+import de.undercouch.bson4jackson.types.Decimal128;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Timestamp;
@@ -364,9 +366,8 @@ public class BsonGeneratorTest {
 
 		org.bson.types.ObjectId result = (org.bson.types.ObjectId) obj.get("_id");
 		assertNotNull(result);
-		assertEquals(objectId.getTime(), result.getTimeSecond());
-		assertEquals(objectId.getMachine(), result.getMachine());
-		assertEquals(objectId.getInc(), result.getInc());
+		assertEquals(org.bson.types.ObjectId.createFromLegacyFormat(
+				objectId.getTime(), objectId.getMachine(), objectId.getInc()), result);
 	}
 
 	/**
@@ -490,6 +491,33 @@ public class BsonGeneratorTest {
 
 		String strResult = (String)obj.get("big");
 		assertEquals("0.3", strResult);
+	}
+
+	/**
+	 * Test if {@link BigDecimal} objects can be serialized as {@link Decimal128}s
+	 * @throws Exception if something goes wrong
+	 */
+	@Test
+	public void writeBigDecimalsAsDecimal128s() throws Exception {
+		Map<String, Object> data = new LinkedHashMap<String, Object>();
+		data.put("big", new BigDecimal("0.3"));
+
+		BSONObject obj = generateAndParse(data);
+
+		Double result = (Double)obj.get("big");
+
+		//BigDecimal("0.3") does not equal 0.3!
+		assertEquals(0.3, result, 0.000001);
+		assertFalse(Double.valueOf(0.3).equals(result));
+
+		data = new LinkedHashMap<String, Object>();
+		data.put("big", new BigDecimal("0.3"));
+
+		obj = generateAndParse(data,
+				Feature.WRITE_BIGDECIMALS_AS_DECIMAL128);
+
+		org.bson.types.Decimal128 strResult = (org.bson.types.Decimal128)obj.get("big");
+		assertEquals(new BigDecimal("0.3"), strResult.bigDecimalValue());
 	}
 
 	/**

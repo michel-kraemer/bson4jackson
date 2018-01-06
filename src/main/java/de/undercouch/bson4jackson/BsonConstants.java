@@ -51,6 +51,7 @@ public final class BsonConstants {
 	public static final byte TYPE_INT32 = 0x10;
 	public static final byte TYPE_TIMESTAMP = 0x11;
 	public static final byte TYPE_INT64 = 0x12;
+	public static final byte TYPE_DECIMAL128 = 0x13;
 	public static final byte TYPE_MINKEY = (byte)0xFF;
 	public static final byte TYPE_MAXKEY = 0x7f;
 	

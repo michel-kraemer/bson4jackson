@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
+import de.undercouch.bson4jackson.types.Decimal128;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
@@ -73,7 +74,14 @@ public class BsonGenerator extends GeneratorBase {
 		 * that require more bits or a higher accuracy.</p>
 		 * <p>This feature is disabled by default.</p>
 		 */
-		WRITE_BIGDECIMALS_AS_STRINGS;
+		WRITE_BIGDECIMALS_AS_STRINGS,
+
+		/**
+		 * <p>Forces {@link BigDecimal}s to be written as {@link Decimal128}s.
+		 * (since BSON specification 1.1).</p>
+		 * <p>This feature is disabled by default.</p>
+		 */
+		WRITE_BIGDECIMALS_AS_DECIMAL128;
 		
 		/**
 		 * @return the bit mask that identifies this feature
@@ -555,6 +563,17 @@ public class BsonGenerator extends GeneratorBase {
 	@Override
 	public void writeNumber(BigDecimal dec) throws IOException,
 			JsonGenerationException {
+		if (isEnabled(Feature.WRITE_BIGDECIMALS_AS_DECIMAL128)) {
+			Decimal128 d = new Decimal128(dec);
+			_writeArrayFieldNameIfNeeded();
+			_verifyValueWrite("write number");
+			_buffer.putByte(_typeMarker, BsonConstants.TYPE_DECIMAL128);
+			_buffer.putLong(d.getLow());
+			_buffer.putLong(d.getHigh());
+			flushBuffer();
+			return;
+		}
+
 		if (isEnabled(Feature.WRITE_BIGDECIMALS_AS_STRINGS)) {
 			writeString(dec.toString());
 			return;
@@ -741,7 +760,7 @@ public class BsonGenerator extends GeneratorBase {
 			provider.findValueSerializer(Map.class, null).serialize(javaScript.getScope(), this, provider);
 			// write the length
 			if (!isEnabled(Feature.ENABLE_STREAMING)) {
-				int l = _buffer.size() - p + 4;
+				int l = _buffer.size() - p;
 				_buffer.putInt(p, l);
 			}
 		}

@@ -234,7 +234,7 @@ public class BsonParserTest {
 		BSONObject o = new BasicBSONObject();
 		o.put("Timestamp", new BSONTimestamp(0xAABB, 0xCCDD));
 		o.put("Symbol", new Symbol("Test"));
-		o.put("ObjectId", new org.bson.types.ObjectId(
+		o.put("ObjectId", org.bson.types.ObjectId.createFromLegacyFormat(
 				Integer.MAX_VALUE, -2, Integer.MIN_VALUE));
 		Pattern p = Pattern.compile(".*", Pattern.CASE_INSENSITIVE |
 				Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNICODE_CASE);

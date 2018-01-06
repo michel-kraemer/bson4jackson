@@ -44,6 +44,7 @@ import de.undercouch.bson4jackson.io.CountingInputStream;
 import de.undercouch.bson4jackson.io.LittleEndianInputStream;
 import de.undercouch.bson4jackson.io.StaticBufferedInputStream;
 import de.undercouch.bson4jackson.io.UnsafeByteArrayInputStream;
+import de.undercouch.bson4jackson.types.Decimal128;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
@@ -366,7 +367,14 @@ public class BsonParser extends ParserBase {
 					ctx.value = _in.readLong();
 					_currToken = JsonToken.VALUE_NUMBER_INT;
 					break;
-					
+
+				case BsonConstants.TYPE_DECIMAL128:
+					long low = _in.readLong();
+					long high = _in.readLong();
+					ctx.value = Decimal128.fromIEEE754BIDEncoding(high, low);
+					_currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+					break;
+
 				case BsonConstants.TYPE_MINKEY:
 					ctx.value = "MinKey";
 					_currToken = JsonToken.VALUE_STRING;
