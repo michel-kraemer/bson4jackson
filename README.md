@@ -13,7 +13,7 @@ format of the document-oriented database management system
 The bson4jackson library integrates completely into Jackson. Please have
 a look at the [Jackson wiki](http://wiki.fasterxml.com/JacksonDocumentation)
 for a complete description. For more information you may also have a
-look at the [bson4jackson tutorial](http://www.michel-kraemer.com/binary-json-with-bson4jackson).
+look at the [bson4jackson tutorial](https://michelkraemer.com/binary-json-with-bson4jackson).
 
 The BSON specification defines some additional types not available in
 the original JSON specification. These types are mapped to simple
