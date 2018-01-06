@@ -6,9 +6,16 @@ jdk:
   - oraclejdk8
   - oraclejdk9
 
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+  - rm -f  $HOME/.gradle/caches/*/fileHashes/fileHashes.bin
+  - rm -f  $HOME/.gradle/caches/*/fileHashes/fileHashes.lock
+
 cache:
   directories:
-  - $HOME/.gradle
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
 
 install:
   # If the build targets Java 7, we need to temporarily switch to Java 9 to
