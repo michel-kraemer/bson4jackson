@@ -16,12 +16,13 @@ package de.undercouch.bson4jackson.serializers;
 
 import java.io.IOException;
 
+import org.bson.types.Symbol;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import de.undercouch.bson4jackson.BsonGenerator;
-import de.undercouch.bson4jackson.types.Symbol;
 
 /**
  * Serializer for BSON Symbols

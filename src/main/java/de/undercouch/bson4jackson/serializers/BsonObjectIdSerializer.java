@@ -16,12 +16,13 @@ package de.undercouch.bson4jackson.serializers;
 
 import java.io.IOException;
 
+import org.bson.types.ObjectId;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import de.undercouch.bson4jackson.BsonGenerator;
-import de.undercouch.bson4jackson.types.ObjectId;
 
 /**
  * Serializer for ObjectIds
@@ -40,9 +41,10 @@ public class BsonObjectIdSerializer extends JsonSerializer<ObjectId> {
 			bgen.writeObjectId(value);
 		} else {
 			gen.writeStartObject();
-			gen.writeNumberField("$time", value.getTime());
-			gen.writeNumberField("$machine", value.getMachine());
-			gen.writeNumberField("$inc", value.getInc());
+			gen.writeNumberField("$timestamp", value.getTimestamp());
+			gen.writeNumberField("$machineIdentifier", value.getMachineIdentifier());
+			gen.writeNumberField("$processIdentifier", value.getProcessIdentifier());
+			gen.writeNumberField("$counter", value.getCounter());
 			gen.writeEndObject();
 		}
 	}

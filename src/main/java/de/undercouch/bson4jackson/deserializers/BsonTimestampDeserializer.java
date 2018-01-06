@@ -16,6 +16,8 @@ package de.undercouch.bson4jackson.deserializers;
 
 import java.io.IOException;
 
+import org.bson.BsonTimestamp;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.TreeNode;
@@ -25,30 +27,29 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonParser;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Deserializes BSON Timestamp objects
  * @author Michel Kraemer
  * @since 2.8.0
  */
-public class BsonTimestampDeserializer extends JsonDeserializer<Timestamp> {
+public class BsonTimestampDeserializer extends JsonDeserializer<BsonTimestamp> {
 	@Override
 	@SuppressWarnings("deprecation")
-	public Timestamp deserialize(JsonParser jp, DeserializationContext ctxt)
+	public BsonTimestamp deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException {
 		if (jp instanceof BsonParser) {
 			BsonParser bsonParser = (BsonParser)jp;
 			if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
 					bsonParser.getCurrentBsonType() != BsonConstants.TYPE_TIMESTAMP) {
-				throw ctxt.mappingException(Timestamp.class);
+				throw ctxt.mappingException(BsonTimestamp.class);
 			}
-			return (Timestamp)bsonParser.getEmbeddedObject();
+			return (BsonTimestamp)bsonParser.getEmbeddedObject();
 		} else {
 			TreeNode tree = jp.getCodec().readTree(jp);
 			int time = ((ValueNode)tree.get("$time")).asInt();
 			int inc = ((ValueNode)tree.get("$inc")).asInt();
-			return new Timestamp(time, inc);
+			return new BsonTimestamp(time, inc);
 		}
 	}
 }

@@ -40,11 +40,14 @@ import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONEncoder;
 import org.bson.BasicBSONObject;
+import org.bson.BsonTimestamp;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Binary;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
+import org.bson.types.CodeWithScope;
 import org.bson.types.MinKey;
+import org.bson.types.ObjectId;
 import org.bson.types.Symbol;
 import org.junit.Test;
 
@@ -60,10 +63,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Tests {@link BsonParser}
@@ -234,19 +233,19 @@ public class BsonParserTest {
 		BSONObject o = new BasicBSONObject();
 		o.put("Timestamp", new BSONTimestamp(0xAABB, 0xCCDD));
 		o.put("Symbol", new Symbol("Test"));
-		o.put("ObjectId", org.bson.types.ObjectId.createFromLegacyFormat(
-				Integer.MAX_VALUE, -2, Integer.MIN_VALUE));
+		o.put("ObjectId", new ObjectId(Integer.MAX_VALUE, 16777215, (short)100, 123));
 		Pattern p = Pattern.compile(".*", Pattern.CASE_INSENSITIVE |
 				Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNICODE_CASE);
 		o.put("Regex", p);
 		
 		Map<?, ?> data = parseBsonObject(o);
-		assertEquals(new Timestamp(0xAABB, 0xCCDD), data.get("Timestamp"));
-		assertEquals(new de.undercouch.bson4jackson.types.Symbol("Test"), data.get("Symbol"));
+		assertEquals(new BsonTimestamp(0xAABB, 0xCCDD), data.get("Timestamp"));
+		assertEquals(new Symbol("Test"), data.get("Symbol"));
 		ObjectId oid = (ObjectId)data.get("ObjectId");
-		assertEquals(Integer.MAX_VALUE, oid.getTime());
-		assertEquals(-2, oid.getMachine());
-		assertEquals(Integer.MIN_VALUE, oid.getInc());
+		assertEquals(Integer.MAX_VALUE, oid.getTimestamp());
+		assertEquals(16777215, oid.getMachineIdentifier());
+		assertEquals((short)100, oid.getProcessIdentifier());
+		assertEquals(123, oid.getCounter());
 		Pattern p2 = (Pattern)data.get("Regex");
 		assertEquals(p.flags(), p2.flags());
 		assertEquals(p.pattern(), p2.pattern());
@@ -371,7 +370,7 @@ public class BsonParserTest {
 	}
 
 	/**
-	 * Test if {@link JavaScript} objects can be deserialized
+	 * Test if {@link CodeWithScope} objects can be deserialized
 	 * @throws Exception if something goes wrong
 	 */
 	@Test
@@ -385,8 +384,8 @@ public class BsonParserTest {
 		
 		Map<?, ?> data = parseBsonObject(o);
 		assertEquals(2, data.size());
-		JavaScript c1 = (JavaScript)data.get("Code1");
-		JavaScript c2 = (JavaScript)data.get("Code2");
+		CodeWithScope c1 = (CodeWithScope)data.get("Code1");
+		Code c2 = (Code)data.get("Code2");
 		assertEquals("alert('test');", c1.getCode());
 		assertEquals("alert('Hello');", c2.getCode());
 		Map<String, Object> c1scope = c1.getScope();

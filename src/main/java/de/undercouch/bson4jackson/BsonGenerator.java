@@ -24,6 +24,13 @@ import java.util.Date;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.bson.BsonTimestamp;
+import org.bson.types.Code;
+import org.bson.types.CodeWithScope;
+import org.bson.types.Decimal128;
+import org.bson.types.ObjectId;
+import org.bson.types.Symbol;
+
 import com.fasterxml.jackson.core.Base64Variant;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -33,13 +40,7 @@ import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
-import de.undercouch.bson4jackson.types.Decimal128;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Writes BSON code to the provided output stream
@@ -670,13 +671,7 @@ public class BsonGenerator extends GeneratorBase {
 		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write datetime");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_OBJECTID);
-		// ObjectIds have their byte order flipped
-		int time = ByteOrderUtil.flip(objectId.getTime());
-		int machine = ByteOrderUtil.flip(objectId.getMachine());
-		int inc = ByteOrderUtil.flip(objectId.getInc());
-		_buffer.putInt(time);
-		_buffer.putInt(machine);
-		_buffer.putInt(inc);
+		_buffer.putBytes(objectId.toByteArray());
 		flushBuffer();
 	}
 
@@ -724,7 +719,7 @@ public class BsonGenerator extends GeneratorBase {
 	 * @param timestamp The timestamp to write
 	 * @throws IOException If an error occurred in the stream while writing
 	 */
-	public void writeTimestamp(Timestamp timestamp) throws IOException {
+	public void writeTimestamp(BsonTimestamp timestamp) throws IOException {
 		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write timestamp");
 		_buffer.putByte(_typeMarker, BsonConstants.TYPE_TIMESTAMP);
@@ -736,16 +731,16 @@ public class BsonGenerator extends GeneratorBase {
 	/**
 	 * Write a BSON JavaScript object
 	 *
-	 * @param javaScript The javaScript to write
+	 * @param code The code to write
 	 * @param provider The serializer provider, for serializing the scope
 	 * @throws IOException If an error occurred in the stream while writing
 	 */
-	public void writeJavaScript(JavaScript javaScript, SerializerProvider provider) throws IOException {
+	public void writeCode(Code code, SerializerProvider provider) throws IOException {
 		_writeArrayFieldNameIfNeeded();
 		_verifyValueWrite("write javascript");
-		if (javaScript.getScope() == null) {
+		if (!(code instanceof CodeWithScope)) {
 			_buffer.putByte(_typeMarker, BsonConstants.TYPE_JAVASCRIPT);
-			_writeString(javaScript.getCode());
+			_writeString(code.getCode());
 		} else {
 			_buffer.putByte(_typeMarker, BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE);
 			// reserve space for the entire structure size
@@ -753,11 +748,15 @@ public class BsonGenerator extends GeneratorBase {
 			_buffer.putInt(0);
 
 			// write the code
-			_writeString(javaScript.getCode());
+			_writeString(code.getCode());
 
 			nextObjectIsEmbeddedInValue = true;
+			
 			// write the document
-			provider.findValueSerializer(Map.class, null).serialize(javaScript.getScope(), this, provider);
+			CodeWithScope cws = (CodeWithScope)code;
+			provider.findValueSerializer(Map.class, null)
+				.serialize(cws.getScope(), this, provider);
+			
 			// write the length
 			if (!isEnabled(Feature.ENABLE_STREAMING)) {
 				int l = _buffer.size() - p;

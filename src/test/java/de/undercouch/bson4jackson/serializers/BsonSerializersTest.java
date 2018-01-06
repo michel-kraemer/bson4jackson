@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -29,18 +28,20 @@ import java.util.regex.Pattern;
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
+import org.bson.BsonTimestamp;
+import org.bson.Document;
+import org.bson.types.BSONTimestamp;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
+import org.bson.types.CodeWithScope;
+import org.bson.types.ObjectId;
+import org.bson.types.Symbol;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.undercouch.bson4jackson.BsonFactory;
 import de.undercouch.bson4jackson.BsonModule;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Tests {@link BsonSerializers}
@@ -89,28 +90,29 @@ public class BsonSerializersTest {
 	}
 	
 	/**
-	 * Tests {@link BsonJavaScriptSerializer}
+	 * Tests {@link BsonCodeSerializer}
 	 * @throws Exception if something goes wrong
 	 */
 	@Test
 	public void javascript() throws Exception {
-		JavaScript js = new JavaScript("code");
+		Code js = new Code("code");
 		Code code = (Code)generateAndParse(js);
 		assertEquals(js.getCode(), code.getCode());
 	}
 	
 	/**
-	 * Tests {@link BsonJavaScriptSerializer}
+	 * Tests {@link BsonCodeSerializer}
 	 * @throws Exception if something goes wrong
 	 */
 	@Test
+	@SuppressWarnings("unchecked")
 	public void javascriptWithScope() throws Exception {
-		Map<String, Object> scope = new HashMap<>();
+		Document scope = new Document();
 		scope.put("j", 5);
-		JavaScript js = new JavaScript("code", scope);
+		CodeWithScope js = new CodeWithScope("code", scope);
 		CodeWScope code = (CodeWScope)generateAndParse(js);
 		assertEquals(js.getCode(), code.getCode());
-		assertEquals(js.getScope(), code.getScope());
+		assertEquals(js.getScope(), new Document(code.getScope().toMap()));
 	}
 	
 	/**
@@ -119,10 +121,9 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void objectId() throws Exception {
-		ObjectId id = new ObjectId(1, 2, 3);
+		ObjectId id = new ObjectId(1, 2, (short)3, 4);
 		org.bson.types.ObjectId roid = (org.bson.types.ObjectId)generateAndParse(id);
-		assertEquals(org.bson.types.ObjectId.createFromLegacyFormat(
-				id.getTime(), id.getMachine(), id.getInc()), roid);
+		assertEquals(id, roid);
 	}
 	
 	/**
@@ -144,7 +145,7 @@ public class BsonSerializersTest {
 	public void symbol() throws Exception {
 		Symbol sym = new Symbol("symbol");
 		String obj = (String)generateAndParse(sym);
-		assertEquals(sym, obj);
+		assertEquals(sym.getSymbol(), obj);
 	}
 	
 	/**
@@ -153,8 +154,8 @@ public class BsonSerializersTest {
 	 */
 	@Test
 	public void timestamp() throws Exception {
-		Timestamp ts = new Timestamp(1, 2);
-		org.bson.types.BSONTimestamp rts = (org.bson.types.BSONTimestamp)generateAndParse(ts);
+		BsonTimestamp ts = new BsonTimestamp(1, 2);
+		BSONTimestamp rts = (BSONTimestamp)generateAndParse(ts);
 		assertEquals(ts.getTime(), rts.getTime());
 		assertEquals(ts.getInc(), rts.getInc());
 	}

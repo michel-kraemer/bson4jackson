@@ -4,11 +4,14 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.bson.BsonTimestamp;
+import org.bson.Document;
+import org.bson.types.CodeWithScope;
+import org.bson.types.ObjectId;
+import org.bson.types.Symbol;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -18,10 +21,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.undercouch.bson4jackson.serializers.BsonSerializers;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Test if properties that are serialized by {@link BsonSerializers} can
@@ -57,24 +56,24 @@ public class TypePropertyLastTest {
 		UUID uuid;
 		Date date;
 		Calendar calendar;
-		JavaScript javaScript;
+		CodeWithScope code;
 		ObjectId objectId;
 		Pattern pattern;
 		Symbol symbol;
-		Timestamp timestamp;
+		BsonTimestamp timestamp;
 		
 		public TypeAsProperty() {
 			uuid = UUID.randomUUID();
 			date = new Date();
 			calendar = Calendar.getInstance();
-			Map<String, Object> scope = new HashMap<>();
+			Document scope = new Document();
 			scope.put("j", 5);
-			javaScript = new JavaScript("var i;", scope);
-			objectId = new ObjectId(1, 2, 3);
+			code = new CodeWithScope("var i;", scope);
+			objectId = new ObjectId(1, 2, (short)3, 4);
 			pattern = Pattern.compile("[a-zA-Z0-9]+",
 					Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 			symbol = new Symbol("foobar");
-			timestamp = new Timestamp(100, 200);
+			timestamp = new BsonTimestamp(100, 200);
 		}
 		
 		public void setType(String type) {
@@ -109,12 +108,12 @@ public class TypePropertyLastTest {
 			return calendar;
 		}
 		
-		public void setJavaScript(JavaScript javascript) {
-			this.javaScript = javascript;
+		public void setCode(CodeWithScope code) {
+			this.code = code;
 		}
 		
-		public JavaScript getJavaScript() {
-			return javaScript;
+		public CodeWithScope getCode() {
+			return code;
 		}
 		
 		public void setObjectId(ObjectId objectId) {
@@ -141,11 +140,11 @@ public class TypePropertyLastTest {
 			return symbol;
 		}
 		
-		public void setTimestamp(Timestamp timestamp) {
+		public void setTimestamp(BsonTimestamp timestamp) {
 			this.timestamp = timestamp;
 		}
 		
-		public Timestamp getTimestamp() {
+		public BsonTimestamp getTimestamp() {
 			return timestamp;
 		}
 	}
@@ -186,11 +185,8 @@ public class TypePropertyLastTest {
 		assertEquals(a.getDate(), v.getDate());
 		assertEquals(a.getCalendar().getTimeInMillis(),
 				v.getCalendar().getTimeInMillis());
-		assertEquals(a.getJavaScript().getCode(), v.getJavaScript().getCode());
-		assertEquals(a.getJavaScript().getScope(), v.getJavaScript().getScope());
-		assertEquals(a.getObjectId().getTime(), v.getObjectId().getTime());
-		assertEquals(a.getObjectId().getMachine(), v.getObjectId().getMachine());
-		assertEquals(a.getObjectId().getInc(), v.getObjectId().getInc());
+		assertEquals(a.getCode(), v.getCode());
+		assertEquals(a.getObjectId(), v.getObjectId());
 		assertEquals(a.getPattern().pattern(), v.getPattern().pattern());
 		assertEquals(a.getPattern().flags(), v.getPattern().flags());
 		assertEquals(a.getSymbol(), v.getSymbol());

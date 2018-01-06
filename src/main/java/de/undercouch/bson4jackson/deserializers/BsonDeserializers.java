@@ -18,11 +18,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.module.SimpleDeserializers;
+import org.bson.BsonTimestamp;
+import org.bson.types.Code;
+import org.bson.types.ObjectId;
 
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Timestamp;
+import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 
 /**
  * BSON deserializers
@@ -38,9 +38,9 @@ public class BsonDeserializers extends SimpleDeserializers {
 	public BsonDeserializers() {
 		addDeserializer(Date.class, new BsonDateDeserializer());
 		addDeserializer(Calendar.class, new BsonCalendarDeserializer());
-		addDeserializer(JavaScript.class, new BsonJavaScriptDeserializer());
+		addDeserializer(Code.class, new BsonCodeDeserializer());
 		addDeserializer(ObjectId.class, new BsonObjectIdDeserializer());
 		addDeserializer(Pattern.class, new BsonRegexDeserializer());
-		addDeserializer(Timestamp.class, new BsonTimestampDeserializer());
+		addDeserializer(BsonTimestamp.class, new BsonTimestampDeserializer());
 	}
 }

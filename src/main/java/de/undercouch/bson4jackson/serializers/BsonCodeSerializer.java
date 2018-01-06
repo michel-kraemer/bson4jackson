@@ -16,12 +16,14 @@ package de.undercouch.bson4jackson.serializers;
 
 import java.io.IOException;
 
+import org.bson.types.Code;
+import org.bson.types.CodeWithScope;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import de.undercouch.bson4jackson.BsonGenerator;
-import de.undercouch.bson4jackson.types.JavaScript;
 
 /**
  * Serializer for JavaScript
@@ -29,19 +31,21 @@ import de.undercouch.bson4jackson.types.JavaScript;
  * @author James Roper
  * @author Michel Kraemer
  */
-public class BsonJavaScriptSerializer extends JsonSerializer<JavaScript> {
+public class BsonCodeSerializer extends JsonSerializer<Code> {
 	@Override
-	public void serialize(JavaScript value, JsonGenerator gen,
+	public void serialize(Code value, JsonGenerator gen,
 			SerializerProvider provider) throws IOException {
 		if (value == null) {
 			provider.defaultSerializeNull(gen);
 		} else if (gen instanceof BsonGenerator) {
 			BsonGenerator bgen = (BsonGenerator)gen;
-			bgen.writeJavaScript(value, provider);
+			bgen.writeCode(value, provider);
 		} else {
 			gen.writeStartObject();
 			gen.writeStringField("$code", value.getCode());
-			gen.writeObjectField("$scope", value.getScope());
+			if (value instanceof CodeWithScope) {
+				gen.writeObjectField("$scope", ((CodeWithScope)value).getScope());
+			}
 			gen.writeEndObject();
 		}
 	}

@@ -28,6 +28,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.bson.BsonTimestamp;
+import org.bson.Document;
+import org.bson.types.Code;
+import org.bson.types.CodeWithScope;
+import org.bson.types.Decimal128;
+import org.bson.types.ObjectId;
+import org.bson.types.Symbol;
+
 import com.fasterxml.jackson.core.Base64Variant;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -39,16 +47,10 @@ import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import de.undercouch.bson4jackson.io.BoundedInputStream;
-import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.CountingInputStream;
 import de.undercouch.bson4jackson.io.LittleEndianInputStream;
 import de.undercouch.bson4jackson.io.StaticBufferedInputStream;
 import de.undercouch.bson4jackson.io.UnsafeByteArrayInputStream;
-import de.undercouch.bson4jackson.types.Decimal128;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Reads a BSON document from the provided input stream
@@ -340,7 +342,7 @@ public class BsonParser extends ParserBase {
 					break;
 					
 				case BsonConstants.TYPE_JAVASCRIPT:
-					ctx.value = new JavaScript(readString());
+					ctx.value = new Code(readString());
 					_currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
 					break;
 					
@@ -546,8 +548,8 @@ public class BsonParser extends ParserBase {
 		//skip size
 		_in.readInt();
 		String code = readString();
-		Map<String, Object> doc = readDocument();
-		getContext().value = new JavaScript(code, doc);
+		Document doc = new Document(readDocument());
+		getContext().value = new CodeWithScope(code, doc);
 		return JsonToken.VALUE_EMBEDDED_OBJECT;
 	}
 	
@@ -604,10 +606,10 @@ public class BsonParser extends ParserBase {
 	 * @return the timestamp
 	 * @throws IOException if the timestamp could not be read
 	 */
-	protected Timestamp readTimestamp() throws IOException {
+	protected BsonTimestamp readTimestamp() throws IOException {
 		int inc = _in.readInt();
 		int time = _in.readInt();
-		return new Timestamp(time, inc);
+		return new BsonTimestamp(time, inc);
 	}
 	
 	/**
@@ -616,10 +618,12 @@ public class BsonParser extends ParserBase {
 	 * @throws IOException if the ObjectID could not be read
 	 */
 	protected ObjectId readObjectId() throws IOException {
-		int time = ByteOrderUtil.flip(_in.readInt());
-		int machine = ByteOrderUtil.flip(_in.readInt());
-		int inc = ByteOrderUtil.flip(_in.readInt());
-		return new ObjectId(time, machine, inc);
+		byte[] bytes = new byte[12];
+		int read = _in.read(bytes);
+		if (read < bytes.length) {
+			throw new EOFException();
+		}
+		return new ObjectId(bytes);
 	}
 	
 	/**

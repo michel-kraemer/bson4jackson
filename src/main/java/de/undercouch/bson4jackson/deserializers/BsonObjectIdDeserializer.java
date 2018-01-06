@@ -16,6 +16,8 @@ package de.undercouch.bson4jackson.deserializers;
 
 import java.io.IOException;
 
+import org.bson.types.ObjectId;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.TreeNode;
@@ -25,7 +27,6 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonParser;
-import de.undercouch.bson4jackson.types.ObjectId;
 
 /**
  * Deserializes BSON ObjectId objects
@@ -46,10 +47,11 @@ public class BsonObjectIdDeserializer extends JsonDeserializer<ObjectId> {
 			return (ObjectId)bsonParser.getEmbeddedObject();
 		} else {
 			TreeNode tree = jp.getCodec().readTree(jp);
-			int time = ((ValueNode)tree.get("$time")).asInt();
-			int machine = ((ValueNode)tree.get("$machine")).asInt();
-			int inc = ((ValueNode)tree.get("$inc")).asInt();
-			return new ObjectId(time, machine, inc);
+			int timestamp = ((ValueNode)tree.get("$timestamp")).asInt();
+			int machineIdentifier = ((ValueNode)tree.get("$machineIdentifier")).asInt();
+			short processIdentifier = ((ValueNode)tree.get("$processIdentifier")).shortValue();
+			int counter = ((ValueNode)tree.get("$counter")).asInt();
+			return new ObjectId(timestamp, machineIdentifier, processIdentifier, counter);
 		}
 	}
 }

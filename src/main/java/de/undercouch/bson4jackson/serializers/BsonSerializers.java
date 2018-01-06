@@ -19,12 +19,12 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.module.SimpleSerializers;
+import org.bson.BsonTimestamp;
+import org.bson.types.Code;
+import org.bson.types.ObjectId;
+import org.bson.types.Symbol;
 
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
+import com.fasterxml.jackson.databind.module.SimpleSerializers;
 
 /**
  * Bson Serializers
@@ -41,11 +41,11 @@ public class BsonSerializers extends SimpleSerializers {
 	public BsonSerializers() {
 		addSerializer(Date.class, new BsonDateSerializer());
 		addSerializer(Calendar.class, new BsonCalendarSerializer());
-		addSerializer(JavaScript.class, new BsonJavaScriptSerializer());
+		addSerializer(Code.class, new BsonCodeSerializer());
 		addSerializer(ObjectId.class, new BsonObjectIdSerializer());
 		addSerializer(Pattern.class, new BsonRegexSerializer());
 		addSerializer(Symbol.class, new BsonSymbolSerializer());
-		addSerializer(Timestamp.class, new BsonTimestampSerializer());
+		addSerializer(BsonTimestamp.class, new BsonTimestampSerializer());
 		addSerializer(UUID.class, new BsonUuidSerializer());
 	}
 }

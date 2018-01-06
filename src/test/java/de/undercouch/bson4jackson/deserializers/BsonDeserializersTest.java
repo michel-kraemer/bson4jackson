@@ -26,18 +26,19 @@ import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONEncoder;
 import org.bson.BasicBSONObject;
+import org.bson.BsonTimestamp;
+import org.bson.types.BSONTimestamp;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
+import org.bson.types.CodeWithScope;
+import org.bson.types.ObjectId;
+import org.bson.types.Symbol;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.undercouch.bson4jackson.BsonFactory;
 import de.undercouch.bson4jackson.BsonModule;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Symbol;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Tests {@link BsonDeserializers}
@@ -60,7 +61,7 @@ public class BsonDeserializersTest {
 		};
 		
 		public static class J {
-			public JavaScript obj;
+			public Code obj;
 		};
 		
 		public static class O {
@@ -76,7 +77,7 @@ public class BsonDeserializersTest {
 		};
 		
 		public static class T {
-			public Timestamp obj;
+			public BsonTimestamp obj;
 		};
 		
 		public static class U {
@@ -133,7 +134,7 @@ public class BsonDeserializersTest {
 		CodeWScope codews = new CodeWScope("code", new BasicBSONObject("key", "value"));
 		obj = generateAndParse(codews, TC.J.class);
 		assertEquals(code.getCode(), obj.obj.getCode());
-		assertEquals(codews.getScope().toMap(), obj.obj.getScope());
+		assertEquals(codews.getScope().toMap(), ((CodeWithScope)obj.obj).getScope());
 	}
 	
 	/**
@@ -142,10 +143,9 @@ public class BsonDeserializersTest {
 	 */
 	@Test
 	public void objectId() throws Exception {
-		org.bson.types.ObjectId id = org.bson.types.ObjectId.createFromLegacyFormat(1, 2, 3);
+		ObjectId id = new ObjectId(1, 2, (short)3, 4);
 		TC.O obj = generateAndParse(id, TC.O.class);
-		assertEquals(id,  org.bson.types.ObjectId.createFromLegacyFormat(
-				obj.obj.getTime(), obj.obj.getMachine(), obj.obj.getInc()));
+		assertEquals(id, obj.obj);
 	}
 	
 	/**
@@ -165,18 +165,18 @@ public class BsonDeserializersTest {
 	 */
 	@Test
 	public void symbol() throws Exception {
-		org.bson.types.Symbol sym = new org.bson.types.Symbol("symbol");
+		Symbol sym = new Symbol("symbol");
 		TC.S obj = generateAndParse(sym, TC.S.class);
 		assertEquals(sym.getSymbol(), obj.obj.getSymbol());
 	}
 	
 	/**
-	 * Tests if {@code Timestamp} objects can be deserialized
+	 * Tests if {@code BsonTimestamp} objects can be deserialized
 	 * @throws Exception if something goes wrong
 	 */
 	@Test
 	public void timestamp() throws Exception {
-		org.bson.types.BSONTimestamp ts = new org.bson.types.BSONTimestamp(1, 2);
+		BSONTimestamp ts = new BSONTimestamp(1, 2);
 		TC.T obj = generateAndParse(ts, TC.T.class);
 		assertEquals(ts.getTime(), obj.obj.getTime());
 		assertEquals(ts.getInc(), obj.obj.getInc());

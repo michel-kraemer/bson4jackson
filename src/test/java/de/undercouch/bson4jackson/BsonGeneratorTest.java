@@ -34,16 +34,20 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
+import org.bson.BsonTimestamp;
+import org.bson.Document;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
+import org.bson.types.CodeWithScope;
+import org.bson.types.Decimal128;
+import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -59,10 +63,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import de.undercouch.bson4jackson.BsonGenerator.Feature;
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
-import de.undercouch.bson4jackson.types.Decimal128;
-import de.undercouch.bson4jackson.types.JavaScript;
-import de.undercouch.bson4jackson.types.ObjectId;
-import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Tests {@link BsonGenerator}
@@ -359,15 +359,14 @@ public class BsonGeneratorTest {
 	public void objectIds() throws Exception {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		ObjectId objectId = new ObjectId((int)(System.currentTimeMillis() / 1000),
-				new Random().nextInt(), 100);
+				16777215, (short)65534, 100);
 		data.put("_id", objectId);
 
 		BSONObject obj = generateAndParse(data);
 
-		org.bson.types.ObjectId result = (org.bson.types.ObjectId) obj.get("_id");
+		ObjectId result = (ObjectId)obj.get("_id");
 		assertNotNull(result);
-		assertEquals(org.bson.types.ObjectId.createFromLegacyFormat(
-				objectId.getTime(), objectId.getMachine(), objectId.getInc()), result);
+		assertEquals(objectId, result);
 	}
 
 	/**
@@ -390,30 +389,30 @@ public class BsonGeneratorTest {
 	}
 
 	/**
-	 * Test if {@link Timestamp} objects can be serialized
+	 * Test if {@link BsonTimestamp} objects can be serialized
 	 * @throws Exception if something goes wrong
 	 */
 	@Test
 	public void timestamps() throws Exception {
-		Timestamp timestamp = new Timestamp(100, 200);
+		BsonTimestamp timestamp = new BsonTimestamp(100, 200);
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("timestamp", timestamp);
 
 		BSONObject obj = generateAndParse(data);
 
-		BSONTimestamp result = (BSONTimestamp) obj.get("timestamp");
+		BSONTimestamp result = (BSONTimestamp)obj.get("timestamp");
 		assertNotNull(result);
 		assertEquals(timestamp.getInc(), result.getInc());
 		assertEquals(timestamp.getTime(), result.getTime());
 	}
 
 	/**
-	 * Test if {@link JavaScript} objects can be serialized
+	 * Test if {@link Code} objects can be serialized
 	 * @throws Exception if something goes wrong
 	 */
 	@Test
 	public void javascript() throws Exception {
-		JavaScript javaScript = new JavaScript("a < 100");
+		Code javaScript = new Code("a < 100");
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("javaScript", javaScript);
 
@@ -425,15 +424,15 @@ public class BsonGeneratorTest {
 	}
 
 	/**
-	 * Test if {@link JavaScript} objects with a scope can be serialized
+	 * Test if {@link Code} objects with a scope can be serialized
 	 * @throws Exception if something goes wrong
 	 */
 	@Test
 	public void javascriptWithScope() throws Exception {
-		Map<String, Object> scope = new LinkedHashMap<String, Object>();
+		Document scope = new Document();
 		scope.put("a", 99);
 		scope.put("b", 80);
-		JavaScript javaScript = new JavaScript("a < 100", scope);
+		Code javaScript = new CodeWithScope("a < 100", scope);
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("javaScript", javaScript);
 
