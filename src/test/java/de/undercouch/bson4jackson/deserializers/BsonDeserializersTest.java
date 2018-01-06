@@ -14,7 +14,6 @@
 
 package de.undercouch.bson4jackson.deserializers;
 
-import static org.bson.types.ObjectId.createFromLegacyFormat;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
@@ -143,9 +142,10 @@ public class BsonDeserializersTest {
 	 */
 	@Test
 	public void objectId() throws Exception {
-		org.bson.types.ObjectId id = createFromLegacyFormat(1, 2, 3);
+		org.bson.types.ObjectId id = org.bson.types.ObjectId.createFromLegacyFormat(1, 2, 3);
 		TC.O obj = generateAndParse(id, TC.O.class);
-		assertEquals(id,  createFromLegacyFormat(obj.obj.getTime(), obj.obj.getMachine(), obj.obj.getInc()));
+		assertEquals(id,  org.bson.types.ObjectId.createFromLegacyFormat(
+				obj.obj.getTime(), obj.obj.getMachine(), obj.obj.getInc()));
 	}
 	
 	/**

@@ -78,7 +78,7 @@ public class BsonGenerator extends GeneratorBase {
 
 		/**
 		 * <p>Forces {@link BigDecimal}s to be written as {@link Decimal128}s.
-		 * (since mongo 2.4)
+		 * (since BSON specification 1.1).</p>
 		 * <p>This feature is disabled by default.</p>
 		 */
 		WRITE_BIGDECIMALS_AS_DECIMAL128;
@@ -563,7 +563,7 @@ public class BsonGenerator extends GeneratorBase {
 	@Override
 	public void writeNumber(BigDecimal dec) throws IOException,
 			JsonGenerationException {
-		if(isEnabled(Feature.WRITE_BIGDECIMALS_AS_DECIMAL128)) {
+		if (isEnabled(Feature.WRITE_BIGDECIMALS_AS_DECIMAL128)) {
 			Decimal128 d = new Decimal128(dec);
 			_writeArrayFieldNameIfNeeded();
 			_verifyValueWrite("write number");
@@ -573,6 +573,7 @@ public class BsonGenerator extends GeneratorBase {
 			flushBuffer();
 			return;
 		}
+
 		if (isEnabled(Feature.WRITE_BIGDECIMALS_AS_STRINGS)) {
 			writeString(dec.toString());
 			return;

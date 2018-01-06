@@ -14,7 +14,6 @@
 
 package de.undercouch.bson4jackson;
 
-import static org.bson.types.ObjectId.createFromLegacyFormat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -367,7 +366,8 @@ public class BsonGeneratorTest {
 
 		org.bson.types.ObjectId result = (org.bson.types.ObjectId) obj.get("_id");
 		assertNotNull(result);
-		assertEquals(createFromLegacyFormat(objectId.getTime(), objectId.getMachine(), objectId.getInc()), result);
+		assertEquals(org.bson.types.ObjectId.createFromLegacyFormat(
+				objectId.getTime(), objectId.getMachine(), objectId.getInc()), result);
 	}
 
 	/**
