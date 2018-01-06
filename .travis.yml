@@ -4,6 +4,7 @@ jdk:
   - openjdk7
   - oraclejdk7
   - oraclejdk8
+  - oraclejdk9
 cache:
   directories:
   - $HOME/.gradle
