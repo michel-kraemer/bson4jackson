@@ -1,9 +1,27 @@
 language: java
 sudo: false
+
 jdk:
   - openjdk7
-  - oraclejdk7
   - oraclejdk8
+  - oraclejdk9
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+  - rm -f  $HOME/.gradle/caches/*/fileHashes/fileHashes.bin
+  - rm -f  $HOME/.gradle/caches/*/fileHashes/fileHashes.lock
+
 cache:
   directories:
-  - $HOME/.gradle
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+install:
+  # If the build targets Java 7, we need to temporarily switch to Java 9 to
+  # install the Gradle wrapper and to avoid an InvalidKeyException
+  - if [[ $JAVA_HOME =~ "java-7" ]]; then
+      jdk_switcher use oraclejdk9;
+      ./gradlew tasks;
+      jdk_switcher use openjdk7;
+    fi

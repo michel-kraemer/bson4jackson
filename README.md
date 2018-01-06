@@ -13,7 +13,7 @@ format of the document-oriented database management system
 The bson4jackson library integrates completely into Jackson. Please have
 a look at the [Jackson wiki](http://wiki.fasterxml.com/JacksonDocumentation)
 for a complete description. For more information you may also have a
-look at the [bson4jackson tutorial](http://www.michel-kraemer.com/binary-json-with-bson4jackson).
+look at the [bson4jackson tutorial](https://michelkraemer.com/binary-json-with-bson4jackson).
 
 The BSON specification defines some additional types not available in
 the original JSON specification. These types are mapped to simple
@@ -31,37 +31,24 @@ You may also use [Maven](http://maven.apache.org/) to download bson4jackson:
     <dependency>
         <groupId>de.undercouch</groupId>
         <artifactId>bson4jackson</artifactId>
-        <version>2.7.0</version>
+        <version>2.8.0</version>
     </dependency>
 </dependencies>
 ```
 
-If you're using [Gradle](http://www.gradle.org/), you may add the
+If you're using [Gradle](https://gradle.org/), you may add the
 following snippet to your `build.gradle`:
 
 ```gradle
 dependencies {
-    compile 'de.undercouch:bson4jackson:2.7.0'
+    compile 'de.undercouch:bson4jackson:2.8.0'
 }
-```
-
-For [sbt](http://code.google.com/p/simple-build-tool/),
-add the following line to your project::
-
-```sbt
-val bson4jackson = "de.undercouch" % "bson4jackson" % "2.7.0"
-```
-
-For [buildr](http://buildr.apache.org/) use the following snippet::
-
-```ruby
-compile.with 'de.undercouch:bson4jackson:jar:2.7.0'
 ```
 
 ## Compatibility
 
 bson4jackson 2.x is compatible to Jackson 2.x and higher. Due to some
-compatibility issues both libraries' major and minor version numbers
+compatibility issues, both libraries' major and minor version numbers
 have to match. That means you have to use at least bson4jackson 2.1
 if you use Jackson 2.1, bson4jackson 2.2 if you use Jackson 2.2, etc.
 I will try to keep bson4jackson up to date. If there is a compatibility
@@ -70,12 +57,12 @@ the new Jackson version has been released.
 
 Here's the compatibility matrix for the current library versions:
 
-Library                | Jackson 2.7.x | Jackson 2.6.x | Jackson 2.5.x | Jackson 2.4.x | Jackson 2.3.x
+Library                | Jackson 2.8.x | Jackson 2.7.x | Jackson 2.6.x | Jackson 2.5.x | Jackson 2.4.x
 :----------------------|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:
-**bson4jackson 2.7.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes
-**bson4jackson 2.6.x** |      No       |      Yes      |      Yes      |      Yes      |      Yes
-**bson4jackson 2.5.x** |      No       |      No       |      Yes      |      Yes      |      Yes
-**bson4jackson 2.4.x** |      No       |      No       |      No       |      Yes      |      Yes
+**bson4jackson 2.8.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes
+**bson4jackson 2.7.x** |      No       |      Yes      |      Yes      |      Yes      |      Yes
+**bson4jackson 2.6.x** |      No       |      No       |      Yes      |      Yes      |      Yes
+**bson4jackson 2.5.x** |      No       |      No       |      No       |      Yes      |      Yes
 
 If you're looking for a version compatible to Jackson 1.x, please use
 bson4jackson 1.3.0. It's the last version for the 1.x branch.

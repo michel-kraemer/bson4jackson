@@ -5,7 +5,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
-version = '2.8.0-SNAPSHOT'
+version = '2.8.0'
 group = 'de.undercouch'
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
@@ -33,13 +33,13 @@ configurations {
 String jacksonCore = 'com.fasterxml.jackson.core:jackson-core:'
 String jacksonAnnotations = 'com.fasterxml.jackson.core:jackson-annotations:'
 String jacksonDatabind = 'com.fasterxml.jackson.core:jackson-databind:'
-String junit = 'junit:junit:4.11'
+String junit = 'junit:junit:4.12'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:3.4.0'
 
 dependencies {
-    compile jacksonCore + '2.8.4'
-    compile jacksonAnnotations + '2.8.4'
-    compile jacksonDatabind + '2.8.4'
+    compile jacksonCore + '2.8.11'
+    compile jacksonAnnotations + '2.8.11'
+    compile jacksonDatabind + '2.8.11'
 
     testCompile junit
     testCompile mongoDbJavaDriver
@@ -96,7 +96,7 @@ jar {
 
 // initialize gradle wrapper
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.10'
+    gradleVersion = '4.4.1'
 }
 
 // package javadoc into a jar file
