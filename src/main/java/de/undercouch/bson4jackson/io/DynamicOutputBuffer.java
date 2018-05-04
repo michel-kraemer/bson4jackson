@@ -254,7 +254,7 @@ public class DynamicOutputBuffer {
 	 * @return the buffer at the requested position
 	 */
 	protected ByteBuffer getBuffer(int position) {
-		int n = position / _bufferSize;
+		int n = (position + 4) / _bufferSize;
 		while (n >= _buffers.size()) {
 			addNewBuffer();
 		}
@@ -570,7 +570,7 @@ public class DynamicOutputBuffer {
 					if (minibb == null) {
 						minibb = ByteBuffer.allocate(4);
 					}
-					minibb.rewind();
+					minibb.clear(); //rewind();
 					bb = minibb;
 					index = 0;
 				} else {
