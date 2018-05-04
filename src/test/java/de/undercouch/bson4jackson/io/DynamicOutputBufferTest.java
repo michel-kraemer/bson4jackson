@@ -23,6 +23,7 @@ import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -338,4 +339,24 @@ public class DynamicOutputBufferTest {
 		String s = String.valueOf(c);
 		assertEquals("Hello", s);
 	}
+
+	static final int SIZE = DynamicOutputBuffer.DEFAULT_BUFFER_SIZE - 1;
+	@Test
+	public void testBufferAllocOnOverflow () {
+
+		char[] chars = new char[SIZE + SIZE];
+		Arrays.fill(chars, 0, SIZE, 'A');
+		chars[SIZE] = (char) 2047; //represented with 2 bytes in UTF8
+		chars[SIZE + 1] = (char) 2048; //represented with 3 bytes in UTF8
+		Arrays.fill(chars, SIZE + 2, 2 * SIZE - 2, 'B');
+		chars[2 * SIZE - 2] = (char) 2048;
+		chars[2 * SIZE - 1] = (char) 2048;
+
+		DynamicOutputBuffer buff = new DynamicOutputBuffer();
+		int nbytes = buff.putUTF8(String.valueOf(chars));
+		//the sizeof(bytes)-sizeof(chars) should be 7 because 2047 adds 1 extra byte
+		// and 3 chars of 2048 add 6 extra bytes total
+		assertEquals("Unexpected number of written bytes", chars.length + 7, nbytes);
+	}
+
 }
