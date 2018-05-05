@@ -340,23 +340,29 @@ public class DynamicOutputBufferTest {
 		assertEquals("Hello", s);
 	}
 
-	static final int SIZE = DynamicOutputBuffer.DEFAULT_BUFFER_SIZE - 1;
+	/**
+	 * Test if the internal mini buffer is correctly cleared on overflow. If
+	 * not, this test will cause an infinite loop. See issue #79.
+	 */
 	@Test
-	public void testBufferAllocOnOverflow () {
+	public void bufferAllocOnOverflow() {
+		final int SIZE = DynamicOutputBuffer.DEFAULT_BUFFER_SIZE - 1;
 
 		char[] chars = new char[SIZE + SIZE];
+
 		Arrays.fill(chars, 0, SIZE, 'A');
-		chars[SIZE] = (char) 2047; //represented with 2 bytes in UTF8
-		chars[SIZE + 1] = (char) 2048; //represented with 3 bytes in UTF8
+		chars[SIZE] = (char)2047; // represented with 2 bytes in UTF8
+		chars[SIZE + 1] = (char)2048; // represented with 3 bytes in UTF8
+
 		Arrays.fill(chars, SIZE + 2, 2 * SIZE - 2, 'B');
-		chars[2 * SIZE - 2] = (char) 2048;
-		chars[2 * SIZE - 1] = (char) 2048;
+		chars[2 * SIZE - 2] = (char)2048;
+		chars[2 * SIZE - 1] = (char)2048;
 
 		DynamicOutputBuffer buff = new DynamicOutputBuffer();
 		int nbytes = buff.putUTF8(String.valueOf(chars));
-		//the sizeof(bytes)-sizeof(chars) should be 7 because 2047 adds 1 extra byte
-		// and 3 chars of 2048 add 6 extra bytes total
+
+		// sizeof(bytes) - sizeof(chars) should be 7 because 2047 adds 1 extra
+		// byte and 3 chars of 2048 add 6 extra bytes in total
 		assertEquals("Unexpected number of written bytes", chars.length + 7, nbytes);
 	}
-
 }

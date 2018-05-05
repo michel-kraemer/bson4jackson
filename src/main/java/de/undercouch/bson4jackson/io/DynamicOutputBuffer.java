@@ -570,7 +570,7 @@ public class DynamicOutputBuffer {
 					if (minibb == null) {
 						minibb = ByteBuffer.allocate(4);
 					}
-					minibb.clear(); //rewind();
+					minibb.clear();
 					bb = minibb;
 					index = 0;
 				} else {
