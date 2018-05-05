@@ -344,7 +344,7 @@ public class DynamicOutputBufferTest {
 	 * Test if the internal mini buffer is correctly cleared on overflow. If
 	 * not, this test will cause an infinite loop. See issue #79.
 	 */
-	@Test
+	@Test(timeout = 5000)
 	public void bufferAllocOnOverflow() {
 		final int SIZE = DynamicOutputBuffer.DEFAULT_BUFFER_SIZE - 1;
 
