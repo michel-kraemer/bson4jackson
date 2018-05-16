@@ -17,6 +17,7 @@ package de.undercouch.bson4jackson;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -56,6 +57,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.undercouch.bson4jackson.BsonGenerator.Feature;
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
@@ -762,5 +764,30 @@ public class BsonGeneratorTest {
 		};
 		
 		assertArrayEquals(sBytes, bsonBytes);
+	}
+
+	/**
+	 * Checks if an {@link ObjectNode} can be written correctly if streaming
+	 * is disabled and flush-after-write-value is enabled (the default).
+	 * See issue #80.
+	 * @throws Exception if something goes wrong
+	 */
+	@Test
+	public void writeObjectNode() throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BsonFactory bsonFactory = new BsonFactory();
+		assertFalse(bsonFactory.isEnabled(BsonGenerator.Feature.ENABLE_STREAMING));
+		ObjectMapper om = new ObjectMapper(bsonFactory);
+		assertTrue(om.isEnabled(SerializationFeature.FLUSH_AFTER_WRITE_VALUE));
+		om.registerModule(new BsonModule());
+
+		ObjectNode objectNode = om.createObjectNode();
+		objectNode.putPOJO("date", new Date(1526424049193L));
+		om.writeValue(baos, objectNode);
+
+		// header must have been updated correctly
+		byte[] r = baos.toByteArray();
+		assertEquals(19, r[0]);
+		assertEquals(19, r.length);
 	}
 }

@@ -259,8 +259,12 @@ public class BsonGenerator extends GeneratorBase {
 	
 	@Override
 	public void flush() throws IOException {
-		_buffer.writeTo(_out);
-		_buffer.clear();
+		//we must not flush the buffer if we are currently writing a document
+		//otherwise we cannot write the document size to the header at the end
+		if (_currentDocument == null) {
+			_buffer.writeTo(_out);
+			_buffer.clear();
+		}
 		_out.flush();
 	}
 
