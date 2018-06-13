@@ -17,6 +17,8 @@ package de.undercouch.bson4jackson.io;
 import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 
 /**
  * Keeps thread-local re-usable buffers. Each buffer is identified by a key.
@@ -31,7 +33,9 @@ public class StaticBuffers {
 	 * All buffers have a minimum size of 64 kb
 	 */
 	public static final int GLOBAL_MIN_SIZE = 1024 * 64;
-	
+
+	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
 	/**
 	 * Possible buffer keys
 	 */
@@ -48,26 +52,31 @@ public class StaticBuffers {
 		BUFFER8,
 		BUFFER9
 	}
-	
+
 	/**
 	 * A thread-local soft reference to the singleton instance of this class
 	 */
 	protected static final ThreadLocal<SoftReference<StaticBuffers>> _instance =
 		new ThreadLocal<SoftReference<StaticBuffers>>();
-	
+
 	/**
 	 * Maps of already allocated re-usable buffers
 	 */
 	protected ByteBuffer[] _byteBuffers = new ByteBuffer[Key.values().length];
 	protected CharBuffer[] _charBuffers = new CharBuffer[Key.values().length];
-	
+
+	/**
+	 * Cached decoder.
+	 */
+	protected CharsetDecoder _decoder = UTF8_CHARSET.newDecoder();
+
 	/**
 	 * Hidden constructor
 	 */
 	protected StaticBuffers() {
 		//nothing to do here
 	}
-	
+
 	/**
 	 * @return a thread-local singleton instance of this class
 	 */
@@ -80,7 +89,7 @@ public class StaticBuffers {
 		}
 		return buf;
 	}
-	
+
 	/**
 	 * Creates or re-uses a {@link CharBuffer} that has a minimum size. Calling
 	 * this method multiple times with the same key will always return the
@@ -94,7 +103,7 @@ public class StaticBuffers {
 	 */
 	public CharBuffer charBuffer(Key key, int minSize) {
 		minSize = Math.max(minSize, GLOBAL_MIN_SIZE);
-		
+
 		CharBuffer r = _charBuffers[key.ordinal()];
 		if (r == null || r.capacity() < minSize) {
 			r = CharBuffer.allocate(minSize);
@@ -104,7 +113,7 @@ public class StaticBuffers {
 		}
 		return r;
 	}
-	
+
 	/**
 	 * Marks a buffer a being re-usable.
 	 * @param key the buffer's key
@@ -114,7 +123,7 @@ public class StaticBuffers {
 	public void releaseCharBuffer(Key key, CharBuffer buf) {
 		_charBuffers[key.ordinal()] = buf;
 	}
-	
+
 	/**
 	 * Creates or re-uses a {@link ByteBuffer} that has a minimum size. Calling
 	 * this method multiple times with the same key will always return the
@@ -128,7 +137,7 @@ public class StaticBuffers {
 	 */
 	public ByteBuffer byteBuffer(Key key, int minSize) {
 		minSize = Math.max(minSize, GLOBAL_MIN_SIZE);
-		
+
 		ByteBuffer r = _byteBuffers[key.ordinal()];
 		if (r == null || r.capacity() < minSize) {
 			r = ByteBuffer.allocate(minSize);
@@ -138,7 +147,7 @@ public class StaticBuffers {
 		}
 		return r;
 	}
-	
+
 	/**
 	 * Marks a buffer a being re-usable.
 	 * @param key the buffer's key
@@ -147,5 +156,24 @@ public class StaticBuffers {
 	 */
 	public void releaseByteBuffer(Key key, ByteBuffer buf) {
 		_byteBuffers[key.ordinal()] = buf;
+	}
+
+	/**
+	 * Get the cached decoder.
+	 *
+	 * @return the decoder
+	 */
+	public CharsetDecoder getDecoder() {
+		return _decoder;
+	}
+
+	/**
+	 * Flush and reset the cached decoder.
+     *
+     * @param cb The output character buffer
+	 */
+	public void resetDecoder(CharBuffer cb) {
+	    _decoder.flush(cb);
+		_decoder.reset();
 	}
 }

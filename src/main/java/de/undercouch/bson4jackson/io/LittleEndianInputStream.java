@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
 
@@ -56,6 +55,8 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	 * A buffer that will lazily be initialized by {@link #readLine()}
 	 */
 	protected CharBuffer _lineBuffer;
+
+	private StaticBuffers staticBuffers;
 	
 	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)
@@ -64,6 +65,13 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		super(in);
 		_rawBuf = new byte[8];
 		_buf = ByteBuffer.wrap(_rawBuf).order(ByteOrder.LITTLE_ENDIAN);
+	}
+
+	private StaticBuffers getStaticBuffers() {
+		if(staticBuffers == null) {
+			staticBuffers = StaticBuffers.getInstance();
+		}
+		return staticBuffers;
 	}
 	
 	@Override
@@ -240,12 +248,12 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	 * has been read
 	 */
 	public String readUTF(DataInput input, int len) throws IOException {
-		StaticBuffers staticBuffers = StaticBuffers.getInstance();
+		final StaticBuffers staticBuffers = getStaticBuffers();
 		
 		ByteBuffer utf8buf = staticBuffers.byteBuffer(UTF8_BUFFER, 1024 * 8);
 		byte[] rawUtf8Buf = utf8buf.array();
 
-		CharsetDecoder dec = Charset.forName("UTF-8").newDecoder();
+		CharsetDecoder dec = staticBuffers.getDecoder();
 		int expectedLen = (len > 0 ? (int)(dec.averageCharsPerByte() * len) + 1 : 1024);
 		CharBuffer cb = staticBuffers.charBuffer(UTF8_BUFFER, expectedLen);
 		try {
@@ -275,9 +283,13 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 				//decode byte buffer
 				CoderResult cr = dec.decode(utf8buf, cb, len == 0);
 				if (cr.isUnderflow()) {
-					//too few input bytes. move rest of the buffer
-					//to the beginning and then try again
-					utf8buf.compact();
+					if(len == 0) {
+						break;
+					} else {
+						//too few input bytes. move rest of the buffer
+						//to the beginning and then try again
+						utf8buf.compact();
+					}
 				} else if (cr.isOverflow()) {
 					//output buffer to small. enlarge buffer and try again
 					utf8buf.compact();
@@ -294,6 +306,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 				}
 			}
 		} finally {
+			staticBuffers.resetDecoder(cb);
 			staticBuffers.releaseCharBuffer(UTF8_BUFFER, cb);
 			staticBuffers.releaseByteBuffer(UTF8_BUFFER, utf8buf);
 		}
