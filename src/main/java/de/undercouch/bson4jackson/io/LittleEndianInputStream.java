@@ -28,6 +28,7 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Works like {@link DataInputStream} but reads values using
@@ -56,6 +57,12 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 	 * A buffer that will lazily be initialized by {@link #readLine()}
 	 */
 	protected CharBuffer _lineBuffer;
+
+	/**
+	 * A cached UTF-8 decoder
+	 * @see #getUTF8Decoder()
+	 */
+	private CharsetDecoder utf8decoder;
 	
 	/**
 	 * @see FilterInputStream#FilterInputStream(InputStream)
@@ -65,7 +72,18 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		_rawBuf = new byte[8];
 		_buf = ByteBuffer.wrap(_rawBuf).order(ByteOrder.LITTLE_ENDIAN);
 	}
-	
+
+	/**
+	 * Get or create a UTF-8 decoder
+	 * @return the decoder
+	 */
+	private CharsetDecoder getUTF8Decoder() {
+		if (utf8decoder == null) {
+			utf8decoder = StandardCharsets.UTF_8.newDecoder();
+		}
+		return utf8decoder;
+	}
+
 	@Override
 	public void readFully(byte[] b) throws IOException {
 		readFully(b, 0, b.length);
@@ -245,7 +263,7 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 		ByteBuffer utf8buf = staticBuffers.byteBuffer(UTF8_BUFFER, 1024 * 8);
 		byte[] rawUtf8Buf = utf8buf.array();
 
-		CharsetDecoder dec = Charset.forName("UTF-8").newDecoder();
+		CharsetDecoder dec = getUTF8Decoder();
 		int expectedLen = (len > 0 ? (int)(dec.averageCharsPerByte() * len) + 1 : 1024);
 		CharBuffer cb = staticBuffers.charBuffer(UTF8_BUFFER, expectedLen);
 		try {
@@ -294,6 +312,8 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
 				}
 			}
 		} finally {
+			dec.flush(cb);
+			dec.reset();
 			staticBuffers.releaseCharBuffer(UTF8_BUFFER, cb);
 			staticBuffers.releaseByteBuffer(UTF8_BUFFER, utf8buf);
 		}

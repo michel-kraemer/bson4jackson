@@ -20,7 +20,7 @@ import java.nio.CharBuffer;
 
 /**
  * Keeps thread-local re-usable buffers. Each buffer is identified by a key.
- * This class is a singleton, whereas the reference to the instance is hold
+ * This class is a singleton, whereas the reference to the instance is held
  * in a {@link SoftReference} so buffers can be freed when they are not needed
  * anymore.
  * @see com.fasterxml.jackson.core.util.BufferRecycler
