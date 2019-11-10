@@ -1,4 +1,4 @@
-# BSON for Jackson [![Build Status](https://travis-ci.org/michel-kraemer/bson4jackson.svg?branch=master)](https://travis-ci.org/michel-kraemer/bson4jackson) [![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+# BSON for Jackson [![Actions Status](https://github.com/michel-kraemer/bson4jackson/workflows/CI/badge.svg)](https://github.com/michel-kraemer/bson4jackson/actions) [![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 This library adds support for [BSON](http://bsonspec.org) to the
 [Jackson JSON processor](https://github.com/FasterXML/jackson).
