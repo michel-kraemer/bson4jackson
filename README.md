@@ -3,26 +3,26 @@
 This library adds support for [BSON](http://bsonspec.org) to the
 [Jackson JSON processor](https://github.com/FasterXML/jackson).
 
-BSON is a binary representation of [JSON](http://json.org/). It has
-gained prominence by its usage as the main exchange and persistence
-format of the document-oriented database management system
-[MongoDB](http://www.mongodb.org).
+BSON is a binary representation of [JSON](https://json.org/). It is
+well known as the main exchange and persistence
+format of [MongoDB](https://www.mongodb.com/).
 
-## Usage
+## Quick start
 
-The bson4jackson library integrates completely into Jackson. Please have
-a look at the [Jackson wiki](http://wiki.fasterxml.com/JacksonDocumentation)
-for a complete description. For more information you may also have a
-look at the [bson4jackson tutorial](https://michelkraemer.com/binary-json-with-bson4jackson).
+Just create a Jackson `ObjectMapper` with a `BsonFactory` as follows:
 
-The BSON specification defines some additional types not available in
-the original JSON specification. These types are mapped to simple
-wrapper objects.
+```java
+ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+```
+
+For more information, you may read my
+[bson4jackson tutorial](https://michelkraemer.com/binary-json-with-bson4jackson)
+or the complete [documentation of Jackson](https://github.com/FasterXML/jackson).
 
 ## Download
 
 bson4jackson binaries are available from the
-[GitHub Releases page](https://github.com/michel-kraemer/bson4jackson/releases>).
+[GitHub releases page](https://github.com/michel-kraemer/bson4jackson/releases>).
 
 You may also use [Maven](http://maven.apache.org/) to download bson4jackson:
 
@@ -36,7 +36,7 @@ You may also use [Maven](http://maven.apache.org/) to download bson4jackson:
 </dependencies>
 ```
 
-If you're using [Gradle](https://gradle.org/), you may add the
+If you are using [Gradle](https://gradle.org/), you may add the
 following snippet to your `build.gradle`:
 
 ```gradle
@@ -55,7 +55,7 @@ I will try to keep bson4jackson up to date. If there is a compatibility
 issue I will update it, usually within a couple of days after the new
 Jackson version has been released.
 
-Here's the compatibility matrix for the current library versions:
+Here is the compatibility matrix for the current library versions:
 
 Library                | Jackson 2.9.x | Jackson 2.8.x | Jackson 2.7.x | Jackson 2.6.x | Jackson 2.5.x
 :----------------------|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:
@@ -64,7 +64,7 @@ Library                | Jackson 2.9.x | Jackson 2.8.x | Jackson 2.7.x | Jackson
 **bson4jackson 2.7.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes
 **bson4jackson 2.6.x** |      No       |      No       |      No       |      Yes      |      Yes
 
-If you're looking for a version compatible to Jackson 1.x, please use
+If you are looking for a version compatible to Jackson 1.x, please use
 bson4jackson 1.3.0. It's the last version for the 1.x branch.
 bson4jackson 1.3.0 is compatible to Jackson 1.7 up to 1.9.
 
@@ -75,32 +75,13 @@ unit tests:
 
     ./gradlew test
 
-The script automatically downloads the correct Gradle version, so you
+The script automatically downloads the correct Gradle version so you
 won't have to do anything else. If everything runs successfully, you
 may create a .jar library:
 
     ./gradlew jar
 
-The library will be located under the `build/libs` directory.
-
-### Eclipse
-
-Gradle includes a task that creates all files required to develop
-bson4jackson in Eclipse. Run the following command:
-
-    ./gradlew eclipse
-
-Then import the project into your workspace.
-
-### IntelliJ
-
-Gradle includes a task that creates all files required to develop
-bson4jackson in IntelliJ. Run the following command:
-
-    ./gradlew idea
-
-Then import the project into your workspace or open the root `bson4jackson.ipr`
-project file.
+The library will be located under `build/libs`.
 
 ## License
 
