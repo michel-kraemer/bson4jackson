@@ -99,11 +99,6 @@ jar {
     from 'LICENSE.txt'
 }
 
-// initialize gradle wrapper
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.4.1'
-}
-
 // package javadoc into a jar file
 task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
     from javadoc.destinationDir
