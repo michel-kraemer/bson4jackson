@@ -51,7 +51,7 @@ public class UnsafeByteArrayInputStream extends InputStream {
 
     @Override
     public int read() {
-        return _pos >= _count ? -1 : _buf[_pos++];
+        return _pos >= _count ? -1 : (_buf[_pos++] & 0xFF);
     }
 
     @Override

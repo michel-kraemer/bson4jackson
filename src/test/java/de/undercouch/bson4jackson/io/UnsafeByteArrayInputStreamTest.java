@@ -13,8 +13,9 @@ import static org.junit.Assert.assertEquals;
  * @author Michel Kraemer
  */
 public class UnsafeByteArrayInputStreamTest {
-    private static final byte[] BUF = "abcdefghijklmnopqrstuvwxyz\0\0".getBytes();
+    private static final byte[] BUF = "aXcdefghijklmnopqrstuvwxyz\0\0".getBytes();
     static {
+        BUF[1] = (byte)0xff;
         BUF[BUF.length - 1] = (byte)0xff;
     }
     private UnsafeByteArrayInputStream _in;
@@ -36,7 +37,7 @@ public class UnsafeByteArrayInputStreamTest {
     @Test
     public void read() {
         assertEquals('a', _in.read());
-        assertEquals('b', _in.read());
+        assertEquals(0xFF, _in.read());
         assertEquals('c', _in.read());
 
         byte[] b = new byte[10];
@@ -88,7 +89,7 @@ public class UnsafeByteArrayInputStreamTest {
     @Test
     public void mark() {
         assertEquals('a', _in.read());
-        assertEquals('b', _in.read());
+        assertEquals(0xFF, _in.read());
         assertEquals('c', _in.read());
         _in.mark(3);
         assertEquals('d', _in.read());
