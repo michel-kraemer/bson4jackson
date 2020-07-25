@@ -29,6 +29,9 @@ public class BsonTimestampDeserializer extends JsonDeserializer<Timestamp> {
                 throw ctxt.mappingException(Timestamp.class);
             }
             return (Timestamp)bsonParser.getEmbeddedObject();
+        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+                jp.getEmbeddedObject() instanceof Timestamp) {
+            return (Timestamp)jp.getEmbeddedObject();
         } else {
             TreeNode tree = jp.getCodec().readTree(jp);
             int time = ((ValueNode)tree.get("$time")).asInt();

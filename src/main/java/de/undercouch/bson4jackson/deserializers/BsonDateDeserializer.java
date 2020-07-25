@@ -27,6 +27,9 @@ public class BsonDateDeserializer extends JsonDeserializer<Date> {
                 throw ctxt.mappingException(Date.class);
             }
             return (Date)bsonParser.getEmbeddedObject();
+        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+                jp.getEmbeddedObject() instanceof Date) {
+            return (Date)jp.getEmbeddedObject();
         } else {
             return new Date(jp.getLongValue());
         }

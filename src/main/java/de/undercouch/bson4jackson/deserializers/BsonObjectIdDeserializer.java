@@ -29,6 +29,9 @@ public class BsonObjectIdDeserializer extends JsonDeserializer<ObjectId> {
                 throw ctxt.mappingException(ObjectId.class);
             }
             return (ObjectId)bsonParser.getEmbeddedObject();
+        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+                jp.getEmbeddedObject() instanceof ObjectId) {
+            return (ObjectId)jp.getEmbeddedObject();
         } else {
             TreeNode tree = jp.getCodec().readTree(jp);
             int time = ((ValueNode)tree.get("$time")).asInt();

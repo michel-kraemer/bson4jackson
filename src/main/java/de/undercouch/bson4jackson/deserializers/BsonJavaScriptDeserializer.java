@@ -32,6 +32,9 @@ public class BsonJavaScriptDeserializer extends JsonDeserializer<JavaScript> {
                 throw ctxt.mappingException(JavaScript.class);
             }
             return (JavaScript)bsonParser.getEmbeddedObject();
+        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+                jp.getEmbeddedObject() instanceof JavaScript) {
+            return (JavaScript)jp.getEmbeddedObject();
         } else {
             TreeNode tree = jp.getCodec().readTree(jp);
 

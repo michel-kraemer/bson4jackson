@@ -36,6 +36,11 @@ public class BsonCalendarDeserializer extends JsonDeserializer<Calendar> {
             Calendar cal = Calendar.getInstance();
             cal.setTime((Date)obj);
             return cal;
+        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+                jp.getEmbeddedObject() instanceof Date) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime((Date)jp.getEmbeddedObject());
+            return cal;
         } else {
             Date date = new Date(jp.getLongValue());
             Calendar cal = Calendar.getInstance();

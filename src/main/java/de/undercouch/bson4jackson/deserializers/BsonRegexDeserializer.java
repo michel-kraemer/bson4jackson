@@ -29,6 +29,9 @@ public class BsonRegexDeserializer extends JsonDeserializer<Pattern> {
                 throw ctxt.mappingException(Pattern.class);
             }
             return (Pattern)bsonParser.getEmbeddedObject();
+        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+                jp.getEmbeddedObject() instanceof Pattern) {
+            return (Pattern)jp.getEmbeddedObject();
         } else {
             TreeNode tree = jp.getCodec().readTree(jp);
 
