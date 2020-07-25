@@ -239,7 +239,7 @@ uploadArchives {
                name 'bson4jackson'
                packaging 'jar'
                description 'A pluggable BSON generator and parser for Jackson JSON processor.'
-               url 'http://www.michel-kraemer.com'
+               url 'https://michelkraemer.com'
  
                scm {
                    url 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
@@ -250,7 +250,7 @@ uploadArchives {
                licenses {
                    license {
                        name 'The Apache Software License, Version 2.0'
-                       url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                       url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
                        distribution 'repo'
                    }
                }
