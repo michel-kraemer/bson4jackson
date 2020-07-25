@@ -31,7 +31,7 @@ You may also use [Maven](http://maven.apache.org/) to download bson4jackson:
     <dependency>
         <groupId>de.undercouch</groupId>
         <artifactId>bson4jackson</artifactId>
-        <version>2.9.2</version>
+        <version>2.11.0</version>
     </dependency>
 </dependencies>
 ```
@@ -41,28 +41,16 @@ following snippet to your `build.gradle`:
 
 ```gradle
 dependencies {
-    compile 'de.undercouch:bson4jackson:2.9.2'
+    implementation 'de.undercouch:bson4jackson:2.11.0'
 }
 ```
 
 ## Compatibility
 
-bson4jackson 2.x is compatible to Jackson 2.x and higher. Due to some
-compatibility issues, both libraries' major and minor version numbers
-should match. That means you should use at least bson4jackson 2.1
-if you use Jackson 2.1, bson4jackson 2.2 if you use Jackson 2.2, etc.
-I will try to keep bson4jackson up to date. If there is a compatibility
-issue I will update it, usually within a couple of days after the new
-Jackson version has been released.
-
-Here is the compatibility matrix for the current library versions:
-
-Library                | Jackson 2.9.x | Jackson 2.8.x | Jackson 2.7.x | Jackson 2.6.x | Jackson 2.5.x
-:----------------------|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:
-**bson4jackson 2.9.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes
-**bson4jackson 2.8.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes
-**bson4jackson 2.7.x** |      Yes      |      Yes      |      Yes      |      Yes      |      Yes
-**bson4jackson 2.6.x** |      No       |      No       |      No       |      Yes      |      Yes
+The latest version of bson4jackson is backward compatible to all versions of
+Jackson 2.x released up to date. It should be compatible to newer versions as
+well. If you experience compatibility issues,
+[just let me know](https://github.com/michel-kraemer/bson4jackson/issues).
 
 If you are looking for a version compatible to Jackson 1.x, please use
 bson4jackson 1.3.0. It's the last version for the 1.x branch.
