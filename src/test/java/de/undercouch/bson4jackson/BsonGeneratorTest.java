@@ -465,10 +465,7 @@ public class BsonGeneratorTest {
         BSONObject obj = generateAndParse(data);
 
         Double result = (Double)obj.get("big");
-
-        // BigDecimal("0.3") does not equal 0.3!
-        assertEquals(0.3, result, 0.000001);
-        assertNotEquals(0.3, result, 0.0);
+        assertEquals(0.3, result, 0.0);
 
         data = new LinkedHashMap<String, Object>();
         data.put("big", new BigDecimal("0.3"));
@@ -492,10 +489,7 @@ public class BsonGeneratorTest {
         BSONObject obj = generateAndParse(data);
 
         Double result = (Double)obj.get("big");
-
-        // BigDecimal("0.3") does not equal 0.3!
-        assertEquals(0.3, result, 0.000001);
-        assertNotEquals(0.3, result, 0.0);
+        assertEquals(0.3, result, 0.0);
 
         data = new LinkedHashMap<String, Object>();
         data.put("big", new BigDecimal("0.3"));

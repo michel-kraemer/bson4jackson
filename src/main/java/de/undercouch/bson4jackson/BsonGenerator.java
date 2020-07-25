@@ -568,16 +568,13 @@ public class BsonGenerator extends GeneratorBase {
             return;
         }
 
-        float f = dec.floatValue();
-        if (!Float.isInfinite(f)) {
-            writeNumber(f);
+        // BSON does not know 32-bit floating point numbers, so we can
+        // convert to a double directly
+        double d = dec.doubleValue();
+        if (!Double.isInfinite(d)) {
+            writeNumber(d);
         } else {
-            double d = dec.doubleValue();
-            if (!Double.isInfinite(d)) {
-                writeNumber(d);
-            } else {
-                writeString(dec.toString());
-            }
+            writeString(dec.toString());
         }
     }
 
