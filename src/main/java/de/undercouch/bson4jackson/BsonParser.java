@@ -706,6 +706,11 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
+    public Number getNumberValueExact() throws IOException {
+        return getNumberValue();
+    }
+
+    @Override
     public JsonParser.NumberType getNumberType() throws IOException, JsonParseException {
         if (_currentContext == null) {
             return null;
