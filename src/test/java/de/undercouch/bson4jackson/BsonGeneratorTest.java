@@ -345,15 +345,16 @@ public class BsonGeneratorTest {
     public void objectIds() throws Exception {
         Map<String, Object> data = new LinkedHashMap<String, Object>();
         ObjectId objectId = new ObjectId((int)(System.currentTimeMillis() / 1000),
-                new Random().nextInt(), 100);
+                100, new Random().nextInt() & 0xFFFFFF, (short)(new Random().nextInt()));
         data.put("_id", objectId);
 
         BSONObject obj = generateAndParse(data);
 
         org.bson.types.ObjectId result = (org.bson.types.ObjectId) obj.get("_id");
         assertNotNull(result);
-        assertEquals(org.bson.types.ObjectId.createFromLegacyFormat(
-                objectId.getTime(), objectId.getMachine(), objectId.getInc()), result);
+        assertEquals(new org.bson.types.ObjectId(
+                objectId.getTimestamp(), objectId.getRandomValue1(),
+                objectId.getRandomValue2(), objectId.getCounter()), result);
     }
 
     /**

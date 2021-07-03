@@ -654,7 +654,33 @@ public class BsonGenerator extends GeneratorBase {
      */
     public void writeObjectId(ObjectId objectId) throws IOException {
         _writeArrayFieldNameIfNeeded();
-        _verifyValueWrite("write datetime");
+        _verifyValueWrite("write objectId");
+        _buffer.putByte(_typeMarker, BsonConstants.TYPE_OBJECTID);
+        // ObjectIds have their byte order flipped
+        int timestamp = ByteOrderUtil.flip(objectId.getTimestamp());
+        _buffer.putInt(timestamp);
+        _buffer.putByte((byte)((objectId.getRandomValue1() >> 16) & 0xFF));
+        _buffer.putByte((byte)((objectId.getRandomValue1() >> 8) & 0xFF));
+        _buffer.putByte((byte)(objectId.getRandomValue1() & 0xFF));
+        _buffer.putByte((byte)((objectId.getRandomValue2() >> 8) & 0xFF));
+        _buffer.putByte((byte)(objectId.getRandomValue2() & 0xFF));
+        _buffer.putByte((byte)((objectId.getCounter() >> 16) & 0xFF));
+        _buffer.putByte((byte)((objectId.getCounter() >> 8) & 0xFF));
+        _buffer.putByte((byte)(objectId.getCounter() & 0xFF));
+        flushBuffer();
+    }
+
+    /**
+     * Write a BSON ObjectId in the legacy format
+     *
+     * @param objectId The objectId to write
+     * @throws IOException If an error occurred in the stream while writing
+     * @deprecated Use {@link #writeObjectId(ObjectId)} instead
+     */
+    @Deprecated
+    public void writeObjectIdLegacy(ObjectId objectId) throws IOException {
+        _writeArrayFieldNameIfNeeded();
+        _verifyValueWrite("write legacy objectId");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_OBJECTID);
         // ObjectIds have their byte order flipped
         int time = ByteOrderUtil.flip(objectId.getTime());

@@ -218,8 +218,7 @@ public class BsonParserTest {
         BSONObject o = new BasicBSONObject();
         o.put("Timestamp", new BSONTimestamp(0xAABB, 0xCCDD));
         o.put("Symbol", new Symbol("Test"));
-        o.put("ObjectId", org.bson.types.ObjectId.createFromLegacyFormat(
-                Integer.MAX_VALUE, -2, Integer.MIN_VALUE));
+        o.put("ObjectId", new org.bson.types.ObjectId(Integer.MAX_VALUE, 12345));
         Pattern p = Pattern.compile(".*", Pattern.CASE_INSENSITIVE |
                 Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNICODE_CASE);
         o.put("Regex", p);
@@ -228,9 +227,8 @@ public class BsonParserTest {
         assertEquals(new Timestamp(0xAABB, 0xCCDD), data.get("Timestamp"));
         assertEquals(new de.undercouch.bson4jackson.types.Symbol("Test"), data.get("Symbol"));
         ObjectId oid = (ObjectId)data.get("ObjectId");
-        assertEquals(Integer.MAX_VALUE, oid.getTime());
-        assertEquals(-2, oid.getMachine());
-        assertEquals(Integer.MIN_VALUE, oid.getInc());
+        assertEquals(Integer.MAX_VALUE, oid.getTimestamp());
+        assertEquals(12345, oid.getCounter());
         Pattern p2 = (Pattern)data.get("Regex");
         assertEquals(p.flags(), p2.flags());
         assertEquals(p.pattern(), p2.pattern());

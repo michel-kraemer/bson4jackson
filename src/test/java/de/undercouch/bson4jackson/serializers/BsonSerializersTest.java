@@ -103,10 +103,10 @@ public class BsonSerializersTest {
      */
     @Test
     public void objectId() throws Exception {
-        ObjectId id = new ObjectId(1, 2, 3);
+        ObjectId id = new ObjectId(1, 2, 3, (short)4);
         org.bson.types.ObjectId roid = (org.bson.types.ObjectId)generateAndParse(id);
-        assertEquals(org.bson.types.ObjectId.createFromLegacyFormat(
-                id.getTime(), id.getMachine(), id.getInc()), roid);
+        assertEquals(1, roid.getTimestamp());
+        assertEquals(2, roid.getCounter());
     }
 
     /**

@@ -125,10 +125,10 @@ public class BsonDeserializersTest {
      */
     @Test
     public void objectId() throws Exception {
-        org.bson.types.ObjectId id = org.bson.types.ObjectId.createFromLegacyFormat(1, 2, 3);
+        org.bson.types.ObjectId id = new org.bson.types.ObjectId(1, 2);
         TC.O obj = generateAndParse(id, TC.O.class);
-        assertEquals(id,  org.bson.types.ObjectId.createFromLegacyFormat(
-                obj.obj.getTime(), obj.obj.getMachine(), obj.obj.getInc()));
+        assertEquals(id.getTimestamp(), obj.obj.getTimestamp());
+        assertEquals(id.getCounter(), obj.obj.getCounter());
     }
 
     /**
