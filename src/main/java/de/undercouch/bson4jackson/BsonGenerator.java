@@ -494,10 +494,7 @@ public class BsonGenerator extends GeneratorBase {
         if (end > data.length) {
             end = data.length;
         }
-        while (offset < end) {
-            _buffer.putByte(data[offset]);
-            ++offset;
-        }
+        _buffer.putBytes(data, offset, end);
         flushBuffer();
     }
 
