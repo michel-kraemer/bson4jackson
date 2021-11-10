@@ -105,20 +105,6 @@ dependencies {
     integrationTest213 jacksonDatabind + '2.13.0'
 }
 
-jar {
-    // define OSGi bundle manifest
-    manifest {
-        name = 'bson4jackson'
-        symbolicName = "de.undercouch.bson4jackson"
-        vendor = 'Michel Kraemer'
-        instruction 'Import-Package', '*'
-        instruction 'Export-Package', "de.undercouch.*;version=${version}"
-    }
-    
-    // include license into jar
-    from 'LICENSE.txt'
-}
-
 // package javadoc into a jar file
 task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
     from javadoc.destinationDir
