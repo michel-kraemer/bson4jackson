@@ -7,8 +7,8 @@ apply plugin: 'idea'
 
 version = '2.12.0'
 group = 'de.undercouch'
-sourceCompatibility = '1.7'
-targetCompatibility = '1.7'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 repositories {
     mavenCentral()
