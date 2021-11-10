@@ -327,8 +327,8 @@ public class DynamicOutputBuffer {
     }
 
     /**
-     * Puts bytes array into the buffer at the given position with given offset.
-     * Does not increase the write position.
+     * Puts a byte array into the buffer at the given position with the given
+     * offset and increases the write position accordingly.
      * @param bs an array of bytes to put
      * @param offset the offset within the array of the first byte to be read
      * @param length the number of bytes to be read from the given array
@@ -362,8 +362,8 @@ public class DynamicOutputBuffer {
     }
 
     /**
-     * Puts bytes array into the buffer at the given position with given offset.
-     * Does not increase the write position.
+     * Puts a byte array into the buffer at the given position with the given
+     * offset. Does not increase the write position.
      * @param pos the position where to put the bytes
      * @param bs an array of bytes to put
      * @param offset the offset within the array of the first byte to be read
