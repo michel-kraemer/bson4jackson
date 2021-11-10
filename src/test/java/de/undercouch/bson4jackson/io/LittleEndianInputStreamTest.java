@@ -110,11 +110,8 @@ public class LittleEndianInputStreamTest {
         bb.putFloat(1234.1234f);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        LittleEndianInputStream leis = new LittleEndianInputStream(bais);
-        try {
+        try (LittleEndianInputStream leis = new LittleEndianInputStream(bais)) {
             assertEquals(1234.1234f, leis.readFloat(), 0.00001);
-        } finally {
-            leis.close();
         }
     }
 
@@ -125,11 +122,8 @@ public class LittleEndianInputStreamTest {
         bb.putDouble(1234.1234);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        LittleEndianInputStream leis = new LittleEndianInputStream(bais);
-        try {
+        try (LittleEndianInputStream leis = new LittleEndianInputStream(bais)) {
             assertEquals(1234.1234, leis.readDouble(), 0.00001);
-        } finally {
-            leis.close();
         }
     }
 

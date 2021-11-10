@@ -36,7 +36,7 @@ public class Symbol {
             return false;
         }
         if (o instanceof String) {
-            return _symbol.equals((String)o);
+            return _symbol.equals(o);
         }
         if (o instanceof Symbol) {
             return _symbol.equals(((Symbol)o)._symbol);

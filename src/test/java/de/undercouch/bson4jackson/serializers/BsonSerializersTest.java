@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class BsonSerializersTest {
     private static Object generateAndParse(Object data) throws Exception {
-        Map<String, Object> m = new LinkedHashMap<String, Object>();
+        Map<String, Object> m = new LinkedHashMap<>();
         m.put("data", data);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

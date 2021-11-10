@@ -11,6 +11,7 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,7 +100,7 @@ public class DynamicOutputBuffer {
     /**
      * A linked list of internal buffers
      */
-    protected List<ByteBuffer> _buffers = new ArrayList<ByteBuffer>(1);
+    protected List<ByteBuffer> _buffers = new ArrayList<>(1);
 
     /**
      * The character set used in {@link #putUTF8(String)}. Will be
@@ -214,7 +215,7 @@ public class DynamicOutputBuffer {
         ByteBuffer bb = _buffers.set(n, null);
         if (bb != null && _reuseBuffersCount > 0) {
             if (_buffersToReuse == null) {
-                _buffersToReuse = new LinkedList<ByteBuffer>();
+                _buffersToReuse = new LinkedList<>();
             }
             if (_reuseBuffersCount > _buffersToReuse.size()) {
                 _buffersToReuse.add(bb);
@@ -264,7 +265,7 @@ public class DynamicOutputBuffer {
      */
     protected Charset getUTF8Charset() {
         if (_utf8 == null) {
-            _utf8 = Charset.forName("UTF-8");;
+            _utf8 = StandardCharsets.UTF_8;
         }
         return _utf8;
     }

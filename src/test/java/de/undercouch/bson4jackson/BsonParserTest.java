@@ -1,6 +1,5 @@
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -57,7 +56,6 @@ public class BsonParserTest {
     /**
      * Simple test class for {@link BsonParserTest#parseRootObjectArray()}
      */
-    @SuppressWarnings("javadoc")
     public static class SimpleClass {
         public String name;
     }
@@ -65,7 +63,6 @@ public class BsonParserTest {
     /**
      * Simple test class for {@link BsonParserTest#parseBinaryObject()}
      */
-    @SuppressWarnings("javadoc")
     public static class BinaryClass {
         public byte[] barr;
     }
@@ -73,7 +70,6 @@ public class BsonParserTest {
     /**
      * Simple test class for {@link BsonParserTest#parseObjectId()}
      */
-    @SuppressWarnings("javadoc")
     public static class ObjectIdClass {
         public org.bson.types.ObjectId oid;
     }
@@ -161,18 +157,15 @@ public class BsonParserTest {
         }
         o.put("String", bigStr.toString());
 
-        ArrayList<Thread> threads = new ArrayList<Thread>();
+        ArrayList<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
-            threads.add(new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        parseBsonObject(o);
-                        Map<?, ?> data = parseBsonObject(o);
-                        assertNotNull(data);
-                    } catch (Exception e) {
-                        fail("Threading issue " + fails.incrementAndGet());
-                    }
+            threads.add(new Thread(() -> {
+                try {
+                    parseBsonObject(o);
+                    Map<?, ?> data = parseBsonObject(o);
+                    assertNotNull(data);
+                } catch (Exception e) {
+                    fail("Threading issue " + fails.incrementAndGet());
                 }
             }));
         }
@@ -287,7 +280,7 @@ public class BsonParserTest {
      */
     @Test
     public void parseEmbeddedArray() throws Exception {
-        List<Integer> i = new ArrayList<Integer>();
+        List<Integer> i = new ArrayList<>();
         i.add(5);
         i.add(6);
         BSONObject o = new BasicBSONObject();
@@ -503,8 +496,7 @@ public class BsonParserTest {
      */
     @Test
     public void readBSONFile() throws Exception {
-        InputStream is = getClass().getResourceAsStream("test.bson");
-        try {
+        try (InputStream is = getClass().getResourceAsStream("test.bson")) {
             ObjectMapper mapper = new ObjectMapper(new BsonFactory());
             @SuppressWarnings("deprecation")
             MappingIterator<BSONObject> iterator =
@@ -522,8 +514,6 @@ public class BsonParserTest {
             assertEquals(10.0, o.get("size"));
             assertTrue(o.keySet().contains("_id"));
             assertEquals(3, o.keySet().size());
-        } finally {
-            is.close();
         }
     }
 

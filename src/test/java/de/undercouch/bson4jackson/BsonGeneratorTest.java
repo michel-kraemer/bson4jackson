@@ -69,7 +69,7 @@ public class BsonGeneratorTest {
      */
     @Test
     public void generatePrimitives() throws Exception {
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("Int32", 5);
         data.put("Boolean1", true);
         data.put("Boolean2", false);
@@ -216,12 +216,12 @@ public class BsonGeneratorTest {
      */
     @Test
     public void stackedObjects() throws Exception {
-        Map<String, Object> data1 = new LinkedHashMap<String, Object>();
+        Map<String, Object> data1 = new LinkedHashMap<>();
         data1.put("Int32", 5);
-        Map<String, Object> data3 = new LinkedHashMap<String, Object>();
+        Map<String, Object> data3 = new LinkedHashMap<>();
         data3.put("String", "Hello");
 
-        Map<String, Object> data2 = new LinkedHashMap<String, Object>();
+        Map<String, Object> data2 = new LinkedHashMap<>();
         data2.put("Int64", 10L);
         data2.put("data1", data1);
         data2.put("data3", data3);
@@ -242,20 +242,20 @@ public class BsonGeneratorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void arrays() throws Exception {
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("Int32", 5);
         data.put("Arr", Arrays.asList("a", "b", "c"));
         data.put("Int64", 10L);
         List<String> a3 = Arrays.asList("d", "e", "f");
         List<String> a4 = Arrays.asList("g", "h", "j");
-        List<List<String>> a5 = new ArrayList<List<String>>();
+        List<List<String>> a5 = new ArrayList<>();
         a5.add(a3);
         a5.add(a4);
         data.put("Arr2", a5);
 
-        Map<String, Object> data2 = new LinkedHashMap<String, Object>();
+        Map<String, Object> data2 = new LinkedHashMap<>();
         data2.put("Str", "Hello");
-        List<Map<String, Object>> a6 = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> a6 = new ArrayList<>();
         a6.add(data2);
         data.put("Arr3", a6);
 
@@ -304,7 +304,7 @@ public class BsonGeneratorTest {
      */
     @Test
     public void uuids() throws Exception {
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("Int32", 5);
         data.put("Arr", Arrays.asList("a", "b", "c"));
         UUID uuid = UUID.randomUUID();
@@ -324,7 +324,7 @@ public class BsonGeneratorTest {
      */
     @Test
     public void dates() throws Exception {
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -343,7 +343,7 @@ public class BsonGeneratorTest {
      */
     @Test
     public void objectIds() throws Exception {
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         ObjectId objectId = new ObjectId((int)(System.currentTimeMillis() / 1000),
                 100, new Random().nextInt() & 0xFFFFFF, (short)(new Random().nextInt()));
         data.put("_id", objectId);
@@ -365,7 +365,7 @@ public class BsonGeneratorTest {
     public void patterns() throws Exception {
         Pattern pattern = Pattern.compile("a.*a",
                 Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("pattern", pattern);
 
         BSONObject obj = generateAndParse(data);
@@ -383,7 +383,7 @@ public class BsonGeneratorTest {
     @Test
     public void timestamps() throws Exception {
         Timestamp timestamp = new Timestamp(100, 200);
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("timestamp", timestamp);
 
         BSONObject obj = generateAndParse(data);
@@ -401,7 +401,7 @@ public class BsonGeneratorTest {
     @Test
     public void javascript() throws Exception {
         JavaScript javaScript = new JavaScript("a < 100");
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("javaScript", javaScript);
 
         BSONObject obj = generateAndParse(data);
@@ -417,11 +417,11 @@ public class BsonGeneratorTest {
      */
     @Test
     public void javascriptWithScope() throws Exception {
-        Map<String, Object> scope = new LinkedHashMap<String, Object>();
+        Map<String, Object> scope = new LinkedHashMap<>();
         scope.put("a", 99);
         scope.put("b", 80);
         JavaScript javaScript = new JavaScript("a < 100", scope);
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("javaScript", javaScript);
 
         BSONObject obj = generateAndParse(data);
@@ -459,7 +459,7 @@ public class BsonGeneratorTest {
      */
     @Test
     public void writeBigDecimalsAsStrings() throws Exception {
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("big", new BigDecimal("0.3"));
 
         BSONObject obj = generateAndParse(data);
@@ -467,7 +467,7 @@ public class BsonGeneratorTest {
         Double result = (Double)obj.get("big");
         assertEquals(0.3, result, 0.0);
 
-        data = new LinkedHashMap<String, Object>();
+        data = new LinkedHashMap<>();
         data.put("big", new BigDecimal("0.3"));
 
         obj = generateAndParse(data,
@@ -483,7 +483,7 @@ public class BsonGeneratorTest {
      */
     @Test
     public void writeBigDecimalsAsDecimal128s() throws Exception {
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("big", new BigDecimal("0.3"));
 
         BSONObject obj = generateAndParse(data);
@@ -491,7 +491,7 @@ public class BsonGeneratorTest {
         Double result = (Double)obj.get("big");
         assertEquals(0.3, result, 0.0);
 
-        data = new LinkedHashMap<String, Object>();
+        data = new LinkedHashMap<>();
         data.put("big", new BigDecimal("0.3"));
 
         obj = generateAndParse(data,
@@ -511,7 +511,7 @@ public class BsonGeneratorTest {
                 (byte)0x30, 'A', 'B', 'C', (byte)0x13, (byte)0x80,
                 (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
 
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put("binary", binary);
 
         // binary data has to be converted to base64 with normal JSON

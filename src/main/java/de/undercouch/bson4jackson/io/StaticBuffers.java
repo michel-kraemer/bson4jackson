@@ -21,8 +21,7 @@ public class StaticBuffers {
     /**
      * Possible buffer keys
      */
-    @SuppressWarnings("javadoc")
-    public static enum Key {
+    public enum Key {
         BUFFER0,
         BUFFER1,
         BUFFER2,
@@ -39,7 +38,7 @@ public class StaticBuffers {
      * A thread-local soft reference to the singleton instance of this class
      */
     protected static final ThreadLocal<SoftReference<StaticBuffers>> _instance =
-            new ThreadLocal<SoftReference<StaticBuffers>>();
+            new ThreadLocal<>();
 
     /**
      * Maps of already allocated re-usable buffers
@@ -62,7 +61,7 @@ public class StaticBuffers {
         StaticBuffers buf = (ref == null ? null : ref.get());
         if (buf == null) {
             buf = new StaticBuffers();
-            _instance.set(new SoftReference<StaticBuffers>(buf));
+            _instance.set(new SoftReference<>(buf));
         }
         return buf;
     }

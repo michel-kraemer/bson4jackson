@@ -214,7 +214,7 @@ public class BsonParser extends ParserBase {
 
     @Override
     @SuppressWarnings("deprecation")
-    public JsonToken nextToken() throws IOException, JsonParseException {
+    public JsonToken nextToken() throws IOException {
         Context ctx = _currentContext;
         if (_currToken == null && ctx == null) {
             try {
@@ -514,7 +514,7 @@ public class BsonParser extends ParserBase {
      * @throws IOException if an I/O error occurs
      */
     protected JsonToken handleDBPointer() throws IOException {
-        Map<String, Object> pointer = new LinkedHashMap<String, Object>();
+        Map<String, Object> pointer = new LinkedHashMap<>();
         pointer.put("$ns", readString());
         pointer.put("$id", readObjectId());
         getContext().value = pointer;
@@ -639,7 +639,7 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public String getCurrentName() throws IOException, JsonParseException {
+    public String getCurrentName() {
         if (_currentContext == null) {
             return null;
         }
@@ -667,7 +667,7 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public String getText() throws IOException, JsonParseException {
+    public String getText() {
         if (_currentContext == null || _currentContext.state == State.FIELDNAME) {
             return null;
         }
@@ -678,19 +678,19 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public char[] getTextCharacters() throws IOException, JsonParseException {
+    public char[] getTextCharacters() {
         // not very efficient; that's why hasTextCharacters()
         // always returns false
         return getText().toCharArray();
     }
 
     @Override
-    public int getTextLength() throws IOException, JsonParseException {
+    public int getTextLength() {
         return getText().length();
     }
 
     @Override
-    public int getTextOffset() throws IOException, JsonParseException {
+    public int getTextOffset() {
         return 0;
     }
 
@@ -701,7 +701,7 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public Number getNumberValue() throws IOException, JsonParseException {
+    public Number getNumberValue() throws IOException {
         return (Number)getContext().value;
     }
 
@@ -711,7 +711,7 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public JsonParser.NumberType getNumberType() throws IOException, JsonParseException {
+    public JsonParser.NumberType getNumberType() {
         if (_currentContext == null) {
             return null;
         }
@@ -732,18 +732,17 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public int getIntValue() throws IOException, JsonParseException {
+    public int getIntValue() throws IOException {
         return ((Number)getContext().value).intValue();
     }
 
     @Override
-    public long getLongValue() throws IOException, JsonParseException {
+    public long getLongValue() throws IOException {
         return ((Number)getContext().value).longValue();
     }
 
     @Override
-    public BigInteger getBigIntegerValue() throws IOException,
-            JsonParseException {
+    public BigInteger getBigIntegerValue() throws IOException {
         Number n = getNumberValue();
         if (n == null) {
             return null;
@@ -758,17 +757,17 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public float getFloatValue() throws IOException, JsonParseException {
+    public float getFloatValue() throws IOException {
         return ((Number)getContext().value).floatValue();
     }
 
     @Override
-    public double getDoubleValue() throws IOException, JsonParseException {
+    public double getDoubleValue() throws IOException {
         return ((Number)getContext().value).doubleValue();
     }
 
     @Override
-    public BigDecimal getDecimalValue() throws IOException, JsonParseException {
+    public BigDecimal getDecimalValue() throws IOException {
         Number n = getNumberValue();
         if (n == null) {
             return null;
@@ -783,13 +782,12 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public byte[] getBinaryValue(Base64Variant b64variant) throws IOException,
-            JsonParseException {
+    public byte[] getBinaryValue(Base64Variant b64variant) throws IOException {
         return (byte[])getContext().value;
     }
 
     @Override
-    public Object getEmbeddedObject() throws IOException, JsonParseException {
+    public Object getEmbeddedObject() {
         return _currentContext != null ? _currentContext.value : null;
     }
 
@@ -800,13 +798,13 @@ public class BsonParser extends ParserBase {
 
     @Override
     @SuppressWarnings("deprecation")
-    protected boolean loadMore() throws IOException {
+    protected boolean loadMore() {
         // we don't actually use this
         return true;
     }
 
     @Override
-    protected void _finishString() throws IOException, JsonParseException {
+    protected void _finishString() {
         // not used
     }
 

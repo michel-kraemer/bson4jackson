@@ -49,7 +49,6 @@ public class TypePropertyLastTest {
     // 'type' must be the last property to really test this feature!
     @JsonPropertyOrder({"uuid", "date", "calendar", "javaScript",
             "objectId", "pattern", "symbol", "timestamp", "type"})
-    @SuppressWarnings("javadoc")
     public static abstract class TypeAsProperty {
         String type;
         UUID uuid;
@@ -148,7 +147,6 @@ public class TypePropertyLastTest {
         }
     }
 
-    @SuppressWarnings("javadoc")
     public static class TypeAsPropertyA extends TypeAsProperty {
         TypeAsPropertyA() {
             super();
@@ -156,7 +154,6 @@ public class TypePropertyLastTest {
         }
     }
 
-    @SuppressWarnings("javadoc")
     public static class TypeAsPropertyB extends TypeAsProperty {
         TypeAsPropertyB() {
             super();
