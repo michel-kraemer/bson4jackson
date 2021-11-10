@@ -196,6 +196,11 @@ task integrationTest(dependsOn: [ doIntegrationTest21, doIntegrationTest22,
 
 check.dependsOn integrationTest
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
