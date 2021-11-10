@@ -1,14 +1,17 @@
-apply plugin: 'maven'
-apply plugin: 'osgi'
+plugins {
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+}
+
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
 
 version = '2.12.0'
 group = 'de.undercouch'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 repositories {
     mavenCentral()
@@ -42,12 +45,12 @@ String junit = 'junit:junit:4.13'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:3.12.6'
 
 dependencies {
-    compile jacksonCore + '2.13.0'
-    compile jacksonAnnotations + '2.13.0'
-    compile jacksonDatabind + '2.13.0'
+    implementation jacksonCore + '2.13.0'
+    implementation jacksonAnnotations + '2.13.0'
+    implementation jacksonDatabind + '2.13.0'
 
-    testCompile junit
-    testCompile mongoDbJavaDriver
+    testImplementation junit
+    testImplementation mongoDbJavaDriver
     
     integrationTestBase junit
     integrationTestBase mongoDbJavaDriver
@@ -103,18 +106,6 @@ dependencies {
     integrationTest213 jacksonCore + '2.13.0'
     integrationTest213 jacksonAnnotations + '2.13.0'
     integrationTest213 jacksonDatabind + '2.13.0'
-}
-
-// package javadoc into a jar file
-task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
-    from javadoc.destinationDir
-    classifier = 'javadoc'
-}
-
-// package source into a jar file
-task packageSources(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
 }
 
 task doIntegrationTest21(type: Test) {
@@ -205,69 +196,57 @@ task integrationTest(dependsOn: [ doIntegrationTest21, doIntegrationTest22,
 
 check.dependsOn integrationTest
 
-// define artifacts for upload
-artifacts {
-    archives jar
-    archives packageJavadoc
-    archives packageSources
-}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
 
-
-// sign all artifacts
-signing {
-    required { !version.endsWith('SNAPSHOT') && gradle.taskGraph.hasTask(':uploadArchives') }
-    sign configurations.archives
-}
-
-// remove test dependencies from configuration-to-scope mapping
-// this also removes them from the maven pom file
-conf2ScopeMappings.mappings.remove(configurations.testCompile)
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            // sign artifacts before upload
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-            
-            // upload to sonatype OSS
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: this.hasProperty('sonatypeUsername') ? sonatypeUsername : '',
-                    password: this.hasProperty('sonatypePassword') ? sonatypePassword : '')
-            }
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: this.hasProperty('sonatypeUsername') ? sonatypeUsername : '',
-                    password: this.hasProperty('sonatypePassword') ? sonatypePassword : '')
-            }
-            
-            // pom file details
-            pom.project {
-               name 'bson4jackson'
-               packaging 'jar'
-               description 'A pluggable BSON generator and parser for Jackson JSON processor.'
-               url 'https://michelkraemer.com'
+            pom {
+               name = 'bson4jackson'
+               packaging = 'jar'
+               description = 'A pluggable BSON generator and parser for Jackson JSON processor.'
+               url = 'https://michelkraemer.com'
  
                scm {
-                   url 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
-                   connection 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
-                   developerConnection 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
+                   url = 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
+                   connection = 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
+                   developerConnection = 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
                }
  
                licenses {
                    license {
-                       name 'The Apache Software License, Version 2.0'
-                       url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                       distribution 'repo'
+                       name = 'The Apache Software License, Version 2.0'
+                       url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                       distribution = 'repo'
                    }
                }
  
                developers {
                    developer {
-                       id 'michel-kraemer'
-                       name 'Michel Kraemer'
-                       email 'michel@undercouch.de'
+                       id = 'michel-kraemer'
+                       name = 'Michel Kraemer'
+                       email = 'michel@undercouch.de'
+                       url = 'https://michelkraemer.com'
                    }
                }
            }
         }
+    }
+}
+
+// sign all artifacts
+signing {
+    useGpgCmd()
+    sign publishing.publications.mavenJava
+}
+
+tasks.withType(Sign) {
+    // only sign release artifacts and not snapshots
+    onlyIf { isReleaseVersion }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype()
     }
 }
