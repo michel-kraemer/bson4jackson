@@ -204,7 +204,7 @@ public class DynamicOutputBufferTest {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         db.writeTo(baos);
-        String s = new String(baos.toByteArray());
+        String s = baos.toString();
         assertEquals("Hello", s);
 
         db = new DynamicOutputBuffer(2);
@@ -350,5 +350,45 @@ public class DynamicOutputBufferTest {
         // sizeof(bytes) - sizeof(chars) should be 7 because 2047 adds 1 extra
         // byte and 3 chars of 2048 add 6 extra bytes in total
         assertEquals("Unexpected number of written bytes", chars.length + 7, nbytes);
+    }
+
+    /**
+     * Test if a byte array can be put into the buffer
+     */
+    @Test
+    public void putBytes() throws Exception {
+        DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+        db.putBytes((byte)2, (byte)1, (byte)3, (byte)5, (byte)4);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        db.writeTo(baos);
+        byte[] r = baos.toByteArray();
+        assertEquals(5, r.length);
+        assertEquals(2, r[0]);
+        assertEquals(1, r[1]);
+        assertEquals(3, r[2]);
+        assertEquals(5, r[3]);
+        assertEquals(4, r[4]);
+    }
+
+    /**
+     * Test if a byte array can be put into the buffer at a given position
+     */
+    @Test
+    public void putBytesAtPosition() throws Exception {
+        DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+        db.putBytes(2, (byte)2, (byte)1, (byte)3, (byte)5, (byte)4);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        db.writeTo(baos);
+        byte[] r = baos.toByteArray();
+        assertEquals(7, r.length);
+        assertEquals(0, r[0]);
+        assertEquals(0, r[1]);
+        assertEquals(2, r[2]);
+        assertEquals(1, r[3]);
+        assertEquals(3, r[4]);
+        assertEquals(5, r[5]);
+        assertEquals(4, r[6]);
     }
 }
