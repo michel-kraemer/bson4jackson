@@ -372,6 +372,29 @@ public class DynamicOutputBufferTest {
     }
 
     /**
+     * Test if a byte array can be put into the buffer
+     */
+    @Test
+    public void putBytesPositionIncreased() throws Exception {
+        DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+        db.putBytes((byte)2, (byte)1, (byte)3, (byte)5, (byte)4);
+
+        // put one more byte to check that the position has actually been increased
+        db.putByte((byte)10);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        db.writeTo(baos);
+        byte[] r = baos.toByteArray();
+        assertEquals(6, r.length);
+        assertEquals(2, r[0]);
+        assertEquals(1, r[1]);
+        assertEquals(3, r[2]);
+        assertEquals(5, r[3]);
+        assertEquals(4, r[4]);
+        assertEquals(10, r[5]);
+    }
+
+    /**
      * Test if a byte array can be put into the buffer at a given position
      */
     @Test
@@ -390,5 +413,70 @@ public class DynamicOutputBufferTest {
         assertEquals(3, r[4]);
         assertEquals(5, r[5]);
         assertEquals(4, r[6]);
+    }
+
+    /**
+     * Test if a byte array can be put into the buffer at a given position
+     */
+    @Test
+    public void putBytesAtPositionNotIncreased() throws Exception {
+        DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+        db.putBytes(2, (byte)2, (byte)1, (byte)3, (byte)5, (byte)4);
+
+        // write one more byte to check that the position has actually not been increased
+        db.putBytes((byte)10);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        db.writeTo(baos);
+        byte[] r = baos.toByteArray();
+        assertEquals(7, r.length);
+        assertEquals(10, r[0]);
+        assertEquals(0, r[1]);
+        assertEquals(2, r[2]);
+        assertEquals(1, r[3]);
+        assertEquals(3, r[4]);
+        assertEquals(5, r[5]);
+        assertEquals(4, r[6]);
+    }
+
+    /**
+     * Test if a subset of a byte array can be put into the buffer
+     */
+    @Test
+    public void putBytesOffset() throws Exception {
+        DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+        db.putBytes(new byte[] { (byte)2, (byte)1, (byte)3, (byte)5, (byte)4, (byte)20 }, 3, 2);
+
+        // write one more byte to check that the position has actually been increased
+        db.putByte((byte)10);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        db.writeTo(baos);
+        byte[] r = baos.toByteArray();
+        assertEquals(3, r.length);
+        assertEquals(5, r[0]);
+        assertEquals(4, r[1]);
+        assertEquals(10, r[2]);
+    }
+
+    /**
+     * Test if a subset of a byte array can be put into the buffer at a given position
+     */
+    @Test
+    public void putBytesPositionOffset() throws Exception {
+        DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+        db.putBytes(2, new byte[] { (byte)2, (byte)1, (byte)3, (byte)5, (byte)4, (byte)20 }, 3, 2);
+
+        // write one more byte to check that the position has not been increased
+        db.putByte((byte)10);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        db.writeTo(baos);
+        byte[] r = baos.toByteArray();
+        assertEquals(4, r.length);
+        assertEquals(10, r[0]);
+        assertEquals(0, r[1]);
+        assertEquals(5, r[2]);
+        assertEquals(4, r[3]);
     }
 }
