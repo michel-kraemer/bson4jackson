@@ -327,6 +327,18 @@ public class DynamicOutputBuffer {
     }
 
     /**
+     * Puts bytes array into the buffer at the given position with given offset.
+     * Does not increase the write position.
+     * @param bs an array of bytes to put
+     * @param offset the offset within the array of the first byte to be read
+     * @param length the number of bytes to be read from the given array
+     */
+    public void putBytes(byte[] bs, int offset, int length) {
+        putBytes(_position, bs, offset, length);
+        _position += length;
+    }
+
+    /**
      * Puts a byte into the buffer at the given position. Does
      * not increase the write position.
      * @param pos the position where to put the byte
@@ -346,17 +358,29 @@ public class DynamicOutputBuffer {
      * @param bs an array of bytes to put
      */
     public void putBytes(int pos, byte... bs) {
-        adaptSize(pos + bs.length);
-        ByteBuffer bb = null;
-        int i = _bufferSize;
-        for (byte b : bs) {
-            if (i == _bufferSize) {
-                bb = getBuffer(pos);
-                i = pos % _bufferSize;
-            }
-            bb.put(i, b);
-            ++i;
-            ++pos;
+        putBytes(pos, bs, 0, bs.length);
+    }
+
+    /**
+     * Puts bytes array into the buffer at the given position with given offset.
+     * Does not increase the write position.
+     * @param pos the position where to put the bytes
+     * @param bs an array of bytes to put
+     * @param offset the offset within the array of the first byte to be read
+     * @param length the number of bytes to be read from the given array
+     */
+    public void putBytes(int pos, byte[] bs, int offset, int length) {
+        adaptSize(pos + length);
+        ByteBuffer bb;
+        while (length > 0) {
+            bb = getBuffer(pos);
+            int index = pos % _bufferSize;
+            bb.position(index);
+            int chunkLength = Math.min(bb.limit() - index, length);
+            bb.put(bs, offset, chunkLength);
+            pos += chunkLength;
+            offset += chunkLength;
+            length -= chunkLength;
         }
     }
 
