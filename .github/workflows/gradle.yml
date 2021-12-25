@@ -17,5 +17,6 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           architecture: x64
+          distribution: zulu
       - name: Build with Gradle
         run: ./gradlew build
