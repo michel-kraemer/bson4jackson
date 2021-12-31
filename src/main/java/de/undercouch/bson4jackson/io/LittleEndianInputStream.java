@@ -296,8 +296,8 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
                     cr.throwException();
                 }
             }
-        } finally {
             dec.flush(cb);
+        } finally {
             dec.reset();
             staticBuffers.releaseCharBuffer(UTF8_BUFFER, cb);
             staticBuffers.releaseByteBuffer(UTF8_BUFFER, utf8buf);
