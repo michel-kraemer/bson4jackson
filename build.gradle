@@ -1,5 +1,6 @@
 plugins {
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("biz.aQute.bnd.builder") version "6.2.0"
 }
 
 apply plugin: 'maven-publish'
@@ -106,6 +107,18 @@ dependencies {
     integrationTest213 jacksonCore + '2.13.0'
     integrationTest213 jacksonAnnotations + '2.13.0'
     integrationTest213 jacksonDatabind + '2.13.0'
+}
+
+jar {
+    // define OSGi bundle manifest
+    bundle {
+        bnd(
+            "Bundle-Name": "bson4jackson",
+            "Bundle-SymbolicName": "de.undercouch.bson4jackson",
+            "Bundle-Vendor": "Michel Kraemer",
+            '-exportcontents': "de.undercouch.*;version=${version}"
+        )
+    }
 }
 
 task doIntegrationTest21(type: Test) {
