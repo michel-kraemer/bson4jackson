@@ -7,7 +7,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'java'
 
-version = '2.13.0'
+version = '2.13.1'
 group = 'de.undercouch'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
