@@ -4,14 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CoderResult;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -101,18 +95,6 @@ public class DynamicOutputBuffer {
      * A linked list of internal buffers
      */
     protected List<ByteBuffer> _buffers = new ArrayList<>(1);
-
-    /**
-     * The character set used in {@link #putUTF8(String)}. Will be
-     * created lazily in {@link #getUTF8Charset()}
-     */
-    protected Charset _utf8;
-
-    /**
-     * The encoder used in {@link #putUTF8(String)}. Will be created
-     * lazily in {@link #getUTF8Encoder()}
-     */
-    protected CharsetEncoder _utf8Encoder;
 
     /**
      * A queue of buffers that have already been flushed and are
@@ -258,26 +240,6 @@ public class DynamicOutputBuffer {
         if (size > _size) {
             _size = size;
         }
-    }
-
-    /**
-     * @return the lazily created UTF-8 character set
-     */
-    protected Charset getUTF8Charset() {
-        if (_utf8 == null) {
-            _utf8 = StandardCharsets.UTF_8;
-        }
-        return _utf8;
-    }
-
-    /**
-     * @return the lazily created UTF-8 encoder
-     */
-    protected CharsetEncoder getUTF8Encoder() {
-        if (_utf8Encoder == null) {
-            _utf8Encoder = getUTF8Charset().newEncoder();
-        }
-        return _utf8Encoder;
     }
 
     /**
@@ -551,53 +513,114 @@ public class DynamicOutputBuffer {
      * @return the number of UTF-8 bytes put
      */
     public int putUTF8(int pos, String s) {
-        ByteBuffer minibb = null;
-
-        CharsetEncoder enc = getUTF8Encoder();
-        CharBuffer in = CharBuffer.wrap(s);
-
         int pos2 = pos;
         ByteBuffer bb = getBuffer(pos2);
+        byte[] arr = bb.array();
         int index = pos2 % _bufferSize;
-        bb.position(index);
 
-        while (in.remaining() > 0) {
-            CoderResult res = enc.encode(in, bb, true);
-
-            // flush minibb first
-            if (bb == minibb) {
-                bb.flip();
-                while (bb.remaining() > 0) {
-                    putByte(pos2, bb.get());
-                    ++pos2;
-                }
+        // shortcut
+        int si = 0;
+        while (si < s.length() && index < bb.limit()) {
+            char c = s.charAt(si);
+            if (c <= 0x7F) {
+                arr[index++] = (byte)c;
+                pos2++;
             } else {
-                pos2 += bb.position() - index;
+                break;
             }
-
-            if (res.isOverflow()) {
-                if (bb.remaining() > 0) {
-                    // exceeded buffer boundaries; write to a small temporary buffer
-                    if (minibb == null) {
-                        minibb = ByteBuffer.allocate(4);
-                    }
-                    minibb.clear();
-                    bb = minibb;
-                    index = 0;
-                } else {
-                    bb = getBuffer(pos2);
-                    index = pos2 % _bufferSize;
-                    bb.position(index);
-                }
-            } else if (res.isError()) {
-                try {
-                    res.throwException();
-                } catch (CharacterCodingException e) {
-                    throw new RuntimeException("Could not encode string", e);
-                }
-            }
+            ++si;
         }
 
+        while (si < s.length()) {
+            if (index == bb.limit()) {
+                bb.position(index);
+                bb = getBuffer(pos2);
+                arr = bb.array();
+                index = 0;
+            }
+
+            char c = s.charAt(si);
+            if (c <= 0x7F) {
+                arr[index++] = (byte)c;
+                pos2++;
+            } else if (c <= 0x7FF) {
+                arr[index++] = (byte)(0xc0 | (c >> 6));
+                pos2++;
+                if (index == bb.limit()) {
+                    bb.position(index);
+                    bb = getBuffer(pos2);
+                    arr = bb.array();
+                    index = 0;
+                }
+                arr[index++] = (byte)(0x80 | (c & 0x3F));
+                pos2++;
+            } else if (Character.isLowSurrogate(c)) {
+                throw new IllegalStateException("Could not encode string. " +
+                        "Unexpected low surrogate code unit at position " + si);
+            } else if (Character.isHighSurrogate(c)) {
+                if (si + 1 >= s.length()) {
+                    throw new IllegalStateException("Could not encode string. " +
+                            "Missing low surrogate code unit at end of input.");
+                }
+                char d = s.charAt(si + 1);
+                if (!Character.isLowSurrogate(d)) {
+                    throw new IllegalStateException("Could not encode string. " +
+                            "Missing low surrogate code unit at position " + si);
+                }
+                si++;
+
+                int cp = Character.toCodePoint(c, d);
+                arr[index++] = (byte)(0xf0 | (cp >> 18));
+                pos2++;
+                if (index == bb.limit()) {
+                    bb.position(index);
+                    bb = getBuffer(pos2);
+                    arr = bb.array();
+                    index = 0;
+                }
+                arr[index++] = (byte)(0x80 | ((cp >> 12) & 0x3F));
+                pos2++;
+                if (index == bb.limit()) {
+                    bb.position(index);
+                    bb = getBuffer(pos2);
+                    arr = bb.array();
+                    index = 0;
+                }
+                arr[index++] = (byte)(0x80 | ((cp >> 6) & 0x3F));
+                pos2++;
+                if (index == bb.limit()) {
+                    bb.position(index);
+                    bb = getBuffer(pos2);
+                    arr = bb.array();
+                    index = 0;
+                }
+                arr[index++] = (byte)(0x80 | (cp & 0x3F));
+                pos2++;
+            } else {
+                arr[index++] = (byte)(0xe0 | (c >> 12));
+                pos2++;
+                if (index == bb.limit()) {
+                    bb.position(index);
+                    bb = getBuffer(pos2);
+                    arr = bb.array();
+                    index = 0;
+                }
+                arr[index++] = (byte)(0x80 | ((c >> 6) & 0x3F));
+                pos2++;
+                if (index == bb.limit()) {
+                    bb.position(index);
+                    bb = getBuffer(pos2);
+                    arr = bb.array();
+                    index = 0;
+                }
+                arr[index++] = (byte)(0x80 | (c & 0x3F));
+                pos2++;
+            }
+
+            si++;
+        }
+
+        bb.position(index);
         adaptSize(pos2);
         return pos2 - pos;
     }

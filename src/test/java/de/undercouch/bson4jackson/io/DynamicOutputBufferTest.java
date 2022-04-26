@@ -232,6 +232,51 @@ public class DynamicOutputBufferTest {
     }
 
     @Test
+    public void putUTF16() {
+        DynamicOutputBuffer db = new DynamicOutputBuffer(2);
+        int w = db.putUTF8("a\u2139");
+        assertEquals(4, w);
+        assertEquals(4, db.size());
+
+        db = new DynamicOutputBuffer(2);
+        w = db.putUTF8("a\u2139\u8080");
+        assertEquals(7, w);
+        assertEquals(7, db.size());
+
+        db = new DynamicOutputBuffer(20);
+        w = db.putUTF8("a\u2139\u8080");
+        assertEquals(7, w);
+        assertEquals(7, db.size());
+
+        db = new DynamicOutputBuffer(20);
+        w = db.putUTF8("\u0300");
+        assertEquals(2, w);
+        assertEquals(2, db.size());
+
+        db = new DynamicOutputBuffer(20);
+        w = db.putUTF8("a\u0300b\u2139\u8080");
+        assertEquals(10, w);
+        assertEquals(10, db.size());
+
+        db = new DynamicOutputBuffer(20);
+        w = db.putUTF8("a\u0300b\u2139\u8080\uD800\uDC00c");
+        assertEquals(15, w);
+        assertEquals(15, db.size());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void unexpectedLowSurrogate() {
+        DynamicOutputBuffer db = new DynamicOutputBuffer();
+        db.putUTF8("a\uDC00");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void incompleteSurrogate() {
+        DynamicOutputBuffer db = new DynamicOutputBuffer();
+        db.putUTF8("a\uD800");
+    }
+
+    @Test
     public void putRandom() throws Exception {
         DynamicOutputBuffer db = new DynamicOutputBuffer(2);
         db.putByte(5, (byte)0);
