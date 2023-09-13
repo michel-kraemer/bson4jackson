@@ -37,6 +37,8 @@ configurations {
     integrationTest211 { extendsFrom integrationTestBase }
     integrationTest212 { extendsFrom integrationTestBase }
     integrationTest213 { extendsFrom integrationTestBase }
+    integrationTest214 { extendsFrom integrationTestBase }
+    integrationTest215 { extendsFrom integrationTestBase }
 }
 
 String jacksonCore = 'com.fasterxml.jackson.core:jackson-core:'
@@ -46,9 +48,9 @@ String junit = 'junit:junit:4.13.2'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:3.12.12'
 
 dependencies {
-    implementation jacksonCore + '2.13.0'
-    implementation jacksonAnnotations + '2.13.0'
-    implementation jacksonDatabind + '2.13.0'
+    implementation jacksonCore + '2.15.2'
+    implementation jacksonAnnotations + '2.15.2'
+    implementation jacksonDatabind + '2.15.2'
 
     testImplementation junit
     testImplementation mongoDbJavaDriver
@@ -107,6 +109,14 @@ dependencies {
     integrationTest213 jacksonCore + '2.13.0'
     integrationTest213 jacksonAnnotations + '2.13.0'
     integrationTest213 jacksonDatabind + '2.13.0'
+
+    integrationTest214 jacksonCore + '2.14.3'
+    integrationTest214 jacksonAnnotations + '2.14.3'
+    integrationTest214 jacksonDatabind + '2.14.3'
+
+    integrationTest215 jacksonCore + '2.15.2'
+    integrationTest215 jacksonAnnotations + '2.15.2'
+    integrationTest215 jacksonDatabind + '2.15.2'
 }
 
 jar {
@@ -201,11 +211,20 @@ task doIntegrationTest213(type: Test) {
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest213
 }
 
+task doIntegrationTest214(type: Test) {
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest214
+}
+
+task doIntegrationTest215(type: Test) {
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest215
+}
+
 task integrationTest(dependsOn: [ doIntegrationTest21, doIntegrationTest22,
         doIntegrationTest23, doIntegrationTest24, doIntegrationTest25,
         doIntegrationTest26, doIntegrationTest27, doIntegrationTest28,
         doIntegrationTest29, doIntegrationTest210, doIntegrationTest211,
-        doIntegrationTest212, doIntegrationTest213 ])
+        doIntegrationTest212, doIntegrationTest213, doIntegrationTest214,
+        doIntegrationTest215])
 
 check.dependsOn integrationTest
 
