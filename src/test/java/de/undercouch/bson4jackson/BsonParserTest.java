@@ -75,6 +75,21 @@ public class BsonParserTest {
         public org.bson.types.ObjectId oid;
     }
 
+    /**
+     * Test class for {@link BsonParserTest#parseWrappedFloat}
+     */
+    public static class OuterClass {
+        @JsonUnwrapped
+        public InnerClass inner = new InnerClass();
+    }
+
+    /**
+     * Test class for {@link BsonParserTest#parseWrappedFloat}
+     */
+    public static class InnerClass {
+        public float floatValue = 40.0f;
+    }
+
     private <T> T parseBsonObject(BSONObject o, Class<T> cls,
             Module... modules) throws IOException {
         BSONEncoder enc = new BasicBSONEncoder();
@@ -656,17 +671,8 @@ public class BsonParserTest {
         assertEquals("MinKey", data.get("A"));
     }
 
-    static class OuterClass {
-        @JsonUnwrapped
-        public InnerClass inner = new InnerClass();
-    }
-
-    static class InnerClass {
-        public float floatValue = 40.0f;
-    }
-
     /**
-     * Test if wrapped floats deserialized. Refers issue #121.
+     * Test if wrapped floats can be deserialized. Refers issue #121.
      * @throws Exception if something goes wrong
      */
     @Test
