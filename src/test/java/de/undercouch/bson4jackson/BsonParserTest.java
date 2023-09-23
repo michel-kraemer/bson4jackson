@@ -1,5 +1,6 @@
 package de.undercouch.bson4jackson;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -653,5 +654,35 @@ public class BsonParserTest {
         Map<?, ?> data = parseBsonObject(o);
         assertEquals(1, data.size());
         assertEquals("MinKey", data.get("A"));
+    }
+
+    static class OuterClass {
+        @JsonUnwrapped
+        public InnerClass inner = new InnerClass();
+    }
+
+    static class InnerClass {
+        public float floatValue = 40.0f;
+    }
+
+    /**
+     * Test if wrapped floats deserialized. Refers issue #121.
+     * @throws Exception if something goes wrong
+     */
+    @Test
+    public void parseWrappedFloat() throws Exception {
+        OuterClass outer = new OuterClass();
+        outer.inner.floatValue = 50.0f;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+
+        mapper.writeValue(baos, outer);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        OuterClass clone = mapper.readValue(bais, OuterClass.class);
+
+        assertEquals(clone.inner.floatValue, outer.inner.floatValue, 0);
     }
 }

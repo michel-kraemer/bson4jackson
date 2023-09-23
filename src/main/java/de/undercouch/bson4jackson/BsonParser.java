@@ -711,6 +711,11 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
+    public Object getNumberValueDeferred() throws IOException {
+        return getNumberValue();
+    }
+
+    @Override
     public JsonParser.NumberType getNumberType() {
         if (_currentContext == null) {
             return null;
