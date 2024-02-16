@@ -9,18 +9,21 @@ apply plugin: 'java'
 
 version = '2.15.0'
 group = 'de.undercouch'
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 repositories {
     mavenCentral()
 }
 
-tasks.withType(JavaCompile) { 
-    options.compilerArgs << "-Xlint" 
-} 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << "-Xlint"
+}
 
 configurations {
     integrationTestBase
@@ -119,7 +122,7 @@ dependencies {
     integrationTest215 jacksonDatabind + '2.15.2'
 }
 
-jar {
+tasks.named("jar") {
     // define OSGi bundle manifest
     bundle {
         bnd(
@@ -131,100 +134,119 @@ jar {
     }
 }
 
-task doIntegrationTest21(type: Test) {
+tasks.register('doIntegrationTest21', Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
 
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest21
 }
 
-task doIntegrationTest22(type: Test) {
+tasks.register('doIntegrationTest22', Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
 
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest22
 }
 
-task doIntegrationTest23(type: Test) {
+tasks.register('doIntegrationTest23', Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
 
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest23
 }
 
-task doIntegrationTest24(type: Test) {
+tasks.register('doIntegrationTest24', Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
 
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest24
 }
 
-task doIntegrationTest25(type: Test) {
+tasks.register('doIntegrationTest25', Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
+
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest25
 }
 
-task doIntegrationTest26(type: Test) {
+tasks.register('doIntegrationTest26', Test) {
     useJUnit {
         excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
     }
+
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest26
 }
 
-task doIntegrationTest27(type: Test) {
+tasks.register('doIntegrationTest27', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest27
 }
 
-task doIntegrationTest28(type: Test) {
+tasks.register('doIntegrationTest28', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest28
 }
 
-task doIntegrationTest29(type: Test) {
+tasks.register('doIntegrationTest29', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest29
 }
 
-task doIntegrationTest210(type: Test) {
+tasks.register('doIntegrationTest210', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest210
 }
 
-task doIntegrationTest211(type: Test) {
+tasks.register('doIntegrationTest211', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest211
 }
 
-task doIntegrationTest212(type: Test) {
+tasks.register('doIntegrationTest212', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest212
 }
 
-task doIntegrationTest213(type: Test) {
+tasks.register('doIntegrationTest213', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest213
 }
 
-task doIntegrationTest214(type: Test) {
+tasks.register('doIntegrationTest214', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest214
 }
 
-task doIntegrationTest215(type: Test) {
+tasks.register('doIntegrationTest215', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest215
 }
 
-task integrationTest(dependsOn: [ doIntegrationTest21, doIntegrationTest22,
-        doIntegrationTest23, doIntegrationTest24, doIntegrationTest25,
-        doIntegrationTest26, doIntegrationTest27, doIntegrationTest28,
-        doIntegrationTest29, doIntegrationTest210, doIntegrationTest211,
-        doIntegrationTest212, doIntegrationTest213, doIntegrationTest214,
-        doIntegrationTest215])
+tasks.register('integrationTest') {
+    dependsOn([doIntegrationTest21, doIntegrationTest22,
+            doIntegrationTest23, doIntegrationTest24, doIntegrationTest25,
+            doIntegrationTest26, doIntegrationTest27, doIntegrationTest28,
+            doIntegrationTest29, doIntegrationTest210, doIntegrationTest211,
+            doIntegrationTest212, doIntegrationTest213, doIntegrationTest214,
+            doIntegrationTest215])
+}
 
 check.dependsOn integrationTest
 
@@ -277,7 +299,7 @@ signing {
     sign publishing.publications.mavenJava
 }
 
-tasks.withType(Sign) {
+tasks.withType(Sign).configureEach {
     // only sign release artifacts and not snapshots
     onlyIf { isReleaseVersion }
 }
