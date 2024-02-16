@@ -693,7 +693,8 @@ public class BsonParserTest {
     }
 
     /**
-     * Parse empty object, specifically checking getCurrentToken() along the way. See issue #128
+     * Parse empty object, specifically checking getCurrentToken() along the
+     * way. See issue #128
      * @throws Exception if something goes wrong
      */
     @Test
