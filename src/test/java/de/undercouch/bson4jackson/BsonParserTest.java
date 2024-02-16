@@ -691,4 +691,22 @@ public class BsonParserTest {
 
         assertEquals(clone.inner.floatValue, outer.inner.floatValue, 0);
     }
+
+    /**
+     * Parse empty object, specifically checking getCurrentToken() along the way. See issue #128
+     * @throws Exception if something goes wrong
+     */
+    @Test
+    public void parseEmptyObject() throws Exception {
+        byte[] emptyBsonBytes = new BasicBSONEncoder().encode(new BasicBSONObject());
+        try (BsonParser dec = new BsonFactory().createJsonParser(emptyBsonBytes)) {
+            assertNull(dec.getCurrentToken());
+            assertEquals(JsonToken.START_OBJECT, dec.nextToken());
+            assertEquals(JsonToken.START_OBJECT, dec.getCurrentToken());
+            assertEquals(JsonToken.END_OBJECT, dec.nextToken());
+            assertEquals(JsonToken.END_OBJECT, dec.getCurrentToken());
+            assertNull(dec.nextToken());
+            assertNull(dec.getCurrentToken());
+        }
+    }
 }

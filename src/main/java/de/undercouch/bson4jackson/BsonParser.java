@@ -228,7 +228,7 @@ public class BsonParser extends ParserBase {
             if (ctx == null) {
                 if (_currToken == JsonToken.END_OBJECT) {
                     // end of input
-                    return null;
+                    return (_currToken = null);
                 }
                 throw new JsonParseException("Found element outside the document",
                         getTokenLocation());
