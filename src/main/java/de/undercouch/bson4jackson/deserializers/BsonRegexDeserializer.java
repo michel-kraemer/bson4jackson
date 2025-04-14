@@ -19,14 +19,13 @@ import java.util.regex.Pattern;
  */
 public class BsonRegexDeserializer extends JsonDeserializer<Pattern> {
     @Override
-    @SuppressWarnings("deprecation")
     public Pattern deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException {
         if (jp instanceof BsonParser) {
             BsonParser bsonParser = (BsonParser)jp;
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_REGEX) {
-                throw ctxt.mappingException(Pattern.class);
+                ctxt.reportBadDefinition(Pattern.class, "Current token isn't embedded object or regular expression");
             }
             return (Pattern)bsonParser.getEmbeddedObject();
         } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&

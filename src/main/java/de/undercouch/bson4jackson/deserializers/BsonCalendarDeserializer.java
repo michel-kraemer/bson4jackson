@@ -18,14 +18,13 @@ import java.util.Date;
  */
 public class BsonCalendarDeserializer extends JsonDeserializer<Calendar> {
     @Override
-    @SuppressWarnings("deprecation")
     public Calendar deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException {
         if (jp instanceof BsonParser) {
             BsonParser bsonParser = (BsonParser)jp;
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_DATETIME) {
-                throw ctxt.mappingException(Date.class);
+                ctxt.reportBadDefinition(Date.class, "Current token isn't embedded object or date time");
             }
 
             Object obj = bsonParser.getEmbeddedObject();

@@ -21,7 +21,6 @@ import java.util.Map;
  */
 public class BsonJavaScriptDeserializer extends JsonDeserializer<JavaScript> {
     @Override
-    @SuppressWarnings("deprecation")
     public JavaScript deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException {
         if (jp instanceof BsonParser) {
@@ -29,7 +28,7 @@ public class BsonJavaScriptDeserializer extends JsonDeserializer<JavaScript> {
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     (bsonParser.getCurrentBsonType() != BsonConstants.TYPE_JAVASCRIPT &&
                             bsonParser.getCurrentBsonType() != BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE)) {
-                throw ctxt.mappingException(JavaScript.class);
+                ctxt.reportBadDefinition(JavaScript.class, "Current token isn't a JavaScript object");
             }
             return (JavaScript)bsonParser.getEmbeddedObject();
         } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
