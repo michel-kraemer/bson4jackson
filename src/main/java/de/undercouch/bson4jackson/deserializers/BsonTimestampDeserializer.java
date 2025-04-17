@@ -19,14 +19,13 @@ import java.io.IOException;
  */
 public class BsonTimestampDeserializer extends JsonDeserializer<Timestamp> {
     @Override
-    @SuppressWarnings("deprecation")
     public Timestamp deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException {
         if (jp instanceof BsonParser) {
             BsonParser bsonParser = (BsonParser)jp;
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_TIMESTAMP) {
-                throw ctxt.mappingException(Timestamp.class);
+                ctxt.reportBadDefinition(Timestamp.class, "Current token isn't a embedded object or a timestamp");
             }
             return (Timestamp)bsonParser.getEmbeddedObject();
         } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&

@@ -46,7 +46,7 @@ public class BsonObjectIdDeserializer extends JsonDeserializer<ObjectId> {
             BsonParser bsonParser = (BsonParser)jp;
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_OBJECTID) {
-                throw ctxt.mappingException(ObjectId.class);
+                ctxt.reportBadDefinition(ObjectId.class, "Current token isn't a embedded object or isn't objectId");
             }
             return (ObjectId)bsonParser.getEmbeddedObject();
         } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&

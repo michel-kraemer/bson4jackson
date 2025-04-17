@@ -42,6 +42,7 @@ configurations {
     integrationTest213 { extendsFrom integrationTestBase }
     integrationTest214 { extendsFrom integrationTestBase }
     integrationTest215 { extendsFrom integrationTestBase }
+    integrationTest218 { extendsFrom integrationTestBase }
 }
 
 String jacksonCore = 'com.fasterxml.jackson.core:jackson-core:'
@@ -51,36 +52,36 @@ String junit = 'junit:junit:4.13.2'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:3.12.14'
 
 dependencies {
-    implementation jacksonCore + '2.15.2'
-    implementation jacksonAnnotations + '2.15.2'
-    implementation jacksonDatabind + '2.15.2'
+    implementation jacksonCore + '2.18.3'
+    implementation jacksonAnnotations + '2.18.3'
+    implementation jacksonDatabind + '2.18.3'
 
     testImplementation junit
     testImplementation mongoDbJavaDriver
-    
+
     integrationTestBase junit
     integrationTestBase mongoDbJavaDriver
-        
+
     integrationTest21 jacksonCore + '2.1.0'
     integrationTest21 jacksonAnnotations + '2.1.0'
     integrationTest21 jacksonDatabind + '2.1.0'
-    
+
     integrationTest22 jacksonCore + '2.2.0'
     integrationTest22 jacksonAnnotations + '2.2.0'
     integrationTest22 jacksonDatabind + '2.2.0'
-    
+
     integrationTest23 jacksonCore + '2.3.0'
     integrationTest23 jacksonAnnotations + '2.3.0'
     integrationTest23 jacksonDatabind + '2.3.0'
-    
+
     integrationTest24 jacksonCore + '2.4.0'
     integrationTest24 jacksonAnnotations + '2.4.0'
     integrationTest24 jacksonDatabind + '2.4.0'
-    
+
     integrationTest25 jacksonCore + '2.5.0'
     integrationTest25 jacksonAnnotations + '2.5.0'
     integrationTest25 jacksonDatabind + '2.5.0'
-    
+
     integrationTest26 jacksonCore + '2.6.4'
     integrationTest26 jacksonAnnotations + '2.6.4'
     integrationTest26 jacksonDatabind + '2.6.4'
@@ -120,6 +121,10 @@ dependencies {
     integrationTest215 jacksonCore + '2.15.2'
     integrationTest215 jacksonAnnotations + '2.15.2'
     integrationTest215 jacksonDatabind + '2.15.2'
+
+    integrationTest218 jacksonCore + '2.18.3'
+    integrationTest218 jacksonAnnotations + '2.18.3'
+    integrationTest218 jacksonDatabind + '2.18.3'
 }
 
 tasks.named("jar") {
@@ -239,13 +244,18 @@ tasks.register('doIntegrationTest215', Test) {
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest215
 }
 
+tasks.register('doIntegrationTest218', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest218
+}
+
 tasks.register('integrationTest') {
     dependsOn([doIntegrationTest21, doIntegrationTest22,
             doIntegrationTest23, doIntegrationTest24, doIntegrationTest25,
             doIntegrationTest26, doIntegrationTest27, doIntegrationTest28,
             doIntegrationTest29, doIntegrationTest210, doIntegrationTest211,
             doIntegrationTest212, doIntegrationTest213, doIntegrationTest214,
-            doIntegrationTest215])
+            doIntegrationTest215, doIntegrationTest218])
 }
 
 check.dependsOn integrationTest
@@ -265,13 +275,13 @@ publishing {
                packaging = 'jar'
                description = 'A pluggable BSON generator and parser for Jackson JSON processor.'
                url = 'https://michelkraemer.com'
- 
+
                scm {
                    url = 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
                    connection = 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
                    developerConnection = 'scm:git:git://github.com/michel-kraemer/bson4jackson.git'
                }
- 
+
                licenses {
                    license {
                        name = 'The Apache Software License, Version 2.0'
@@ -279,7 +289,7 @@ publishing {
                        distribution = 'repo'
                    }
                }
- 
+
                developers {
                    developer {
                        id = 'michel-kraemer'
