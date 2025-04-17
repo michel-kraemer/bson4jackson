@@ -42,6 +42,8 @@ configurations {
     integrationTest213 { extendsFrom integrationTestBase }
     integrationTest214 { extendsFrom integrationTestBase }
     integrationTest215 { extendsFrom integrationTestBase }
+    integrationTest216 { extendsFrom integrationTestBase }
+    integrationTest217 { extendsFrom integrationTestBase }
     integrationTest218 { extendsFrom integrationTestBase }
 }
 
@@ -121,6 +123,14 @@ dependencies {
     integrationTest215 jacksonCore + '2.15.2'
     integrationTest215 jacksonAnnotations + '2.15.2'
     integrationTest215 jacksonDatabind + '2.15.2'
+
+    integrationTest216 jacksonCore + '2.16.2'
+    integrationTest216 jacksonAnnotations + '2.16.2'
+    integrationTest216 jacksonDatabind + '2.16.2'
+
+    integrationTest217 jacksonCore + '2.17.3'
+    integrationTest217 jacksonAnnotations + '2.17.3'
+    integrationTest217 jacksonDatabind + '2.17.3'
 
     integrationTest218 jacksonCore + '2.18.3'
     integrationTest218 jacksonAnnotations + '2.18.3'
@@ -244,6 +254,16 @@ tasks.register('doIntegrationTest215', Test) {
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest215
 }
 
+tasks.register('doIntegrationTest216', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest216
+}
+
+tasks.register('doIntegrationTest217', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest217
+}
+
 tasks.register('doIntegrationTest218', Test) {
     testClassesDirs = testing.suites.test.sources.output.classesDirs
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest218
@@ -255,7 +275,8 @@ tasks.register('integrationTest') {
             doIntegrationTest26, doIntegrationTest27, doIntegrationTest28,
             doIntegrationTest29, doIntegrationTest210, doIntegrationTest211,
             doIntegrationTest212, doIntegrationTest213, doIntegrationTest214,
-            doIntegrationTest215, doIntegrationTest218])
+            doIntegrationTest215, doIntegrationTest216, doIntegrationTest217,
+            doIntegrationTest218])
 }
 
 check.dependsOn integrationTest
