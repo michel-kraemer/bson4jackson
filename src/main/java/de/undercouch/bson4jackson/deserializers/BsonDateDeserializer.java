@@ -23,7 +23,8 @@ public class BsonDateDeserializer extends JsonDeserializer<Date> {
             BsonParser bsonParser = (BsonParser)jp;
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_DATETIME) {
-                ctxt.reportBadDefinition(Date.class, "Current token isn't embedded object or date time");
+                ctxt.reportBadDefinition(Date.class,
+                        "Current token isn't embedded object or date time");
             }
             return (Date)bsonParser.getEmbeddedObject();
         } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&

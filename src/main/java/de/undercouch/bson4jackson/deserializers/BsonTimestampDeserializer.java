@@ -25,7 +25,8 @@ public class BsonTimestampDeserializer extends JsonDeserializer<Timestamp> {
             BsonParser bsonParser = (BsonParser)jp;
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_TIMESTAMP) {
-                ctxt.reportBadDefinition(Timestamp.class, "Current token isn't a embedded object or a timestamp");
+                ctxt.reportBadDefinition(Timestamp.class,
+                        "Current token isn't a embedded object or a timestamp");
             }
             return (Timestamp)bsonParser.getEmbeddedObject();
         } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&

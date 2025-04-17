@@ -24,7 +24,8 @@ public class BsonCalendarDeserializer extends JsonDeserializer<Calendar> {
             BsonParser bsonParser = (BsonParser)jp;
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_DATETIME) {
-                ctxt.reportBadDefinition(Date.class, "Current token isn't embedded object or date time");
+                ctxt.reportBadDefinition(Date.class,
+                        "Current token isn't embedded object or date time");
             }
 
             Object obj = bsonParser.getEmbeddedObject();

@@ -25,7 +25,8 @@ public class BsonRegexDeserializer extends JsonDeserializer<Pattern> {
             BsonParser bsonParser = (BsonParser)jp;
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_REGEX) {
-                ctxt.reportBadDefinition(Pattern.class, "Current token isn't embedded object or regular expression");
+                ctxt.reportBadDefinition(Pattern.class,
+                        "Current token isn't embedded object or regular expression");
             }
             return (Pattern)bsonParser.getEmbeddedObject();
         } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&

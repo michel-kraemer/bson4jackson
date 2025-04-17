@@ -28,7 +28,8 @@ public class BsonJavaScriptDeserializer extends JsonDeserializer<JavaScript> {
             if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     (bsonParser.getCurrentBsonType() != BsonConstants.TYPE_JAVASCRIPT &&
                             bsonParser.getCurrentBsonType() != BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE)) {
-                ctxt.reportBadDefinition(JavaScript.class, "Current token isn't a JavaScript object");
+                ctxt.reportBadDefinition(JavaScript.class,
+                        "Current token isn't a JavaScript object");
             }
             return (JavaScript)bsonParser.getEmbeddedObject();
         } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
