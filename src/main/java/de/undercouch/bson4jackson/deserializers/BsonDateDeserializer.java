@@ -1,13 +1,12 @@
 package de.undercouch.bson4jackson.deserializers;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonParser;
 
-import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -15,19 +14,18 @@ import java.util.Date;
  * @author Michel Kraemer
  * @since 2.3.2
  */
-public class BsonDateDeserializer extends JsonDeserializer<Date> {
+public class BsonDateDeserializer extends ValueDeserializer<Date> {
     @Override
-    public Date deserialize(JsonParser jp, DeserializationContext ctxt)
-            throws IOException {
+    public Date deserialize(JsonParser jp, DeserializationContext ctxt) {
         if (jp instanceof BsonParser) {
             BsonParser bsonParser = (BsonParser)jp;
-            if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
+            if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_DATETIME) {
                 ctxt.reportBadDefinition(Date.class,
                         "Current token isn't embedded object or date time");
             }
             return (Date)bsonParser.getEmbeddedObject();
-        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+        } else if (jp.currentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
                 jp.getEmbeddedObject() instanceof Date) {
             return (Date)jp.getEmbeddedObject();
         } else {

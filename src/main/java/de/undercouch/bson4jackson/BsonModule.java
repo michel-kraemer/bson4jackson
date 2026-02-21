@@ -1,7 +1,7 @@
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
+import tools.jackson.core.Version;
+import tools.jackson.databind.JacksonModule;
 import de.undercouch.bson4jackson.deserializers.BsonDeserializers;
 import de.undercouch.bson4jackson.serializers.BsonSerializers;
 
@@ -10,7 +10,7 @@ import de.undercouch.bson4jackson.serializers.BsonSerializers;
  * @author James Roper
  * @since 1.3
  */
-public class BsonModule extends Module {
+public class BsonModule extends JacksonModule {
     @Override
     public String getModuleName() {
         return "BsonModule";
@@ -18,7 +18,7 @@ public class BsonModule extends Module {
 
     @Override
     public Version version() {
-        return new Version(2, 9, 2, "", "de.undercouch", "bson4jackson");
+        return new Version(3, 0, 0, "", "de.undercouch", "bson4jackson");
     }
 
     @Override

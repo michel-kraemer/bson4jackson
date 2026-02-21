@@ -1,15 +1,5 @@
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.SerializableString;
-import com.fasterxml.jackson.core.io.CharacterEscapes;
-import com.fasterxml.jackson.core.io.SerializedString;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SequenceWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.undercouch.bson4jackson.BsonGenerator.Feature;
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
 import de.undercouch.bson4jackson.types.Decimal128;
@@ -23,7 +13,17 @@ import org.bson.types.BSONTimestamp;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import tools.jackson.core.ObjectWriteContext;
+import tools.jackson.core.SerializableString;
+import tools.jackson.core.io.CharacterEscapes;
+import tools.jackson.core.io.SerializedString;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.SequenceWriter;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -117,17 +117,17 @@ public class BsonGeneratorTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BsonFactory fac = new BsonFactory();
         fac.enable(BsonGenerator.Feature.ENABLE_STREAMING);
-        BsonGenerator gen = fac.createGenerator(baos);
+        BsonGenerator gen = (BsonGenerator) fac.createGenerator(ObjectWriteContext.empty(), baos);
         byte[] dummy = new byte[DynamicOutputBuffer.DEFAULT_BUFFER_SIZE * 3 / 2];
         gen.writeStartObject();
-        gen.writeFieldName("Test");
+        gen.writeName("Test");
         gen.writeBinary(dummy);
 
         assertEquals(DynamicOutputBuffer.DEFAULT_BUFFER_SIZE, baos.size());
 
         gen.writeEndObject();
         gen.writeStartObject();
-        gen.writeFieldName("Test");
+        gen.writeName("Test");
         gen.writeBinary(dummy);
 
         assertEquals(DynamicOutputBuffer.DEFAULT_BUFFER_SIZE * 3, baos.size());
@@ -158,10 +158,9 @@ public class BsonGeneratorTest {
     @Test
     public void rawChar() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BsonGenerator gen = new BsonGenerator(
-                JsonGenerator.Feature.collectDefaults(), 0, baos);
+        BsonGenerator gen = (BsonGenerator) new BsonFactory().createGenerator(ObjectWriteContext.empty(), baos);
         gen.writeStartObject();
-        gen.writeFieldName("Test");
+        gen.writeName("Test");
         gen.writeRaw(new char[] { 'a', 'b' }, 0, 2);
         gen.writeEndObject();
         gen.close();
@@ -175,10 +174,9 @@ public class BsonGeneratorTest {
     @Test
     public void rawString() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BsonGenerator gen = new BsonGenerator(
-                JsonGenerator.Feature.collectDefaults(), 0, baos);
+        BsonGenerator gen = (BsonGenerator) new BsonFactory().createGenerator(ObjectWriteContext.empty(), baos);
         gen.writeStartObject();
-        gen.writeFieldName("Test");
+        gen.writeName("Test");
         gen.writeRaw("ab");
         gen.writeEndObject();
         gen.close();
@@ -192,10 +190,9 @@ public class BsonGeneratorTest {
     @Test
     public void rawBytes() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BsonGenerator gen = new BsonGenerator(
-                JsonGenerator.Feature.collectDefaults(), 0, baos);
+        BsonGenerator gen = (BsonGenerator) new BsonFactory().createGenerator(ObjectWriteContext.empty(), baos);
         gen.writeStartObject();
-        gen.writeFieldName("Test");
+        gen.writeName("Test");
         gen.writeBinary(new byte[] { (byte)1, (byte)2 });
         gen.writeEndObject();
         gen.close();
@@ -283,10 +280,9 @@ public class BsonGeneratorTest {
     @Test
     public void utf8Strings() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        BsonGenerator gen = new BsonGenerator(
-                JsonGenerator.Feature.collectDefaults(), 0, baos);
+        BsonGenerator gen = (BsonGenerator) new BsonFactory().createGenerator(ObjectWriteContext.empty(), baos);
         gen.writeStartObject();
-        gen.writeFieldName("a\u20AC\u00A2\u00A2bb");
+        gen.writeName("a\u20AC\u00A2\u00A2bb");
         gen.writeString("a\u20AC\u00A2\u00A2bb");
         gen.writeEndObject();
         gen.close();
@@ -442,8 +438,9 @@ public class BsonGeneratorTest {
                 bsonFactory.enable(fe);
             }
         }
-        ObjectMapper om = new ObjectMapper(bsonFactory);
-        om.registerModule(new BsonModule());
+        ObjectMapper om = JsonMapper.builder(bsonFactory)
+            .addModule(new BsonModule())
+            .build();
         om.writeValue(baos, data);
 
         byte[] r = baos.toByteArray();
@@ -547,7 +544,6 @@ public class BsonGeneratorTest {
      * @throws Exception if something goes wrong
      */
     @Test
-    @Category(value = RequiresJackson_v2_5.class)
     public void writeMultipleObjects() throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
@@ -566,8 +562,10 @@ public class BsonGeneratorTest {
         // we explicitly create a sequence writer for writing out several
         // TestPojo objects in a row (useful for storage/online communications)
         bsonFactory.disable(BsonGenerator.Feature.ENABLE_STREAMING);
-        ObjectMapper mapperExplicit = new ObjectMapper(bsonFactory);
-        mapperExplicit.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
+        ObjectMapper mapperExplicit = JsonMapper.builder(new BsonFactory())
+            .disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
+            .addModule(new BsonModule())
+            .build();
         ObjectWriter objectWriterExplicit = mapperExplicit.writer();
         SequenceWriter sequenceWriterExplicit =
                 objectWriterExplicit.writeValues(outputStream);
@@ -588,8 +586,10 @@ public class BsonGeneratorTest {
 
         // write() with implicit flush() (streaming mode)
         bsonFactory.enable(BsonGenerator.Feature.ENABLE_STREAMING);
-        ObjectMapper mapperImplicit = new ObjectMapper(bsonFactory);
-        mapperImplicit.enable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
+        ObjectMapper mapperImplicit = JsonMapper.builder(new BsonFactory())
+            .enable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
+            .addModule(new BsonModule())
+            .build();
         ObjectWriter objectWriterImplicit = mapperImplicit.writer();
         SequenceWriter sequenceWriterImplicit =
                 objectWriterImplicit.writeValues(outputStream);
@@ -615,8 +615,8 @@ public class BsonGeneratorTest {
                         + "\"another\": \"field\", "
                         + "\".some\": \".field\", "
                         + "\"some.\": \"field.\" }");
-        ObjectMapper bsonMapper = new ObjectMapper(new BsonFactory());
-        bsonMapper.getFactory().setCharacterEscapes(new CharacterEscapes() {
+        BsonFactory escapingFactory = new BsonFactory();
+        escapingFactory.setCharacterEscapes(new CharacterEscapes() {
             private static final long serialVersionUID = 283833498358662446L;
 
             @Override
@@ -634,6 +634,7 @@ public class BsonGeneratorTest {
                 return null;
             }
         });
+        ObjectMapper bsonMapper = new ObjectMapper(escapingFactory);
 
         byte[] bsonBytes = bsonMapper.writeValueAsBytes(node);
 
@@ -755,9 +756,10 @@ public class BsonGeneratorTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
         assertFalse(bsonFactory.isEnabled(BsonGenerator.Feature.ENABLE_STREAMING));
-        ObjectMapper om = new ObjectMapper(bsonFactory);
+        ObjectMapper om = JsonMapper.builder(new BsonFactory())
+            .addModule(new BsonModule())
+            .build();
         assertTrue(om.isEnabled(SerializationFeature.FLUSH_AFTER_WRITE_VALUE));
-        om.registerModule(new BsonModule());
 
         ObjectNode objectNode = om.createObjectNode();
         objectNode.putPOJO("date", new Date(1526424049193L));

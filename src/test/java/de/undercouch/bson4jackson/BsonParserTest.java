@@ -1,17 +1,6 @@
 package de.undercouch.bson4jackson;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Timestamp;
@@ -26,6 +15,20 @@ import org.bson.types.CodeWScope;
 import org.bson.types.MinKey;
 import org.bson.types.Symbol;
 import org.junit.Test;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.core.ObjectWriteContext;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -91,19 +94,22 @@ public class BsonParserTest {
     }
 
     private <T> T parseBsonObject(BSONObject o, Class<T> cls,
-            Module... modules) throws IOException {
+            JacksonModule... modules) throws IOException {
         BSONEncoder enc = new BasicBSONEncoder();
         byte[] b = enc.encode(o);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
         BsonFactory fac = new BsonFactory();
-        ObjectMapper mapper = new ObjectMapper(fac);
-        if (modules != null) {
-            for (Module mod : modules) {
-                mapper.registerModule(mod);
+        ObjectMapper mapper;
+        if (modules != null && modules.length > 0) {
+            var builder = new ObjectMapper(fac).rebuild();
+            for (JacksonModule mod : modules) {
+                builder.addModule(mod);
             }
+            mapper = builder.build();
+        } else {
+            mapper = new ObjectMapper(fac);
         }
-        fac.setCodec(mapper);
         return mapper.readValue(bais, cls);
     }
 
@@ -209,9 +215,10 @@ public class BsonParserTest {
         byte[] b = enc.encode(o);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        ObjectMapper mapper = new ObjectMapper(new BsonFactory());
-        mapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
-        mapper.configure(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS, true);
+        ObjectMapper mapper = JsonMapper.builder(new BsonFactory())
+                .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
+                .build();
         Map<?, ?> data = mapper.readValue(bais, Map.class);
         assertEquals(BigDecimal.class, data.get("Double").getClass());
         assertEquals(BigInteger.class, data.get("Int32").getClass());
@@ -333,26 +340,25 @@ public class BsonParserTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
         BsonFactory fac = new BsonFactory();
         ObjectMapper mapper = new ObjectMapper(fac);
-        fac.setCodec(mapper);
 
-        BsonParser dec = fac.createParser(bais);
+        BsonParser dec = (BsonParser) mapper.createParser(bais);
 
         assertEquals(JsonToken.START_OBJECT, dec.nextToken());
 
-        assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
-        assertEquals("Obj2", dec.getCurrentName());
+        assertEquals(JsonToken.PROPERTY_NAME, dec.nextToken());
+        assertEquals("Obj2", dec.currentName());
         assertEquals(JsonToken.START_OBJECT, dec.nextToken());
         JsonNode obj2 = dec.readValueAsTree();
         assertEquals(1, obj2.size());
         assertNotNull(obj2.get("Int64"));
         assertEquals(10L, obj2.get("Int64").longValue());
 
-        assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
-        assertEquals("Obj3", dec.getCurrentName());
+        assertEquals(JsonToken.PROPERTY_NAME, dec.nextToken());
+        assertEquals("Obj3", dec.currentName());
         assertEquals(JsonToken.START_OBJECT, dec.nextToken());
 
-        assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
-        assertEquals("Int64", dec.getCurrentName());
+        assertEquals(JsonToken.PROPERTY_NAME, dec.nextToken());
+        assertEquals("Int64", dec.currentName());
         assertEquals(JsonToken.VALUE_NUMBER_INT, dec.nextToken());
         assertEquals(11L, dec.getLongValue());
 
@@ -428,13 +434,13 @@ public class BsonParserTest {
     public void parseBeyondEnd() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
-        BsonGenerator generator = bsonFactory.createGenerator(out);
+        BsonGenerator generator = (BsonGenerator) bsonFactory.createGenerator(ObjectWriteContext.empty(), out);
         generator.writeStartObject();
-        generator.writeStringField("myField", "myValue");
+        generator.writeStringProperty("myField", "myValue");
         generator.writeEndObject();
         generator.close();
 
-        BsonParser parser = bsonFactory.createJsonParser(out.toByteArray());
+        BsonParser parser = (BsonParser) bsonFactory.createParser(ObjectReadContext.empty(), out.toByteArray());
         // the following loop should throw no exception and end after 4 iterations
         int i = 0;
         while (parser.nextToken() != null) {
@@ -453,9 +459,9 @@ public class BsonParserTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
         bsonFactory.enable(BsonParser.Feature.HONOR_DOCUMENT_LENGTH);
-        BsonGenerator generator = bsonFactory.createGenerator(out);
+        BsonGenerator generator = (BsonGenerator) bsonFactory.createGenerator(ObjectWriteContext.empty(), out);
         generator.writeStartObject();
-        generator.writeStringField("myField", "myValue");
+        generator.writeStringProperty("myField", "myValue");
         generator.writeEndObject();
         generator.close();
 
@@ -463,7 +469,6 @@ public class BsonParserTest {
 
         InputStream is = new ByteArrayInputStream(out.toByteArray());
         ObjectMapper mapper = new ObjectMapper(bsonFactory);
-        bsonFactory.setCodec(mapper);
         Map<?, ?> result = mapper.readValue(is, Map.class);
         assertEquals("myValue", result.get("myField"));
 
@@ -487,21 +492,21 @@ public class BsonParserTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
         BsonFactory fac = new BsonFactory();
-        BsonParser dec = fac.createParser(bais);
+        BsonParser dec = (BsonParser) fac.createParser(ObjectReadContext.empty(), bais);
 
         assertEquals(JsonToken.START_OBJECT, dec.nextToken());
 
-        assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
-        assertEquals("Float", dec.getCurrentName());
+        assertEquals(JsonToken.PROPERTY_NAME, dec.nextToken());
+        assertEquals("Float", dec.currentName());
         assertEquals(JsonToken.VALUE_NUMBER_FLOAT, dec.nextToken());
         assertEquals(5.0f, dec.getFloatValue(), 0.00001);
-        assertEquals("5.0", dec.getText());
+        assertEquals("5.0", dec.getString());
 
-        assertEquals(JsonToken.FIELD_NAME, dec.nextToken());
-        assertEquals("Int32", dec.getCurrentName());
+        assertEquals(JsonToken.PROPERTY_NAME, dec.nextToken());
+        assertEquals("Int32", dec.currentName());
         assertEquals(JsonToken.VALUE_NUMBER_INT, dec.nextToken());
         assertEquals(1234, dec.getIntValue());
-        assertEquals("1234", dec.getText());
+        assertEquals("1234", dec.getString());
 
         assertEquals(JsonToken.END_OBJECT, dec.nextToken());
     }
@@ -516,7 +521,7 @@ public class BsonParserTest {
             ObjectMapper mapper = new ObjectMapper(new BsonFactory());
             @SuppressWarnings("deprecation")
             MappingIterator<BSONObject> iterator =
-                    mapper.reader(BasicBSONObject.class).readValues(is);
+                    mapper.readerFor(BasicBSONObject.class).readValues(is);
 
             BSONObject o = null;
             while (iterator.hasNext()) {
@@ -541,7 +546,8 @@ public class BsonParserTest {
     public void parseRootArray() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
-        BsonGenerator generator = bsonFactory.createGenerator(out);
+        ObjectMapper mapper = new ObjectMapper(bsonFactory);
+        BsonGenerator generator = (BsonGenerator) mapper.createGenerator(out);
         generator.writeStartArray();
         generator.writeString("first");
         generator.writeString("second");
@@ -550,8 +556,6 @@ public class BsonParserTest {
         generator.close();
 
         InputStream is = new ByteArrayInputStream(out.toByteArray());
-        ObjectMapper mapper = new ObjectMapper(bsonFactory);
-        bsonFactory.setCodec(mapper);
         String[] result = mapper.readValue(is, String[].class);
         assertEquals("first", result[0]);
         assertEquals("second", result[1]);
@@ -566,14 +570,13 @@ public class BsonParserTest {
     public void parseEmptyRootArray() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
-        BsonGenerator generator = bsonFactory.createGenerator(out);
+        ObjectMapper mapper = new ObjectMapper(bsonFactory);
+        BsonGenerator generator = (BsonGenerator) mapper.createGenerator(out);
         generator.writeStartArray();
         generator.writeEndArray();
         generator.close();
 
         InputStream is = new ByteArrayInputStream(out.toByteArray());
-        ObjectMapper mapper = new ObjectMapper(bsonFactory);
-        bsonFactory.setCodec(mapper);
         String[] result = mapper.readValue(is, String[].class);
         assertEquals(0, result.length);
     }
@@ -582,19 +585,18 @@ public class BsonParserTest {
      * Tests if a root object is not accidentally parsed as an array
      * @throws Exception if something went wrong
      */
-    @Test(expected = JsonMappingException.class)
+    @Test(expected = DatabindException.class)
     public void parseRootObjectAsArray() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
-        BsonGenerator generator = bsonFactory.createGenerator(out);
+        ObjectMapper mapper = new ObjectMapper(bsonFactory);
+        BsonGenerator generator = (BsonGenerator) mapper.createGenerator(out);
         generator.writeStartObject();
-        generator.writeStringField("myField", "myValue");
+        generator.writeStringProperty("myField", "myValue");
         generator.writeEndObject();
         generator.close();
 
         InputStream is = new ByteArrayInputStream(out.toByteArray());
-        ObjectMapper mapper = new ObjectMapper(bsonFactory);
-        bsonFactory.setCodec(mapper);
         mapper.readValue(is, String[].class);
     }
 
@@ -607,20 +609,19 @@ public class BsonParserTest {
     public void parseRootObjectArray() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
-        BsonGenerator generator = bsonFactory.createGenerator(out);
+        ObjectMapper mapper = new ObjectMapper(bsonFactory);
+        BsonGenerator generator = (BsonGenerator) mapper.createGenerator(out);
         generator.writeStartArray();
         generator.writeStartObject();
-        generator.writeStringField("name", "test");
+        generator.writeStringProperty("name", "test");
         generator.writeEndObject();
         generator.writeStartObject();
-        generator.writeStringField("name", "test2");
+        generator.writeStringProperty("name", "test2");
         generator.writeEndObject();
         generator.writeEndArray();
         generator.close();
 
         InputStream is = new ByteArrayInputStream(out.toByteArray());
-        ObjectMapper mapper = new ObjectMapper(bsonFactory);
-        bsonFactory.setCodec(mapper);
         SimpleClass[] result = mapper.readValue(is, SimpleClass[].class);
         assertEquals("test", result[0].name);
         assertEquals("test2", result[1].name);
@@ -642,7 +643,7 @@ public class BsonParserTest {
 
             @Override
             public org.bson.types.ObjectId deserialize(JsonParser jp,
-                    DeserializationContext ctxt) throws IOException {
+                    DeserializationContext ctxt) {
                 return new org.bson.types.ObjectId(jp.getBinaryValue());
             }
         }
@@ -693,21 +694,22 @@ public class BsonParserTest {
     }
 
     /**
-     * Parse empty object, specifically checking getCurrentToken() along the
+     * Parse empty object, specifically checking currentToken() along the
      * way. See issue #128
      * @throws Exception if something goes wrong
      */
     @Test
     public void parseEmptyObject() throws Exception {
         byte[] emptyBsonBytes = new BasicBSONEncoder().encode(new BasicBSONObject());
-        try (BsonParser dec = new BsonFactory().createJsonParser(emptyBsonBytes)) {
-            assertNull(dec.getCurrentToken());
+        ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+        try (BsonParser dec = (BsonParser) mapper.createParser(emptyBsonBytes)) {
+            assertNull(dec.currentToken());
             assertEquals(JsonToken.START_OBJECT, dec.nextToken());
-            assertEquals(JsonToken.START_OBJECT, dec.getCurrentToken());
+            assertEquals(JsonToken.START_OBJECT, dec.currentToken());
             assertEquals(JsonToken.END_OBJECT, dec.nextToken());
-            assertEquals(JsonToken.END_OBJECT, dec.getCurrentToken());
+            assertEquals(JsonToken.END_OBJECT, dec.currentToken());
             assertNull(dec.nextToken());
-            assertNull(dec.getCurrentToken());
+            assertNull(dec.currentToken());
         }
     }
 }

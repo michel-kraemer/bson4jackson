@@ -1,11 +1,10 @@
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.undercouch.bson4jackson.BsonGenerator;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -14,12 +13,12 @@ import java.util.Date;
  * @author Michel Kraemer
  * @since 1.3
  */
-public class BsonDateSerializer extends JsonSerializer<Date> {
+public class BsonDateSerializer extends ValueSerializer<Date> {
     @Override
     public void serialize(Date value, JsonGenerator gen,
-            SerializerProvider provider) throws IOException {
+            SerializationContext ctxt) {
         if (value == null) {
-            provider.defaultSerializeNull(gen);
+            ctxt.defaultSerializeNullValue(gen);
         } else if (gen instanceof BsonGenerator) {
             BsonGenerator bgen = (BsonGenerator)gen;
             bgen.writeDateTime(value);

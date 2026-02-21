@@ -31,7 +31,7 @@ You may also use [Maven](http://maven.apache.org/) to download bson4jackson:
     <dependency>
         <groupId>de.undercouch</groupId>
         <artifactId>bson4jackson</artifactId>
-        <version>2.18.0</version>
+        <version>3.0.0</version>
     </dependency>
 </dependencies>
 ```
@@ -41,16 +41,16 @@ following snippet to your `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'de.undercouch:bson4jackson:2.18.0'
+    implementation 'de.undercouch:bson4jackson:3.0.0'
 }
 ```
 
 ## Compatibility
 
-The latest version of bson4jackson is backward compatible to all versions of
-Jackson 2.x released up to date. It should be compatible to newer versions as
-well. If you experience compatibility issues,
-[just let me know](https://github.com/michel-kraemer/bson4jackson/issues).
+bson4jackson 3.x is compatible with Jackson 3.x and requires Java 17 or later.
+
+If you are looking for a version compatible to Jackson 2.x, please use
+bson4jackson 2.18.0. It's the last version for the 2.x branch.
 
 If you are looking for a version compatible to Jackson 1.x, please use
 bson4jackson 1.3.0. It's the last version for the 1.x branch.

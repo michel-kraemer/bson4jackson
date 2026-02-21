@@ -1,12 +1,10 @@
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.undercouch.bson4jackson.BsonGenerator;
 import de.undercouch.bson4jackson.types.Timestamp;
-
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for MongoDB Timestamps
@@ -14,19 +12,19 @@ import java.io.IOException;
  * @author James Roper
  * @author Michel Kraemer
  */
-public class BsonTimestampSerializer extends JsonSerializer<Timestamp> {
+public class BsonTimestampSerializer extends ValueSerializer<Timestamp> {
     @Override
     public void serialize(Timestamp value, JsonGenerator gen,
-            SerializerProvider serializerProvider) throws IOException {
+            SerializationContext ctxt) {
         if (value == null) {
-            serializerProvider.defaultSerializeNull(gen);
+            ctxt.defaultSerializeNullValue(gen);
         } else if (gen instanceof BsonGenerator) {
             BsonGenerator bgen = (BsonGenerator)gen;
             bgen.writeTimestamp(value);
         } else {
             gen.writeStartObject();
-            gen.writeNumberField("$time", value.getTime());
-            gen.writeNumberField("$inc", value.getInc());
+            gen.writeNumberProperty("$time", value.getTime());
+            gen.writeNumberProperty("$inc", value.getInc());
             gen.writeEndObject();
         }
     }

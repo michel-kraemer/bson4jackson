@@ -1,20 +1,16 @@
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.io.IOContext;
 import de.undercouch.bson4jackson.io.UnsafeByteArrayInputStream;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.core.ObjectWriteContext;
+import tools.jackson.core.io.CharacterEscapes;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.json.JsonFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.URL;
 
 /**
  * Factory for {@link BsonGenerator} and {@link BsonParser}
@@ -34,6 +30,11 @@ public class BsonFactory extends JsonFactory {
     protected static final int DEFAULT_BSON_PARSER_FEATURE_FLAGS = 0;
 
     /**
+     * Custom character escapes to use for generators created by this factory
+     */
+    protected CharacterEscapes _bsonCharacterEscapes;
+
+    /**
      * The BSON generator features to be enabled when a new
      * generator is created
      */
@@ -49,46 +50,31 @@ public class BsonFactory extends JsonFactory {
      * @see JsonFactory#JsonFactory()
      */
     public BsonFactory() {
-        this(null);
-    }
-
-    /**
-     * @see JsonFactory#JsonFactory(ObjectCodec)
-     */
-    public BsonFactory(ObjectCodec oc) {
-        super(oc);
+        super();
     }
 
     /**
      * <p>Constructor used when copy()ing a factory instance.</p>
-     * <p>Requires Jackson version 2.2.1 or above.</p>
-     * @param src the source BsonFactor to copy
-     * @param codec the codec to copy
-     * @throws java.lang.NoSuchMethodError on jackson versions prior to 2.2.1
-     * @see JsonFactory#JsonFactory(JsonFactory, ObjectCodec)
+     * @param src the source BsonFactory to copy
      * @since 2.5
      */
-    protected BsonFactory(BsonFactory src, ObjectCodec codec) {
-        super(src, codec);
+    protected BsonFactory(BsonFactory src) {
+        super(src);
         _bsonGeneratorFeatures = src._bsonGeneratorFeatures;
         _bsonParserFeatures = src._bsonParserFeatures;
+        _bsonCharacterEscapes = src._bsonCharacterEscapes;
     }
 
     /**
      * Returns a new cloned copy of the factory
      *
-     * Requires Jackson version 2.2.1 or above
-     *
      * @return deep copy of the factory
-     * @throws java.lang.NoSuchMethodError on versions prior to 2.2.1
      * @see JsonFactory#copy()
      *
      * @since 2.5
      */
     public BsonFactory copy() {
-        _checkInvalidCopy(BsonFactory.class);
-        // as per above, do clear ObjectCodec
-        return new BsonFactory(this, null);
+        return new BsonFactory(this);
     }
 
     /**
@@ -181,256 +167,40 @@ public class BsonFactory extends JsonFactory {
         return (_bsonParserFeatures & f.getMask()) != 0;
     }
 
-    @Override
-    protected BsonGenerator _createGenerator(Writer out, IOContext ctxt) {
-        throw new UnsupportedOperationException("Can not create writer for non-byte-based target");
-    }
-
     /**
-     * @deprecated Removed in Jackson 2.4
+     * Sets the character escapes to use for generators created by this factory
+     * @param esc the character escapes (may be null)
      */
-    @Deprecated
-    @SuppressWarnings("javadoc")
-    protected BsonGenerator _createJsonGenerator(Writer out, IOContext ctxt) {
-        return _createGenerator(out, ctxt);
-    }
-
-    /**
-     * @deprecated Removed in Jackson 2.4
-     */
-    @Deprecated
-    @SuppressWarnings("javadoc")
-    protected BsonParser _createJsonParser(byte[] data, int offset, int len, IOContext ctxt) {
-        return _createParser(data, offset, len, ctxt);
-    }
-
-    /**
-     * @deprecated Removed in Jackson 2.4
-     */
-    @Deprecated
-    @SuppressWarnings("javadoc")
-    protected BsonParser _createJsonParser(InputStream in, IOContext ctxt) {
-        return _createParser(in, ctxt);
-    }
-
-    /**
-     * @deprecated Removed in Jackson 2.4
-     */
-    @Deprecated
-    @SuppressWarnings("javadoc")
-    protected BsonParser _createJsonParser(Reader r, IOContext ctxt) {
-        return _createParser(r, ctxt);
+    public void setCharacterEscapes(CharacterEscapes esc) {
+        _bsonCharacterEscapes = esc;
     }
 
     @Override
-    protected BsonParser _createParser(byte[] data, int offset, int len, IOContext ctxt) {
-        return _createParser(new UnsafeByteArrayInputStream(data, offset, len), ctxt);
+    protected BsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, InputStream in) {
+        return new BsonParser(readCtxt, ctxt, _streamReadFeatures, _bsonParserFeatures, in);
     }
 
     @Override
-    protected BsonParser _createParser(InputStream in, IOContext ctxt) {
-        BsonParser p = new BsonParser(ctxt, _parserFeatures, _bsonParserFeatures, in);
-        ObjectCodec codec = getCodec();
-        if (codec != null) {
-            p.setCodec(codec);
-        }
-        return p;
+    protected BsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, byte[] data, int offset, int len) {
+        return _createParser(readCtxt, ctxt, new UnsafeByteArrayInputStream(data, offset, len));
     }
 
     @Override
-    protected BsonParser _createParser(Reader r, IOContext ctxt) {
+    protected BsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, Reader r) {
         throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
     }
 
     @Override
-    protected BsonGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
-        return createGenerator(out);
-    }
-
-    /**
-     * @deprecated Removed in Jackson 2.4
-     */
-    @Deprecated
-    @SuppressWarnings("javadoc")
-    protected BsonGenerator _createUTF8JsonGenerator(OutputStream out, IOContext ctxt) throws IOException {
-        return _createUTF8Generator(out, ctxt);
-    }
-
-    @Override
-    protected Writer _createWriter(OutputStream out, JsonEncoding enc, IOContext ctxt)
-            throws IOException {
-        throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
-    }
-
-    @Override
-    public BsonGenerator createGenerator(File f, JsonEncoding enc) throws IOException {
-        OutputStream out = new FileOutputStream(f);
-        IOContext ctxt = _createContext(out, true);
-        ctxt.setEncoding(enc);
-        if (enc == JsonEncoding.UTF8 && _outputDecorator != null) {
-            out = _outputDecorator.decorate(ctxt, out);
-        }
-        return createGenerator(out, enc);
-    }
-
-    @Override
-    public BsonGenerator createGenerator(OutputStream out) throws IOException {
-        return createGenerator(out, JsonEncoding.UTF8);
-    }
-
-    @Override
-    public BsonGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException {
-        IOContext ctxt = _createContext(out, true);
-        ctxt.setEncoding(enc);
-        if (enc == JsonEncoding.UTF8 && _outputDecorator != null) {
-            out = _outputDecorator.decorate(ctxt, out);
-        }
-        BsonGenerator g = new BsonGenerator(_generatorFeatures, _bsonGeneratorFeatures, out);
-        ObjectCodec codec = getCodec();
-        if (codec != null) {
-            g.setCodec(codec);
-        }
-        if (_characterEscapes != null) {
-            g.setCharacterEscapes(_characterEscapes);
+    protected BsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt, IOContext ctxt, OutputStream out) {
+        BsonGenerator g = new BsonGenerator(writeCtxt, ctxt, _streamWriteFeatures, _bsonGeneratorFeatures, out);
+        if (_bsonCharacterEscapes != null) {
+            g.setCharacterEscapes(_bsonCharacterEscapes);
         }
         return g;
     }
 
     @Override
-    public BsonGenerator createGenerator(Writer writer) {
+    protected BsonGenerator _createGenerator(ObjectWriteContext writeCtxt, IOContext ctxt, Writer out) {
         throw new UnsupportedOperationException("Can not create generator for non-byte-based target");
-    }
-
-    /**
-     * @deprecated Removed in Jackson 2.7
-     */
-    @Deprecated
-    @SuppressWarnings("javadoc")
-    public BsonGenerator createJsonGenerator(File f, JsonEncoding enc) throws IOException {
-        return createGenerator(f, enc);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonGenerator createJsonGenerator(OutputStream out) throws IOException {
-        return createGenerator(out);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonGenerator createJsonGenerator(OutputStream out, JsonEncoding enc) throws IOException {
-        return createGenerator(out, enc);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonGenerator createJsonGenerator(Writer out) {
-        return createGenerator(out);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonParser createJsonParser(byte[] data) throws IOException {
-        return createParser(data);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonParser createJsonParser(byte[] data, int offset, int len) throws IOException {
-        return createParser(data, offset, len);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonParser createJsonParser(File f) throws IOException {
-        return createParser(f);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonParser createJsonParser(InputStream in) throws IOException {
-        return createParser(in);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonParser createJsonParser(Reader r) {
-        return createParser(r);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonParser createJsonParser(String content) {
-        return createParser(content);
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public BsonParser createJsonParser(URL url) throws IOException {
-        return createParser(url);
-    }
-
-    @Override
-    public BsonParser createParser(byte[] data) throws IOException {
-        IOContext ctxt = _createContext(data, true);
-        if (_inputDecorator != null) {
-            InputStream in = _inputDecorator.decorate(ctxt, data, 0, data.length);
-            if (in != null) {
-                return _createParser(in, ctxt);
-            }
-        }
-        return _createParser(data, 0, data.length, ctxt);
-    }
-
-    @Override
-    public BsonParser createParser(byte[] data, int offset, int len) throws IOException {
-        IOContext ctxt = _createContext(data, true);
-        if (_inputDecorator != null) {
-            InputStream in = _inputDecorator.decorate(ctxt, data, offset, len);
-            if (in != null) {
-                return _createParser(in, ctxt);
-            }
-        }
-        return _createParser(data, offset, len, ctxt);
-    }
-
-    @SuppressWarnings("resource")
-    @Override
-    public BsonParser createParser(File f) throws IOException {
-        IOContext ctxt = _createContext(f, true);
-        InputStream in = new FileInputStream(f);
-        if (_inputDecorator != null) {
-            in = _inputDecorator.decorate(ctxt, in);
-        }
-        return _createParser(in, ctxt);
-    }
-
-    @Override
-    public BsonParser createParser(InputStream in) throws IOException {
-        IOContext ctxt = _createContext(in, false);
-        if (_inputDecorator != null) {
-            in = _inputDecorator.decorate(ctxt, in);
-        }
-        return _createParser(in, ctxt);
-    }
-
-    @Override
-    public BsonParser createParser(Reader r) {
-        throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
-    }
-
-    @Override
-    public BsonParser createParser(String content) {
-        throw new UnsupportedOperationException("Can not create reader for non-byte-based source");
-    }
-
-    @Override
-    public BsonParser createParser(URL url) throws IOException {
-        IOContext ctxt = _createContext(url, true);
-        InputStream in = _optimizedStreamFromURL(url);
-        if (_inputDecorator != null) {
-            in = _inputDecorator.decorate(ctxt, in);
-        }
-        return _createParser(in, ctxt);
     }
 }

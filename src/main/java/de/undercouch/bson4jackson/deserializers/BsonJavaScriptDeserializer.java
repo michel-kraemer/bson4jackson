@@ -1,17 +1,17 @@
 package de.undercouch.bson4jackson.deserializers;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonParser;
 import de.undercouch.bson4jackson.types.JavaScript;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.TreeNode;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ValueNode;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -19,29 +19,28 @@ import java.util.Map;
  * @author Michel Kraemer
  * @since 2.8.0
  */
-public class BsonJavaScriptDeserializer extends JsonDeserializer<JavaScript> {
+public class BsonJavaScriptDeserializer extends ValueDeserializer<JavaScript> {
     @Override
-    public JavaScript deserialize(JsonParser jp, DeserializationContext ctxt)
-            throws IOException {
+    public JavaScript deserialize(JsonParser jp, DeserializationContext ctxt) {
         if (jp instanceof BsonParser) {
             BsonParser bsonParser = (BsonParser)jp;
-            if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
+            if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     (bsonParser.getCurrentBsonType() != BsonConstants.TYPE_JAVASCRIPT &&
                             bsonParser.getCurrentBsonType() != BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE)) {
                 ctxt.reportBadDefinition(JavaScript.class,
                         "Current token isn't a JavaScript object");
             }
             return (JavaScript)bsonParser.getEmbeddedObject();
-        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+        } else if (jp.currentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
                 jp.getEmbeddedObject() instanceof JavaScript) {
             return (JavaScript)jp.getEmbeddedObject();
         } else {
-            TreeNode tree = jp.getCodec().readTree(jp);
+            TreeNode tree = ctxt.readTree(jp);
 
             String code = null;
             TreeNode codeNode = tree.get("$code");
             if (codeNode instanceof ValueNode) {
-                code = ((ValueNode)codeNode).asText();
+                code = ((ValueNode)codeNode).asString();
             }
 
             Map<String, Object> scope = null;
@@ -49,7 +48,7 @@ public class BsonJavaScriptDeserializer extends JsonDeserializer<JavaScript> {
             if (scopeNode instanceof ObjectNode) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> scope2 =
-                        jp.getCodec().treeToValue(scopeNode, Map.class);
+                        ctxt.readTreeAsValue((JsonNode)scopeNode, Map.class);
                 scope = scope2;
             }
 

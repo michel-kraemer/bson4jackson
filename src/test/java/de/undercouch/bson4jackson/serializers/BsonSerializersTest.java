@@ -1,6 +1,5 @@
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.undercouch.bson4jackson.BsonFactory;
 import de.undercouch.bson4jackson.BsonModule;
 import de.undercouch.bson4jackson.types.JavaScript;
@@ -13,6 +12,8 @@ import org.bson.BasicBSONDecoder;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
 import org.junit.Test;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -37,8 +38,9 @@ public class BsonSerializersTest {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        ObjectMapper om = new ObjectMapper(new BsonFactory());
-        om.registerModule(new BsonModule());
+        ObjectMapper om = JsonMapper.builder(new BsonFactory())
+            .addModule(new BsonModule())
+            .build();
         om.writeValue(baos, m);
 
         byte[] r = baos.toByteArray();

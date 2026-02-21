@@ -1,12 +1,10 @@
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.undercouch.bson4jackson.BsonGenerator;
 import de.undercouch.bson4jackson.types.ObjectId;
-
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for ObjectIds
@@ -14,7 +12,7 @@ import java.io.IOException;
  * @author Michel Kraemer
  * @since 1.3
  */
-public class BsonObjectIdSerializer extends JsonSerializer<ObjectId> {
+public class BsonObjectIdSerializer extends ValueSerializer<ObjectId> {
     private final boolean useLegacyFormat;
 
     /**
@@ -37,9 +35,9 @@ public class BsonObjectIdSerializer extends JsonSerializer<ObjectId> {
 
     @Override
     public void serialize(ObjectId value, JsonGenerator gen,
-            SerializerProvider serializerProvider) throws IOException {
+            SerializationContext ctxt) {
         if (value == null) {
-            serializerProvider.defaultSerializeNull(gen);
+            ctxt.defaultSerializeNullValue(gen);
         } else if (gen instanceof BsonGenerator) {
             BsonGenerator bgen = (BsonGenerator)gen;
             if (useLegacyFormat) {
@@ -50,14 +48,14 @@ public class BsonObjectIdSerializer extends JsonSerializer<ObjectId> {
         } else {
             gen.writeStartObject();
             if (useLegacyFormat) {
-                gen.writeNumberField("$time", value.getTime());
-                gen.writeNumberField("$machine", value.getMachine());
-                gen.writeNumberField("$inc", value.getInc());
+                gen.writeNumberProperty("$time", value.getTime());
+                gen.writeNumberProperty("$machine", value.getMachine());
+                gen.writeNumberProperty("$inc", value.getInc());
             } else {
-                gen.writeNumberField("$timestamp", value.getTimestamp());
-                gen.writeNumberField("$randomValue1", value.getRandomValue1());
-                gen.writeNumberField("$randomValue2", (int)value.getRandomValue2());
-                gen.writeNumberField("$counter", value.getCounter());
+                gen.writeNumberProperty("$timestamp", value.getTimestamp());
+                gen.writeNumberProperty("$randomValue1", value.getRandomValue1());
+                gen.writeNumberProperty("$randomValue2", (int)value.getRandomValue2());
+                gen.writeNumberProperty("$counter", value.getCounter());
             }
             gen.writeEndObject();
         }

@@ -1,6 +1,6 @@
 package de.undercouch.bson4jackson.deserializers;
 
-import com.fasterxml.jackson.databind.module.SimpleDeserializers;
+import tools.jackson.databind.module.SimpleDeserializers;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Timestamp;

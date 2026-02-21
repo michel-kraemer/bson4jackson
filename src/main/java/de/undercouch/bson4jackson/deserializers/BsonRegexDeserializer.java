@@ -1,15 +1,14 @@
 package de.undercouch.bson4jackson.deserializers;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.node.ValueNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.TreeNode;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.node.ValueNode;
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonParser;
 
-import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
@@ -17,26 +16,25 @@ import java.util.regex.Pattern;
  * @author Michel Kraemer
  * @since 2.8.0
  */
-public class BsonRegexDeserializer extends JsonDeserializer<Pattern> {
+public class BsonRegexDeserializer extends ValueDeserializer<Pattern> {
     @Override
-    public Pattern deserialize(JsonParser jp, DeserializationContext ctxt)
-            throws IOException {
+    public Pattern deserialize(JsonParser jp, DeserializationContext ctxt) {
         if (jp instanceof BsonParser) {
             BsonParser bsonParser = (BsonParser)jp;
-            if (bsonParser.getCurrentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
+            if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_REGEX) {
                 ctxt.reportBadDefinition(Pattern.class,
                         "Current token isn't embedded object or regular expression");
             }
             return (Pattern)bsonParser.getEmbeddedObject();
-        } else if (jp.getCurrentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
+        } else if (jp.currentToken() == JsonToken.VALUE_EMBEDDED_OBJECT &&
                 jp.getEmbeddedObject() instanceof Pattern) {
             return (Pattern)jp.getEmbeddedObject();
         } else {
-            TreeNode tree = jp.getCodec().readTree(jp);
+            TreeNode tree = ctxt.readTree(jp);
 
             TreeNode patternNode = tree.get("$pattern");
-            String pattern = ((ValueNode)patternNode).asText();
+            String pattern = ((ValueNode)patternNode).asString();
 
             TreeNode flagsNode = tree.get("$flags");
             int flags = ((ValueNode)flagsNode).asInt();
