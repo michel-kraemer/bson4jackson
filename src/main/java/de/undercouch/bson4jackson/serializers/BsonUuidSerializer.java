@@ -11,8 +11,6 @@ import java.util.UUID;
 
 /**
  * Serializer for writing UUIDs as BSON binary fields with UUID subtype
- * @author Ed Anuff
- * @author Michel Kraemer
  */
 public class BsonUuidSerializer extends ValueSerializer<UUID> {
     @Override

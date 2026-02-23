@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Tests {@link LittleEndianInputStream}
- * @author Michel Kraemer
  */
 public class LittleEndianInputStreamTest {
     /**

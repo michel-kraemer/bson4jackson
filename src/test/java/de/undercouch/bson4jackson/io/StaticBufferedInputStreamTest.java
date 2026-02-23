@@ -13,7 +13,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link StaticBufferedInputStream}
- * @author Michel Kraemer
  */
 public class StaticBufferedInputStreamTest {
     private static final byte[] BUF = "abcdefghijklmnopqrstuvwxyz\0\0".getBytes();

@@ -2,7 +2,6 @@ package de.undercouch.bson4jackson.types;
 
 /**
  * A distinct string
- * @author Michel Kraemer
  */
 public class Symbol {
     /**

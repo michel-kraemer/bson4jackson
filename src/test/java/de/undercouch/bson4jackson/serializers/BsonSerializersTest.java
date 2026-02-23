@@ -29,7 +29,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link BsonSerializers}
- * @author Michel Kraemer
  */
 public class BsonSerializersTest {
     private static Object generateAndParse(Object data) throws Exception {

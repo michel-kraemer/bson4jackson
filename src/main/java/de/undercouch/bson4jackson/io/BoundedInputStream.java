@@ -7,7 +7,6 @@ import java.io.InputStream;
 /**
  * Input stream that bounds an underlying input stream to a particular size.
  * This class is not thread-safe.
- * @author James Roper
  */
 public class BoundedInputStream extends FilterInputStream {
     protected final int size;

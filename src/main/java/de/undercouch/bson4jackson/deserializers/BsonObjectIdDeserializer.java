@@ -12,7 +12,6 @@ import tools.jackson.databind.node.ValueNode;
 
 /**
  * Deserializes BSON ObjectId objects
- * @author Michel Kraemer
  * @since 2.8.0
  */
 public class BsonObjectIdDeserializer extends ValueDeserializer<ObjectId> {

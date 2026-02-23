@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 
 /**
  * BSON serializers
- * @author James Roper
  * @since 2.0
  */
 public class BsonSerializers extends SimpleSerializers {

@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 /**
  * Writes BSON code to the provided output stream
- * @author Michel Kraemer
  */
 public class BsonGenerator extends GeneratorBase {
     /**
@@ -83,7 +82,6 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * A structure describing the document currently being generated
-     * @author Michel Kraemer
      */
     protected static class DocumentInfo {
         /**

@@ -10,7 +10,6 @@ import java.nio.CharBuffer;
  * in a {@link SoftReference} so buffers can be freed when they are not needed
  * anymore.
  * @see tools.jackson.core.util.BufferRecycler
- * @author Michel Kraemer
  */
 public class StaticBuffers {
     /**

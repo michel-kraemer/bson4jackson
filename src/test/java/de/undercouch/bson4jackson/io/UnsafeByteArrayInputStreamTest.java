@@ -10,7 +10,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link UnsafeByteArrayInputStream}
- * @author Michel Kraemer
  */
 public class UnsafeByteArrayInputStreamTest {
     private static final byte[] BUF = "aXcdefghijklmnopqrstuvwxyz\0\0".getBytes();

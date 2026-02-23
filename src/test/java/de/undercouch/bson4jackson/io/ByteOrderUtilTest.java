@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link ByteOrderUtil}
- * @author Michel Kraemer
  */
 public class ByteOrderUtilTest {
     @Test

@@ -12,7 +12,6 @@ import de.undercouch.bson4jackson.types.Timestamp;
 
 /**
  * Deserializes BSON Timestamp objects
- * @author Michel Kraemer
  * @since 2.8.0
  */
 public class BsonTimestampDeserializer extends ValueDeserializer<Timestamp> {

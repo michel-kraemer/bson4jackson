@@ -5,7 +5,6 @@ import java.io.InputStream;
 /**
  * An input stream that serves the content of an array. Compared to
  * {@link java.io.ByteArrayInputStream} this class is not thread-safe.
- * @author Michel Kraemer
  */
 public class UnsafeByteArrayInputStream extends InputStream {
     /**

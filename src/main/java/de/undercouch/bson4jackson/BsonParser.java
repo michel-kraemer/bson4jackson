@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 
 /**
  * Reads a BSON document from the provided input stream
- * @author Michel Kraemer
  */
 public class BsonParser extends ParserBase {
     /**

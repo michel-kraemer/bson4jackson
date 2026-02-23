@@ -7,7 +7,6 @@ import java.io.InputStream;
 /**
  * Reads from another input stream, but counts the number of
  * bytes read or skipped (i.e. saves the current buffer position).
- * @author Michel Kraemer
  */
 public class CountingInputStream extends FilterInputStream {
     /**

@@ -9,8 +9,6 @@ import tools.jackson.databind.ValueSerializer;
 /**
  * Serializer for BSON symbols
  * @since 1.3
- * @author James Roper
- * @author Michel Kraemer
  */
 public class BsonSymbolSerializer extends ValueSerializer<Symbol> {
     @Override

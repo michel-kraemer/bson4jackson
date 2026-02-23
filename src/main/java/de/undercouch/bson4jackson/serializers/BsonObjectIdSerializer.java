@@ -8,8 +8,6 @@ import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for ObjectIds
- * @author James Roper
- * @author Michel Kraemer
  * @since 1.3
  */
 public class BsonObjectIdSerializer extends ValueSerializer<ObjectId> {

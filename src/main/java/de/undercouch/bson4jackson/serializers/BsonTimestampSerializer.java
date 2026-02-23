@@ -9,8 +9,6 @@ import tools.jackson.databind.ValueSerializer;
 /**
  * Serializer for MongoDB Timestamps
  * @since 1.3
- * @author James Roper
- * @author Michel Kraemer
  */
 public class BsonTimestampSerializer extends ValueSerializer<Timestamp> {
     @Override

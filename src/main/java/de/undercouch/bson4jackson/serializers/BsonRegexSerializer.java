@@ -10,8 +10,6 @@ import java.util.regex.Pattern;
 /**
  * Serializer for regular expression patterns
  * @since 1.3
- * @author James Roper
- * @author Michel Kraemer
  */
 public class BsonRegexSerializer extends ValueSerializer<Pattern> {
     @Override

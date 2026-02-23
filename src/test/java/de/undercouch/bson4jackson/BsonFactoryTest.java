@@ -9,7 +9,6 @@ import static org.junit.Assert.assertNotSame;
 
 /**
  * Tests {@link BsonFactory}
- * @author Andy Coates
  */
 public class BsonFactoryTest {
     private BsonFactory factory;

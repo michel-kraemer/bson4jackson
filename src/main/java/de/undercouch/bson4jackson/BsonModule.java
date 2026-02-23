@@ -7,7 +7,6 @@ import de.undercouch.bson4jackson.serializers.BsonSerializers;
 
 /**
  * Module that configures Jackson to be able to correctly handle all BSON types
- * @author James Roper
  * @since 1.3
  */
 public class BsonModule extends JacksonModule {

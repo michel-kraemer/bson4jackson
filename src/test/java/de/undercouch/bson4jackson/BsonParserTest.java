@@ -54,7 +54,6 @@ import static org.junit.Assert.fail;
 
 /**
  * Tests {@link BsonParser}
- * @author Michel Kraemer
  */
 public class BsonParserTest {
     /**
@@ -147,7 +146,6 @@ public class BsonParserTest {
     /**
      * Tests reading a very large string. Refers issue #18
      * @throws Exception if something went wrong
-     * @author endasb
      */
     @Test
     public void parseBigString() throws Exception {
@@ -167,7 +165,6 @@ public class BsonParserTest {
      * You may have to run unit tests several times though to really rule out
      * multi-threading issues.
      * @throws Exception if something went wrong
-     * @author endasb
      */
     @Test
     public void parseBigStringInThreads() throws Exception {
@@ -320,7 +317,6 @@ public class BsonParserTest {
      * Tests reading an embedded document through
      * {@link BsonParser#readValueAsTree()}. Refers issue #9
      * @throws Exception if something went wrong
-     * @author audistard
      */
     @Test
     public void parseEmbeddedDocumentAsTree() throws Exception {
@@ -427,8 +423,6 @@ public class BsonParserTest {
      * Test if {@link BsonParser#nextToken()} returns null if there
      * is no more input. Refers issue #10.
      * @throws Exception if something went wrong
-     * @author hertzsprung
-     * @author Michel Kraemer
      */
     @Test
     public void parseBeyondEnd() throws Exception {

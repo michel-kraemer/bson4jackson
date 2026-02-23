@@ -2,7 +2,6 @@ package de.undercouch.bson4jackson;
 
 /**
  * Constants used within the BSON format
- * @author Michel Kraemer
  */
 @SuppressWarnings("all")
 public final class BsonConstants {

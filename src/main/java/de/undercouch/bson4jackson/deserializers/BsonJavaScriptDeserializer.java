@@ -16,7 +16,6 @@ import java.util.Map;
 
 /**
  * Deserializes BSON JavaScript objects
- * @author Michel Kraemer
  * @since 2.8.0
  */
 public class BsonJavaScriptDeserializer extends ValueDeserializer<JavaScript> {

@@ -2,7 +2,6 @@ package de.undercouch.bson4jackson.types;
 
 /**
  * A special internal type used by MongoDB replication and sharding.
- * @author Michel Kraemer
  */
 public class Timestamp {
     /**

@@ -14,7 +14,6 @@ import java.io.Writer;
 
 /**
  * Factory for {@link BsonGenerator} and {@link BsonParser}
- * @author Michel Kraemer
  */
 public class BsonFactory extends JsonFactory {
     private static final long serialVersionUID = 1991836957699496674L;

@@ -3,7 +3,6 @@ package de.undercouch.bson4jackson.types;
 /**
  * A unique identifier for MongoDB documents. Such identifiers
  * consist of a timestamp, a machine ID and a counter.
- * @author Michel Kraemer
  */
 public class ObjectId {
     private final int timestamp;

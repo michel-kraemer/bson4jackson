@@ -9,8 +9,6 @@ import java.util.Date;
 
 /**
  * Serializes dates as BSON date type objects
- * @author James Roper
- * @author Michel Kraemer
  * @since 1.3
  */
 public class BsonDateSerializer extends ValueSerializer<Date> {

@@ -26,7 +26,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link BsonDeserializers}
- * @author Michel Kraemer
  */
 public class BsonDeserializersTest {
     /**

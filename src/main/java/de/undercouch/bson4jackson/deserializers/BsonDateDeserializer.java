@@ -11,7 +11,6 @@ import java.util.Date;
 
 /**
  * Deserializes BSON date type objects to dates
- * @author Michel Kraemer
  * @since 2.3.2
  */
 public class BsonDateDeserializer extends ValueDeserializer<Date> {

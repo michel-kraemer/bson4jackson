@@ -15,7 +15,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link DynamicOutputBuffer}
- * @author Michel Kraemer
  */
 public class DynamicOutputBufferTest {
     @Test

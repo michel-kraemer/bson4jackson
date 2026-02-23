@@ -20,7 +20,6 @@ import java.nio.charset.StandardCharsets;
  * little-endian encoding. Apart from that, it provides a method
  * that reads an UTF-8 encoded string without reading the number of
  * bytes from the input stream.
- * @author Michel Kraemer
  */
 public class LittleEndianInputStream extends FilterInputStream implements DataInput {
     /**

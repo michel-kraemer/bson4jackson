@@ -34,7 +34,6 @@ import static org.junit.Assert.assertEquals;
  * handle {@link BsonGenerator} and
  * {@link tools.jackson.databind.util.TokenBuffer}.
  * @see <a href="https://github.com/michel-kraemer/bson4jackson/issues/67">Issue 67</a>
- * @author Michel Kraemer
  */
 public class TypePropertyLastTest {
     @JsonTypeInfo(

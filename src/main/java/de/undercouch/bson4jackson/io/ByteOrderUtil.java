@@ -2,7 +2,6 @@ package de.undercouch.bson4jackson.io;
 
 /**
  * Provides static methods to change the byte order of single values
- * @author Michel Kraemer
  */
 public class ByteOrderUtil {
     /**

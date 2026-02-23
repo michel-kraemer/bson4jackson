@@ -8,7 +8,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link BoundedInputStream}
- * @author James Roper
  */
 public class BoundedInputStreamTest {
 

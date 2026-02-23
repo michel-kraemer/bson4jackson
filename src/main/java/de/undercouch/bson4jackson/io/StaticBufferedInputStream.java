@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
  * Works like {@link java.io.BufferedInputStream}, but is not thread-safe and
  * also uses a a re-usable static buffer provided by {@link StaticBuffers} to
  * achieve better performance
- * @author Michel Kraemer
  */
 public class StaticBufferedInputStream extends InputStream {
     /**

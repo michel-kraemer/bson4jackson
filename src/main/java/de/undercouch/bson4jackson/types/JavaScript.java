@@ -4,7 +4,6 @@ import java.util.Map;
 
 /**
  * Embedded JavaScript code with an optional scope (i.e. an embedded BSON document)
- * @author Michel Kraemer
  */
 public class JavaScript {
     /**

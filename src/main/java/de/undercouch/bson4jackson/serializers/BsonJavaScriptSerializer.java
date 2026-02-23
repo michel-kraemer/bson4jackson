@@ -9,8 +9,6 @@ import tools.jackson.databind.ValueSerializer;
 /**
  * Serializer for JavaScript
  * @since 1.3
- * @author James Roper
- * @author Michel Kraemer
  */
 public class BsonJavaScriptSerializer extends ValueSerializer<JavaScript> {
     @Override

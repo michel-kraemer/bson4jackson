@@ -52,7 +52,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Tests {@link BsonGenerator}
- * @author Michel Kraemer
  */
 public class BsonGeneratorTest {
     /**

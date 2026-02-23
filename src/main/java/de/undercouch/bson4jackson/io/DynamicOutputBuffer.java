@@ -45,7 +45,6 @@ import java.util.Queue;
  * <p>Once the buffer has been written to an output stream or channel, putting
  * elements into it is not possible anymore and will lead to an
  * {@link java.lang.IndexOutOfBoundsException}.</p>
- * @author Michel Kraemer
  */
 public class DynamicOutputBuffer {
     /**

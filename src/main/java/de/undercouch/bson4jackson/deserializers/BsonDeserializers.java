@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 /**
  * BSON deserializers
- * @author Michel Kraemer
  * @since 2.3.2
  */
 public class BsonDeserializers extends SimpleDeserializers {

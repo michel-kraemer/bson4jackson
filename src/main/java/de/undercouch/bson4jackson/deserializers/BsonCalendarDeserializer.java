@@ -12,7 +12,6 @@ import java.util.Date;
 
 /**
  * Deserializes BSON date type objects to calendars
- * @author Michel Kraemer
  * @since 2.3.2
  */
 public class BsonCalendarDeserializer extends ValueDeserializer<Calendar> {

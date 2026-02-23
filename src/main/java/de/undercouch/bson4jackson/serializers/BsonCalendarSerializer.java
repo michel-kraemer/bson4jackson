@@ -9,8 +9,6 @@ import java.util.Calendar;
 
 /**
  * Serializes calendars as BSON date type objects
- * @author James Roper
- * @author Michel Kraemer
  * @since 1.3
  */
 public class BsonCalendarSerializer extends ValueSerializer<Calendar> {

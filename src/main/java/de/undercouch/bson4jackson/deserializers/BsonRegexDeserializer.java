@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 
 /**
  * Deserializes BSON Regex objects (Patterns)
- * @author Michel Kraemer
  * @since 2.8.0
  */
 public class BsonRegexDeserializer extends ValueDeserializer<Pattern> {
