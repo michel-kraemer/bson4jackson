@@ -26,14 +26,12 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 String jacksonCore = 'tools.jackson.core:jackson-core:'
-String jacksonAnnotations = 'com.fasterxml.jackson.core:jackson-annotations:'
 String jacksonDatabind = 'tools.jackson.core:jackson-databind:'
 String junit = 'junit:junit:4.13.2'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:3.12.14'
 
 dependencies {
     implementation jacksonCore + '3.0.4'
-    implementation jacksonAnnotations + '2.20'
     implementation jacksonDatabind + '3.0.4'
 
     testImplementation junit
