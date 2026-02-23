@@ -71,6 +71,11 @@ may create a .jar library:
 
 The library will be located under `build/libs`.
 
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for
+details on how to report bugs and submit pull requests.
+
 ## License
 
 bson4jackson is licensed under the
