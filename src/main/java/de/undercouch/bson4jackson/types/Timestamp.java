@@ -40,10 +40,9 @@ public class Timestamp {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Timestamp)) {
+        if (!(o instanceof Timestamp t)) {
             return false;
         }
-        Timestamp t = (Timestamp)o;
         return (_inc == t._inc && _time == t._time);
     }
 

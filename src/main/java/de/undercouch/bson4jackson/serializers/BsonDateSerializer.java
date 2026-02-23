@@ -17,8 +17,7 @@ public class BsonDateSerializer extends ValueSerializer<Date> {
             SerializationContext ctxt) {
         if (value == null) {
             ctxt.defaultSerializeNullValue(gen);
-        } else if (gen instanceof BsonGenerator) {
-            BsonGenerator bgen = (BsonGenerator)gen;
+        } else if (gen instanceof BsonGenerator bgen) {
             bgen.writeDateTime(value);
         } else {
             gen.writeNumber(value.getTime());

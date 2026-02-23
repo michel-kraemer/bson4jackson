@@ -10,7 +10,6 @@ import static org.junit.Assert.assertEquals;
  * Tests for {@link BoundedInputStream}
  */
 public class BoundedInputStreamTest {
-
     private final byte[] bytes = new byte[] { 10, 20, 30, 40 };
 
     @Test

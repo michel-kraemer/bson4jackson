@@ -129,7 +129,7 @@ public class BsonSerializersTest {
     public void symbol() throws Exception {
         Symbol sym = new Symbol("symbol");
         String obj = (String)generateAndParse(sym);
-        assertEquals(sym, obj);
+        assertEquals(sym.toString(), obj);
     }
 
     /**

@@ -149,10 +149,9 @@ public class TypePropertySecondTest {
     /**
      * Serialize and deserialize an object of type {@link TypeAsPropertyA} and
      * check if all properties are OK.
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void parse() throws Exception {
+    public void parse() {
         ObjectMapper mapper = JsonMapper.builder(new BsonFactory())
             .addModule(new BsonModule())
             .build();

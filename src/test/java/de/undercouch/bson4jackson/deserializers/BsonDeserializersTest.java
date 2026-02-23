@@ -68,7 +68,7 @@ public class BsonDeserializersTest {
         };
     }
 
-    private static <T> T generateAndParse(Object o, Class<T> cls) throws Exception {
+    private static <T> T generateAndParse(Object o, Class<T> cls) {
         BSONObject bo = new BasicBSONObject();
         bo.put("obj", o); // that's why all properties of classes in TC must be named 'obj'
         BSONEncoder encoder = new BasicBSONEncoder();
@@ -85,10 +85,9 @@ public class BsonDeserializersTest {
 
     /**
      * Tests {@link BsonCalendarDeserializer}
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void calendar() throws Exception {
+    public void calendar() {
         Date date = new Date();
         TC.C obj = generateAndParse(date, TC.C.class);
         assertEquals(date, obj.obj.getTime());
@@ -96,10 +95,9 @@ public class BsonDeserializersTest {
 
     /**
      * Tests {@link BsonDateDeserializer}
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void date() throws Exception {
+    public void date() {
         Date date = new Date();
         TC.D obj = generateAndParse(date, TC.D.class);
         assertEquals(date, obj.obj);
@@ -107,10 +105,9 @@ public class BsonDeserializersTest {
 
     /**
      * Tests if {@code JavaScript} objects can be deserialized
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void javascript() throws Exception {
+    public void javascript() {
         Code code = new Code("code");
         TC.J obj = generateAndParse(code, TC.J.class);
         assertEquals(code.getCode(), obj.obj.getCode());
@@ -123,10 +120,9 @@ public class BsonDeserializersTest {
 
     /**
      * Tests if {@code ObjectId} objects can be deserialized
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void objectId() throws Exception {
+    public void objectId() {
         org.bson.types.ObjectId id = new org.bson.types.ObjectId(1, 2);
         TC.O obj = generateAndParse(id, TC.O.class);
         assertEquals(id.getTimestamp(), obj.obj.getTimestamp());
@@ -135,10 +131,9 @@ public class BsonDeserializersTest {
 
     /**
      * Tests if {@code Pattern} objects can be deserialized
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void regex() throws Exception {
+    public void regex() {
         Pattern pat = Pattern.compile("[a-zA-Z0-9]+");
         TC.R obj = generateAndParse(pat, TC.R.class);
         assertEquals(pat.pattern(), obj.obj.pattern());
@@ -146,10 +141,9 @@ public class BsonDeserializersTest {
 
     /**
      * Tests if {@code Symbol} objects can be deserialized
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void symbol() throws Exception {
+    public void symbol() {
         org.bson.types.Symbol sym = new org.bson.types.Symbol("symbol");
         TC.S obj = generateAndParse(sym, TC.S.class);
         assertEquals(sym.getSymbol(), obj.obj.getSymbol());
@@ -157,10 +151,9 @@ public class BsonDeserializersTest {
 
     /**
      * Tests if {@code Timestamp} objects can be deserialized
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void timestamp() throws Exception {
+    public void timestamp() {
         org.bson.types.BSONTimestamp ts = new org.bson.types.BSONTimestamp(1, 2);
         TC.T obj = generateAndParse(ts, TC.T.class);
         assertEquals(ts.getTime(), obj.obj.getTime());
@@ -169,10 +162,9 @@ public class BsonDeserializersTest {
 
     /**
      * Tests if {@code UUID} objects can be deserialized
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void uuid() throws Exception {
+    public void uuid() {
         UUID uuid = UUID.randomUUID();
         TC.U obj = generateAndParse(uuid, TC.U.class);
         assertEquals(uuid, obj.obj);

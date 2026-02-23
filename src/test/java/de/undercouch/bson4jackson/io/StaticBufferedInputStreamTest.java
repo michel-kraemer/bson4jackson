@@ -83,13 +83,9 @@ public class StaticBufferedInputStreamTest {
         _in.close();
 
         int n = StaticBuffers.GLOBAL_MIN_SIZE * 3 / 2;
-        StringBuilder bigStr = new StringBuilder();
-        for (int i = 0; i < n; ++i) {
-            bigStr.append("abc");
-        }
 
         _in = new StaticBufferedInputStream(new ByteArrayInputStream(
-                bigStr.toString().getBytes()), 2);
+                "abc".repeat(n).getBytes()), 2);
         return n;
     }
 
@@ -119,7 +115,7 @@ public class StaticBufferedInputStreamTest {
     public void markLarge() throws IOException {
         int n = makeLargeIn();
         byte[] b = new byte[30];
-        _in.read(b);
+        assertEquals(b.length, _in.read(b));
         assertEquals('a', _in.read());
         _in.mark(n);
         assertEquals('b', _in.read());

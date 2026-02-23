@@ -16,6 +16,7 @@
 
 package de.undercouch.bson4jackson.types;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -30,7 +31,6 @@ import static java.util.Collections.singletonList;
  * A binary integer decimal representation of a 128-bit decimal value, supporting 34 decimal digits of significand and an exponent range
  * of -6143 to +6144.
  *
- * @since 3.4
  * @see <a href="https://github.com/mongodb/specifications/blob/master/source/bson-decimal128/decimal128.rst">BSON Decimal128
  * specification</a>
  * @see <a href="https://en.wikipedia.org/wiki/Binary_Integer_Decimal">binary integer decimal</a>
@@ -38,7 +38,7 @@ import static java.util.Collections.singletonList;
  * @see <a href="http://ieeexplore.ieee.org/document/4610935/">754-2008 - IEEE Standard for Floating-Point Arithmetic</a>
  */
 public final class Decimal128 extends Number implements Comparable<Decimal128> {
-
+    @Serial
     private static final long serialVersionUID = 4570973266503637887L;
 
     private static final long INFINITY_MASK = 0x7800000000000000L;
@@ -542,17 +542,13 @@ public final class Decimal128 extends Number implements Comparable<Decimal128> {
         if (high != that.high) {
             return false;
         }
-        if (low != that.low) {
-            return false;
-        }
-
-        return true;
+        return low == that.low;
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (low ^ (low >>> 32));
-        result = 31 * result + (int) (high ^ (high >>> 32));
+        int result = Long.hashCode(low);
+        result = 31 * result + Long.hashCode(high);
         return result;
     }
 
@@ -598,9 +594,7 @@ public final class Decimal128 extends Number implements Comparable<Decimal128> {
                 if (pad >= 0) {
                     buffer.append('0');
                     buffer.append('.');
-                    for (int i = 0; i < pad; i++) {
-                        buffer.append('0');
-                    }
+                    buffer.append("0".repeat(pad));
                     buffer.append(significand, 0, significand.length());
                 } else {
                     buffer.append(significand, 0, -pad);

@@ -169,18 +169,20 @@ public class LittleEndianInputStreamTest {
     @Test
     public void readUTF() throws Exception {
         DynamicOutputBuffer db = new DynamicOutputBuffer(20);
-        db.putUTF8("Helloa\u20AC\u00A2\u00A2bb");
-        LittleEndianInputStream leis = outputBufferToInputStream(db);
-        assertEquals("Hello", leis.readUTF(5));
-        assertEquals("a\u20AC\u00A2\u00A2bb", leis.readUTF(db.size() - 5));
+        db.putUTF8("Helloa€¢¢bb");
+        try (LittleEndianInputStream leis = outputBufferToInputStream(db)) {
+            assertEquals("Hello", leis.readUTF(5));
+            assertEquals("a€¢¢bb", leis.readUTF(db.size() - 5));
+        }
     }
 
     @Test(expected = CharacterCodingException.class)
     public void readUTFError() throws Exception {
         DynamicOutputBuffer db = new DynamicOutputBuffer(20);
-        db.putUTF8("a\u00A2");
-        LittleEndianInputStream leis = outputBufferToInputStream(db);
-        leis.readUTF(2);
+        db.putUTF8("a¢");
+        try (LittleEndianInputStream leis = outputBufferToInputStream(db)) {
+            leis.readUTF(2);
+        }
     }
 
     @Test
@@ -188,7 +190,8 @@ public class LittleEndianInputStreamTest {
         DynamicOutputBuffer db = new DynamicOutputBuffer(20);
         db.putUTF8("Hello");
         db.putByte((byte)0);
-        LittleEndianInputStream leis = outputBufferToInputStream(db);
-        assertEquals("Hello", leis.readUTF(-1));
+        try (LittleEndianInputStream leis = outputBufferToInputStream(db)) {
+            assertEquals("Hello", leis.readUTF(-1));
+        }
     }
 }

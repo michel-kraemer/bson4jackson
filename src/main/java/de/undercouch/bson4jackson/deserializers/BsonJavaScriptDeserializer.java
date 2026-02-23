@@ -21,8 +21,7 @@ import java.util.Map;
 public class BsonJavaScriptDeserializer extends ValueDeserializer<JavaScript> {
     @Override
     public JavaScript deserialize(JsonParser jp, DeserializationContext ctxt) {
-        if (jp instanceof BsonParser) {
-            BsonParser bsonParser = (BsonParser)jp;
+        if (jp instanceof BsonParser bsonParser) {
             if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     (bsonParser.getCurrentBsonType() != BsonConstants.TYPE_JAVASCRIPT &&
                             bsonParser.getCurrentBsonType() != BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE)) {

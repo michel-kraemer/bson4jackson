@@ -36,8 +36,7 @@ public class BsonObjectIdSerializer extends ValueSerializer<ObjectId> {
             SerializationContext ctxt) {
         if (value == null) {
             ctxt.defaultSerializeNullValue(gen);
-        } else if (gen instanceof BsonGenerator) {
-            BsonGenerator bgen = (BsonGenerator)gen;
+        } else if (gen instanceof BsonGenerator bgen) {
             if (useLegacyFormat) {
                 bgen.writeObjectIdLegacy(value);
             } else {

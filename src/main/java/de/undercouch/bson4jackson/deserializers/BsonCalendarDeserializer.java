@@ -17,8 +17,7 @@ import java.util.Date;
 public class BsonCalendarDeserializer extends ValueDeserializer<Calendar> {
     @Override
     public Calendar deserialize(JsonParser jp, DeserializationContext ctxt) {
-        if (jp instanceof BsonParser) {
-            BsonParser bsonParser = (BsonParser)jp;
+        if (jp instanceof BsonParser bsonParser) {
             if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_DATETIME) {
                 ctxt.reportBadDefinition(Date.class,

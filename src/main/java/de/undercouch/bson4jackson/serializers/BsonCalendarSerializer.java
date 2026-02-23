@@ -17,8 +17,7 @@ public class BsonCalendarSerializer extends ValueSerializer<Calendar> {
             SerializationContext ctxt) {
         if (value == null) {
             ctxt.defaultSerializeNullValue(gen);
-        } else if (gen instanceof BsonGenerator) {
-            BsonGenerator bgen = (BsonGenerator)gen;
+        } else if (gen instanceof BsonGenerator bgen) {
             bgen.writeDateTime(value.getTime());
         } else {
             gen.writeNumber(value.getTime().getTime());

@@ -30,6 +30,7 @@ import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -901,6 +902,7 @@ public class BsonParser extends ParserBase {
     }
 
     protected static class BsonLocation extends TokenStreamLocation {
+        @Serial
         private static final long serialVersionUID = -5441597278886285168L;
 
         public BsonLocation(ContentReference srcRef, long totalBytes) {

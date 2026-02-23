@@ -27,6 +27,7 @@ import tools.jackson.databind.node.ObjectNode;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -109,10 +110,9 @@ public class BsonGeneratorTest {
     /**
      * Test if the streaming feature works as expected
      * @see BsonGenerator.Feature#ENABLE_STREAMING
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void stream() throws Exception {
+    public void stream() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BsonFactory fac = new BsonFactory();
         fac.enable(BsonGenerator.Feature.ENABLE_STREAMING);
@@ -281,16 +281,16 @@ public class BsonGeneratorTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BsonGenerator gen = (BsonGenerator) new BsonFactory().createGenerator(ObjectWriteContext.empty(), baos);
         gen.writeStartObject();
-        gen.writeName("a\u20AC\u00A2\u00A2bb");
-        gen.writeString("a\u20AC\u00A2\u00A2bb");
+        gen.writeName("a€¢¢bb");
+        gen.writeString("a€¢¢bb");
         gen.writeEndObject();
         gen.close();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         BSONDecoder decoder = new BasicBSONDecoder();
         BSONObject obj = decoder.readObject(bais);
-        String s = (String)obj.get("a\u20AC\u00A2\u00A2bb");
-        assertEquals("a\u20AC\u00A2\u00A2bb", s);
+        String s = (String)obj.get("a€¢¢bb");
+        assertEquals("a€¢¢bb", s);
     }
 
     /**
@@ -540,10 +540,9 @@ public class BsonGeneratorTest {
     /**
      * Test if multiple objects can be written in sequence using
      * {@link SequenceWriter}
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void writeMultipleObjects() throws Exception {
+    public void writeMultipleObjects() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
 
@@ -616,6 +615,7 @@ public class BsonGeneratorTest {
                         + "\"some.\": \"field.\" }");
         BsonFactory escapingFactory = new BsonFactory();
         escapingFactory.setCharacterEscapes(new CharacterEscapes() {
+            @Serial
             private static final long serialVersionUID = 283833498358662446L;
 
             @Override
@@ -748,10 +748,9 @@ public class BsonGeneratorTest {
      * Checks if an {@link ObjectNode} can be written correctly if streaming
      * is disabled and flush-after-write-value is enabled (the default).
      * See issue #80.
-     * @throws Exception if something goes wrong
      */
     @Test
-    public void writeObjectNode() throws Exception {
+    public void writeObjectNode() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BsonFactory bsonFactory = new BsonFactory();
         assertFalse(bsonFactory.isEnabled(BsonGenerator.Feature.ENABLE_STREAMING));

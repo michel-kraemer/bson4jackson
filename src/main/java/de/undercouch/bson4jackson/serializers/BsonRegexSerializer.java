@@ -17,8 +17,7 @@ public class BsonRegexSerializer extends ValueSerializer<Pattern> {
             SerializationContext ctxt) {
         if (value == null) {
             ctxt.defaultSerializeNullValue(gen);
-        } else if (gen instanceof BsonGenerator) {
-            BsonGenerator bgen = (BsonGenerator)gen;
+        } else if (gen instanceof BsonGenerator bgen) {
             bgen.writeRegex(value);
         } else {
             gen.writeStartObject();

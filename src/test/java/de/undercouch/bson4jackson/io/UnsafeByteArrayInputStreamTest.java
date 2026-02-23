@@ -27,9 +27,9 @@ public class UnsafeByteArrayInputStreamTest {
     @Test
     public void available() {
         assertEquals(BUF.length, _in.available());
-        _in.read();
+        assertEquals(BUF[0], _in.read());
         assertEquals(BUF.length - 1, _in.available());
-        _in.read(new byte[5], 0, 5);
+        assertEquals(5, _in.read(new byte[5], 0, 5));
         assertEquals(BUF.length - 6, _in.available());
     }
 

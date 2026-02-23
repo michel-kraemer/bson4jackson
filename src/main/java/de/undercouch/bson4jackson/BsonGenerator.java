@@ -914,7 +914,7 @@ public class BsonGenerator extends GeneratorBase {
             if (c <= 0x7F && _outputEscapes[c] == CharacterEscapes.ESCAPE_CUSTOM) {
                 SerializableString escape = _characterEscapes.getEscapeSequence(c);
                 if (escape == null) {
-                    _reportError("Invalid custom escape definitions; custom escape "
+                    throw _constructWriteException("Invalid custom escape definitions; custom escape "
                             + "not found for character code 0x" + Integer.toHexString(c) +
                             ", although was supposed to have one");
                 }

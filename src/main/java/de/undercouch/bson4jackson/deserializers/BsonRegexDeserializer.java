@@ -18,8 +18,7 @@ import java.util.regex.Pattern;
 public class BsonRegexDeserializer extends ValueDeserializer<Pattern> {
     @Override
     public Pattern deserialize(JsonParser jp, DeserializationContext ctxt) {
-        if (jp instanceof BsonParser) {
-            BsonParser bsonParser = (BsonParser)jp;
+        if (jp instanceof BsonParser bsonParser) {
             if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_REGEX) {
                 ctxt.reportBadDefinition(Pattern.class,

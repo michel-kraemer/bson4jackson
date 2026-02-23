@@ -207,7 +207,7 @@ public class DynamicOutputBufferTest {
         assertEquals("Hello", s);
 
         db = new DynamicOutputBuffer(2);
-        w = db.putUTF8("a\u20AC\u00A2\u00A2bb");
+        w = db.putUTF8("a€¢¢bb");
         assertEquals(10, w);
         assertEquals(10, db.size());
 
@@ -233,17 +233,17 @@ public class DynamicOutputBufferTest {
     @Test
     public void putUTF16() {
         DynamicOutputBuffer db = new DynamicOutputBuffer(2);
-        int w = db.putUTF8("a\u2139");
+        int w = db.putUTF8("aℹ");
         assertEquals(4, w);
         assertEquals(4, db.size());
 
         db = new DynamicOutputBuffer(2);
-        w = db.putUTF8("a\u2139\u8080");
+        w = db.putUTF8("aℹ肀");
         assertEquals(7, w);
         assertEquals(7, db.size());
 
         db = new DynamicOutputBuffer(20);
-        w = db.putUTF8("a\u2139\u8080");
+        w = db.putUTF8("aℹ肀");
         assertEquals(7, w);
         assertEquals(7, db.size());
 
@@ -253,12 +253,12 @@ public class DynamicOutputBufferTest {
         assertEquals(2, db.size());
 
         db = new DynamicOutputBuffer(20);
-        w = db.putUTF8("a\u0300b\u2139\u8080");
+        w = db.putUTF8("a\u0300bℹ肀");
         assertEquals(10, w);
         assertEquals(10, db.size());
 
         db = new DynamicOutputBuffer(20);
-        w = db.putUTF8("a\u0300b\u2139\u8080\uD800\uDC00c");
+        w = db.putUTF8("a\u0300bℹ肀\uD800\uDC00c");
         assertEquals(15, w);
         assertEquals(15, db.size());
     }

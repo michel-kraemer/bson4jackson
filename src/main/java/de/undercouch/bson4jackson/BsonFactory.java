@@ -10,12 +10,14 @@ import tools.jackson.core.json.JsonFactory;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Serial;
 import java.io.Writer;
 
 /**
  * Factory for {@link BsonGenerator} and {@link BsonParser}
  */
 public class BsonFactory extends JsonFactory {
+    @Serial
     private static final long serialVersionUID = 1991836957699496674L;
 
     /**

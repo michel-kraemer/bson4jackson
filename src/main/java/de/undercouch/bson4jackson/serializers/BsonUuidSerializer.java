@@ -16,8 +16,7 @@ public class BsonUuidSerializer extends ValueSerializer<UUID> {
     @Override
     public void serialize(UUID value, JsonGenerator gen,
             SerializationContext ctxt) {
-        if (gen instanceof BsonGenerator) {
-            BsonGenerator bgen = (BsonGenerator)gen;
+        if (gen instanceof BsonGenerator bgen) {
             bgen.writeBinary(null, BsonConstants.SUBTYPE_UUID,
                     uuidToLittleEndianBytes(value), 0, 16);
         } else {

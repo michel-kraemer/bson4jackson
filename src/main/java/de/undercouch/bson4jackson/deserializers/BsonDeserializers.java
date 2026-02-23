@@ -5,6 +5,7 @@ import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Timestamp;
 
+import java.io.Serial;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
  * @since 2.3.2
  */
 public class BsonDeserializers extends SimpleDeserializers {
+    @Serial
     private static final long serialVersionUID = 261492073508673840L;
 
     /**

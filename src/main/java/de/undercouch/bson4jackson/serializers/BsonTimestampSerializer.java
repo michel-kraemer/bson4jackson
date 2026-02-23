@@ -16,8 +16,7 @@ public class BsonTimestampSerializer extends ValueSerializer<Timestamp> {
             SerializationContext ctxt) {
         if (value == null) {
             ctxt.defaultSerializeNullValue(gen);
-        } else if (gen instanceof BsonGenerator) {
-            BsonGenerator bgen = (BsonGenerator)gen;
+        } else if (gen instanceof BsonGenerator bgen) {
             bgen.writeTimestamp(value);
         } else {
             gen.writeStartObject();

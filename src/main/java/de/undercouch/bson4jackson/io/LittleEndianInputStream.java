@@ -176,8 +176,10 @@ public class LittleEndianInputStream extends FilterInputStream implements DataIn
             } else if (c == '\r') {
                 int c2 = read();
                 if (c2 != -1 && c2 != '\n') {
-                    if (!(in instanceof PushbackInputStream)) {
-                        in = new PushbackInputStream(in);
+                    synchronized (this) {
+                        if (!(in instanceof PushbackInputStream)) {
+                            in = new PushbackInputStream(in);
+                        }
                     }
                     ((PushbackInputStream)in).unread(c2);
                 }

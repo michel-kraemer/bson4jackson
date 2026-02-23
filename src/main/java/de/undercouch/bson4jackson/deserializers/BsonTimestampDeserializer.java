@@ -17,8 +17,7 @@ import de.undercouch.bson4jackson.types.Timestamp;
 public class BsonTimestampDeserializer extends ValueDeserializer<Timestamp> {
     @Override
     public Timestamp deserialize(JsonParser jp, DeserializationContext ctxt) {
-        if (jp instanceof BsonParser) {
-            BsonParser bsonParser = (BsonParser)jp;
+        if (jp instanceof BsonParser bsonParser) {
             if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_TIMESTAMP) {
                 ctxt.reportBadDefinition(Timestamp.class,

@@ -16,8 +16,7 @@ public class BsonSymbolSerializer extends ValueSerializer<Symbol> {
             SerializationContext ctxt) {
         if (value == null) {
             ctxt.defaultSerializeNullValue(gen);
-        } else if (gen instanceof BsonGenerator) {
-            BsonGenerator bgen = (BsonGenerator)gen;
+        } else if (gen instanceof BsonGenerator bgen) {
             bgen.writeSymbol(value);
         } else {
             gen.writeString(value.getSymbol());

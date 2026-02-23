@@ -38,8 +38,7 @@ public class BsonObjectIdDeserializer extends ValueDeserializer<ObjectId> {
     @Override
     @SuppressWarnings("deprecation")
     public ObjectId deserialize(JsonParser jp, DeserializationContext ctxt) {
-        if (jp instanceof BsonParser) {
-            BsonParser bsonParser = (BsonParser)jp;
+        if (jp instanceof BsonParser bsonParser) {
             if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
                     bsonParser.getCurrentBsonType() != BsonConstants.TYPE_OBJECTID) {
                 ctxt.reportBadDefinition(ObjectId.class,
