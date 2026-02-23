@@ -739,28 +739,6 @@ public class BsonGenerator extends GeneratorBase {
     }
 
     /**
-     * Write a BSON ObjectId in the legacy format
-     *
-     * @param objectId The objectId to write
-     * @deprecated Use {@link #writeObjectId(ObjectId)} instead
-     */
-    @Deprecated
-    public JsonGenerator writeObjectIdLegacy(ObjectId objectId) {
-        _writeArrayFieldNameIfNeeded();
-        _verifyValueWrite("write legacy objectId");
-        _buffer.putByte(_typeMarker, BsonConstants.TYPE_OBJECTID);
-        // ObjectIds have their byte order flipped
-        int time = ByteOrderUtil.flip(objectId.getTime());
-        int machine = ByteOrderUtil.flip(objectId.getMachine());
-        int inc = ByteOrderUtil.flip(objectId.getInc());
-        _buffer.putInt(time);
-        _buffer.putInt(machine);
-        _buffer.putInt(inc);
-        flushBuffer();
-        return this;
-    }
-
-    /**
      * Converts a a Java flags word into a BSON options pattern
      *
      * @param flags the Java flags

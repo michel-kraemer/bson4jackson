@@ -122,6 +122,7 @@ public class BsonDeserializersTest {
      * Tests if {@code ObjectId} objects can be deserialized
      */
     @Test
+    @SuppressWarnings("deprecation")
     public void objectId() {
         org.bson.types.ObjectId id = new org.bson.types.ObjectId(1, 2);
         TC.O obj = generateAndParse(id, TC.O.class);

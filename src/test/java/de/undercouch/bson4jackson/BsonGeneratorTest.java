@@ -337,6 +337,7 @@ public class BsonGeneratorTest {
      * @throws Exception if something goes wrong
      */
     @Test
+    @SuppressWarnings("deprecation")
     public void objectIds() throws Exception {
         Map<String, Object> data = new LinkedHashMap<>();
         ObjectId objectId = new ObjectId((int)(System.currentTimeMillis() / 1000),

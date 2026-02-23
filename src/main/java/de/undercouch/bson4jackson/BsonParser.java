@@ -598,10 +598,11 @@ public class BsonParser extends ParserBase {
      * @throws IOException if the ObjectID could not be read
      */
     protected ObjectId readObjectId() throws IOException {
-        int time = ByteOrderUtil.flip(_in.readInt());
-        int machine = ByteOrderUtil.flip(_in.readInt());
-        int inc = ByteOrderUtil.flip(_in.readInt());
-        return new ObjectId(time, machine, inc);
+        int timestamp = ByteOrderUtil.flip(_in.readInt());
+        int randomValue1 = _in.readByte() << 16 | _in.readByte() << 8 | _in.readByte();
+        short randomValue2 = (short)(_in.readByte() << 8 | _in.readByte());
+        int counter = _in.readByte() << 16 | _in.readByte() << 8 | _in.readByte();
+        return new ObjectId(timestamp, counter, randomValue1, randomValue2);
     }
 
     /**

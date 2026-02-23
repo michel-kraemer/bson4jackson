@@ -15,28 +15,7 @@ import tools.jackson.databind.node.ValueNode;
  * @since 2.8.0
  */
 public class BsonObjectIdDeserializer extends ValueDeserializer<ObjectId> {
-    private final boolean useLegacyFormat;
-
-    /**
-     * Default constructor
-     */
-    public BsonObjectIdDeserializer() {
-        this(false);
-    }
-
-    /**
-     * Constructor that allows the legacy format to be enabled
-     * @param useLegacyFormat {@code true} if the legacy format should be enabled
-     * @deprecated Legacy ObjectId format is deprecated. Please use the default
-     * constructor to create ObjectIds in the new format.
-     */
-    @Deprecated
-    public BsonObjectIdDeserializer(boolean useLegacyFormat) {
-        this.useLegacyFormat = useLegacyFormat;
-    }
-
     @Override
-    @SuppressWarnings("deprecation")
     public ObjectId deserialize(JsonParser jp, DeserializationContext ctxt) {
         if (jp instanceof BsonParser bsonParser) {
             if (bsonParser.currentToken() != JsonToken.VALUE_EMBEDDED_OBJECT ||
@@ -50,18 +29,11 @@ public class BsonObjectIdDeserializer extends ValueDeserializer<ObjectId> {
             return (ObjectId)jp.getEmbeddedObject();
         } else {
             TreeNode tree = ctxt.readTree(jp);
-            if (useLegacyFormat) {
-                int time = ((ValueNode)tree.get("$time")).asInt();
-                int machine = ((ValueNode)tree.get("$machine")).asInt();
-                int inc = ((ValueNode)tree.get("$inc")).asInt();
-                return new ObjectId(time, machine, inc);
-            } else {
-                int timestamp = ((ValueNode)tree.get("$timestamp")).asInt();
-                int randomValue1 = ((ValueNode)tree.get("$randomValue1")).asInt();
-                short randomValue2 = (short)((ValueNode)tree.get("$randomValue2")).asInt();
-                int counter = ((ValueNode)tree.get("$counter")).asInt();
-                return new ObjectId(timestamp, counter, randomValue1, randomValue2);
-            }
+            int timestamp = ((ValueNode)tree.get("$timestamp")).asInt();
+            int randomValue1 = ((ValueNode)tree.get("$randomValue1")).asInt();
+            short randomValue2 = (short)((ValueNode)tree.get("$randomValue2")).asInt();
+            int counter = ((ValueNode)tree.get("$counter")).asInt();
+            return new ObjectId(timestamp, counter, randomValue1, randomValue2);
         }
     }
 }

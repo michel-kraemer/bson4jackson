@@ -103,6 +103,7 @@ public class BsonSerializersTest {
      * @throws Exception if something goes wrong
      */
     @Test
+    @SuppressWarnings("deprecation")
     public void objectId() throws Exception {
         ObjectId id = new ObjectId(1, 2, 3, (short)4);
         org.bson.types.ObjectId roid = (org.bson.types.ObjectId)generateAndParse(id);

@@ -59,7 +59,7 @@ public class TypePropertySecondTest {
             Map<String, Object> scope = new HashMap<>();
             scope.put("j", 5);
             javaScript = new JavaScript("var i;", scope);
-            objectId = new ObjectId(1, 2, 3);
+            objectId = new ObjectId(1, 2, 3, (short)4);
             pattern = Pattern.compile("[a-zA-Z0-9]+",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
             symbol = new Symbol("foobar");
@@ -166,9 +166,10 @@ public class TypePropertySecondTest {
                 v.getCalendar().getTimeInMillis());
         assertEquals(a.getJavaScript().getCode(), v.getJavaScript().getCode());
         assertEquals(a.getJavaScript().getScope(), v.getJavaScript().getScope());
-        assertEquals(a.getObjectId().getTime(), v.getObjectId().getTime());
-        assertEquals(a.getObjectId().getMachine(), v.getObjectId().getMachine());
-        assertEquals(a.getObjectId().getInc(), v.getObjectId().getInc());
+        assertEquals(a.getObjectId().getTimestamp(), v.getObjectId().getTimestamp());
+        assertEquals(a.getObjectId().getCounter(), v.getObjectId().getCounter());
+        assertEquals(a.getObjectId().getRandomValue1(), v.getObjectId().getRandomValue1());
+        assertEquals(a.getObjectId().getRandomValue2(), v.getObjectId().getRandomValue2());
         assertEquals(a.getPattern().pattern(), v.getPattern().pattern());
         assertEquals(a.getPattern().flags(), v.getPattern().flags());
         assertEquals(a.getSymbol(), v.getSymbol());
