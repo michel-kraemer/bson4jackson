@@ -3,14 +3,14 @@ package de.undercouch.bson4jackson;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.undercouch.bson4jackson.serializers.BsonSerializers;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
 import de.undercouch.bson4jackson.types.Timestamp;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -28,11 +28,11 @@ import static org.junit.Assert.assertEquals;
  * type of the serialized object. We then specify a property order and
  * put this property at the very end. When deserializing Jackson will
  * need to buffer all properties in a
- * {@link com.fasterxml.jackson.databind.util.TokenBuffer} before it can
+ * {@link tools.jackson.databind.util.TokenBuffer} before it can
  * read the type and create the target object. This requires there are
  * appropriate serializers and deserializers for all properties that can
  * handle {@link BsonGenerator} and
- * {@link com.fasterxml.jackson.databind.util.TokenBuffer}.
+ * {@link tools.jackson.databind.util.TokenBuffer}.
  * @see <a href="https://github.com/michel-kraemer/bson4jackson/issues/67">Issue 67</a>
  * @author Michel Kraemer
  */
@@ -167,10 +167,10 @@ public class TypePropertyLastTest {
      * @throws Exception if something goes wrong
      */
     @Test
-    @Category(value = RequiresJackson_v2_7.class)
     public void parse() throws Exception {
-        ObjectMapper mapper = new ObjectMapper(new BsonFactory())
-                .registerModule(new BsonModule());
+        ObjectMapper mapper = JsonMapper.builder(new BsonFactory())
+            .addModule(new BsonModule())
+            .build();
         TypeAsPropertyA a = new TypeAsPropertyA();
         byte[] bytes = mapper.writeValueAsBytes(a);
         TypeAsProperty v = mapper.readValue(bytes,

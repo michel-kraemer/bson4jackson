@@ -1,9 +1,8 @@
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import tools.jackson.core.TokenStreamFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
@@ -27,7 +26,6 @@ public class BsonFactoryTest {
      * {@link BsonFactory#copy()} should create a new instance
      */
     @Test
-    @Category(value = RequiresJackson_v2_3.class)
     public void shouldCreateNewInstanceOnCopy() {
         BsonFactory copy = factory.copy();
         assertNotSame(factory, copy);
@@ -37,7 +35,6 @@ public class BsonFactoryTest {
      * {@link BsonFactory#copy()} should copy parser features
      */
     @Test
-    @Category(value = RequiresJackson_v2_3.class)
     public void shouldCopyParserFeaturesOnCopy() {
         BsonParser.Feature feature = BsonParser.Feature.HONOR_DOCUMENT_LENGTH;
         factory.configure(feature, !factory.isEnabled(feature));
@@ -51,7 +48,6 @@ public class BsonFactoryTest {
      * {@link BsonFactory#copy()} should copy generator features
      */
     @Test
-    @Category(value = RequiresJackson_v2_3.class)
     public void shouldCopyGeneratorFeaturesOnCopy() {
         BsonGenerator.Feature feature = BsonGenerator.Feature.ENABLE_STREAMING;
         factory.configure(feature, !factory.isEnabled(feature));
@@ -63,13 +59,13 @@ public class BsonFactoryTest {
 
     /**
      * {@link BsonFactory#copy()} should copy features of its superclass
-     * {@link JsonFactory}
+     * {@link tools.jackson.core.json.JsonFactory}
      */
     @Test
-    @Category(value = RequiresJackson_v2_3.class)
     public void shouldCopySuperClass() {
-        JsonFactory.Feature feature = JsonFactory.Feature.CANONICALIZE_FIELD_NAMES;
-        factory.configure(feature, !factory.isEnabled(feature));
+        // In Jackson 3, TokenStreamFactory features are immutable after construction,
+        // so we just verify the copy preserves the default feature state
+        TokenStreamFactory.Feature feature = TokenStreamFactory.Feature.CANONICALIZE_PROPERTY_NAMES;
 
         BsonFactory copy = factory.copy();
 

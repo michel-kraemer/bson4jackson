@@ -1,6 +1,6 @@
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.databind.module.SimpleSerializers;
+import tools.jackson.databind.module.SimpleSerializers;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;

@@ -1,6 +1,5 @@
 package de.undercouch.bson4jackson.deserializers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.undercouch.bson4jackson.BsonFactory;
 import de.undercouch.bson4jackson.BsonModule;
 import de.undercouch.bson4jackson.types.JavaScript;
@@ -14,6 +13,8 @@ import org.bson.BasicBSONObject;
 import org.bson.types.Code;
 import org.bson.types.CodeWScope;
 import org.junit.Test;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
 import java.util.Calendar;
@@ -76,8 +77,10 @@ public class BsonDeserializersTest {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(barr);
 
-        ObjectMapper om = new ObjectMapper(new BsonFactory());
-        om.registerModule(new BsonModule());
+        ObjectMapper om = JsonMapper.builder(new BsonFactory())
+            .addModule(new BsonModule())
+            .build();
+
         return om.readValue(bais, cls);
     }
 

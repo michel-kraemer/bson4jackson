@@ -1,12 +1,10 @@
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.undercouch.bson4jackson.BsonGenerator;
 import de.undercouch.bson4jackson.types.JavaScript;
-
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for JavaScript
@@ -14,19 +12,19 @@ import java.io.IOException;
  * @author James Roper
  * @author Michel Kraemer
  */
-public class BsonJavaScriptSerializer extends JsonSerializer<JavaScript> {
+public class BsonJavaScriptSerializer extends ValueSerializer<JavaScript> {
     @Override
     public void serialize(JavaScript value, JsonGenerator gen,
-            SerializerProvider provider) throws IOException {
+            SerializationContext ctxt) {
         if (value == null) {
-            provider.defaultSerializeNull(gen);
+            ctxt.defaultSerializeNullValue(gen);
         } else if (gen instanceof BsonGenerator) {
             BsonGenerator bgen = (BsonGenerator)gen;
-            bgen.writeJavaScript(value, provider);
+            bgen.writeJavaScript(value, ctxt);
         } else {
             gen.writeStartObject();
-            gen.writeStringField("$code", value.getCode());
-            gen.writeObjectField("$scope", value.getScope());
+            gen.writeStringProperty("$code", value.getCode());
+            gen.writePOJOProperty("$scope", value.getScope());
             gen.writeEndObject();
         }
     }

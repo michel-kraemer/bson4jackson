@@ -1,12 +1,5 @@
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.SerializableString;
-import com.fasterxml.jackson.core.base.GeneratorBase;
-import com.fasterxml.jackson.core.io.CharacterEscapes;
-import com.fasterxml.jackson.core.json.JsonWriteContext;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.DynamicOutputBuffer;
 import de.undercouch.bson4jackson.types.Decimal128;
@@ -14,6 +7,20 @@ import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
 import de.undercouch.bson4jackson.types.Timestamp;
+import tools.jackson.core.Base64Variant;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.ObjectWriteContext;
+import tools.jackson.core.SerializableString;
+import tools.jackson.core.StreamWriteCapability;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.core.TokenStreamContext;
+import tools.jackson.core.Version;
+import tools.jackson.core.base.GeneratorBase;
+import tools.jackson.core.io.CharacterEscapes;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.json.JsonWriteContext;
+import tools.jackson.core.util.JacksonFeatureSet;
+import tools.jackson.databind.SerializationContext;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -22,7 +29,6 @@ import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.util.Date;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -147,6 +153,11 @@ public class BsonGenerator extends GeneratorBase {
     protected boolean nextObjectIsEmbeddedInValue = false;
 
     /**
+     * The write context used for tracking object/array nesting
+     */
+    protected JsonWriteContext _writeContext;
+
+    /**
      * Custom character escapes to use when writing strings (field names and string values)
      */
     protected CharacterEscapes _characterEscapes = null;
@@ -159,16 +170,19 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Creates a new generator
+     * @param writeCtxt the object write context
+     * @param ctxt the IO context
      * @param jsonFeatures bit flag composed of bits that indicate which
-     * {@link com.fasterxml.jackson.core.JsonGenerator.Feature}s are enabled.
+     * {@link StreamWriteFeature}s are enabled.
      * @param bsonFeatures bit flag composed of bits that indicate which
      * {@link Feature}s are enabled.
      * @param out the output stream to write to
      */
-    public BsonGenerator(int jsonFeatures, int bsonFeatures, OutputStream out) {
-        super(jsonFeatures, null);
+    public BsonGenerator(ObjectWriteContext writeCtxt, IOContext ctxt, int jsonFeatures, int bsonFeatures, OutputStream out) {
+        super(writeCtxt, ctxt, jsonFeatures);
         _bsonFeatures = bsonFeatures;
         _out = out;
+        _writeContext = JsonWriteContext.createRootContext(null);
 
         if (isEnabled(Feature.ENABLE_STREAMING)) {
             // if streaming is enabled, try to reuse some buffers
@@ -242,14 +256,18 @@ public class BsonGenerator extends GeneratorBase {
     }
 
     @Override
-    public void flush() throws IOException {
-        // we must not flush the buffer if we are currently writing a document
-        // otherwise we cannot write the document size to the header at the end
-        if (_currentDocument == null) {
-            _buffer.writeTo(_out);
-            _buffer.clear();
+    public void flush() {
+        try {
+            // we must not flush the buffer if we are currently writing a document
+            // otherwise we cannot write the document size to the header at the end
+            if (_currentDocument == null) {
+                _buffer.writeTo(_out);
+                _buffer.clear();
+            }
+            _out.flush();
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
         }
-        _out.flush();
     }
 
     @Override
@@ -258,48 +276,96 @@ public class BsonGenerator extends GeneratorBase {
     }
 
     @Override
-    public void close() throws IOException {
+    protected void _closeInput() throws IOException {
         // finish document
-        if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT)) {
+        if (isEnabled(StreamWriteFeature.AUTO_CLOSE_CONTENT)) {
             while (_currentDocument != null) {
                 writeEndObject();
             }
         }
 
         // write buffer to output stream (if streaming is enabled,
-        // this will write the the rest of the buffer)
+        // this will write the rest of the buffer)
         _buffer.writeTo(_out);
         _buffer.clear();
         _out.flush();
 
-        if (isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {
+        if (isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
             _out.close();
         }
-
-        super.close();
     }
 
     @Override
-    public void writeStartArray() throws IOException {
+    public JacksonFeatureSet<StreamWriteCapability> streamWriteCapabilities() {
+        return DEFAULT_BINARY_WRITE_CAPABILITIES;
+    }
+
+    @Override
+    public int streamWriteOutputBuffered() {
+        return _buffer.size();
+    }
+
+    @Override
+    public Object streamWriteOutputTarget() {
+        return _out;
+    }
+
+    @Override
+    public Version version() {
+        return new Version(3, 0, 0, "", "de.undercouch", "bson4jackson");
+    }
+
+    @Override
+    public TokenStreamContext streamWriteContext() {
+        return _writeContext;
+    }
+
+    @Override
+    public Object currentValue() {
+        return _writeContext.currentValue();
+    }
+
+    @Override
+    public void assignCurrentValue(Object v) {
+        _writeContext.assignCurrentValue(v);
+    }
+
+    @Override
+    public JsonGenerator writeStartArray(Object currentValue) {
+        writeStartArray();
+        assignCurrentValue(currentValue);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator writeStartArray() {
         _verifyValueWrite("start an array");
-        _writeContext = _writeContext.createChildArrayContext();
+        _writeContext = _writeContext.createChildArrayContext(null);
         _writeStartObject(true);
+        return this;
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void writeEndArray() throws IOException {
+    public JsonGenerator writeEndArray() {
         if (!_writeContext.inArray()) {
-            _reportError("Current context not an ARRAY but " + _writeContext.getTypeDesc());
+            _reportError("Current context not an ARRAY but " + _writeContext.typeDesc());
         }
         writeEndObjectInternal();
         _writeContext = _writeContext.getParent();
+        return this;
     }
 
     @Override
-    public void writeStartObject() throws IOException {
+    public JsonGenerator writeStartObject(Object currentValue) {
+        writeStartObject();
+        assignCurrentValue(currentValue);
+        return this;
+    }
+
+    @Override
+    public JsonGenerator writeStartObject() {
         if (nextObjectIsEmbeddedInValue) {
-            _writeContext = _writeContext.createChildObjectContext();
+            _writeContext = _writeContext.createChildObjectContext(null);
             _currentDocument = new DocumentInfo(_currentDocument, _buffer.size(), false);
             reserveHeader();
 
@@ -307,17 +373,17 @@ public class BsonGenerator extends GeneratorBase {
             nextObjectIsEmbeddedInValue = false;
         } else {
             _verifyValueWrite("start an object");
-            _writeContext = _writeContext.createChildObjectContext();
+            _writeContext = _writeContext.createChildObjectContext(null);
             _writeStartObject(false);
         }
+        return this;
     }
 
     /**
      * Creates a new embedded document or array
      * @param array true if the embedded object is an array
-     * @throws IOException if the document could not be created
      */
-    protected void _writeStartObject(boolean array) throws IOException {
+    protected void _writeStartObject(boolean array) {
         _writeArrayFieldNameIfNeeded();
         if (_currentDocument != null) {
             // embedded document/array
@@ -329,14 +395,14 @@ public class BsonGenerator extends GeneratorBase {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public void writeEndObject() throws IOException {
+    public JsonGenerator writeEndObject() {
         if (!_writeContext.inObject()) {
             _reportError("Current context not an object but " +
-                    _writeContext.getTypeDesc());
+                    _writeContext.typeDesc());
         }
         _writeContext = _writeContext.getParent();
         writeEndObjectInternal();
+        return this;
     }
 
     protected void writeEndObjectInternal() {
@@ -358,9 +424,8 @@ public class BsonGenerator extends GeneratorBase {
      * If the generator is currently processing an array, this method writes
      * the field name of the current element (which is just the position of the
      * element in the array)
-     * @throws IOException if the field name could not be written
      */
-    protected void _writeArrayFieldNameIfNeeded() throws IOException {
+    protected void _writeArrayFieldNameIfNeeded() {
         if (isArray()) {
             int p = getAndIncCurrentArrayPos();
             _writeFieldName(String.valueOf(p));
@@ -368,15 +433,21 @@ public class BsonGenerator extends GeneratorBase {
     }
 
     @Override
-    public void writeFieldName(String name) throws IOException {
-        int status = _writeContext.writeFieldName(name);
+    public JsonGenerator writeName(String name) {
+        int status = _writeContext.writeName(name);
         if (status == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name);
+        return this;
     }
 
-    protected void _writeFieldName(String name) throws IOException {
+    @Override
+    public JsonGenerator writePropertyId(long id) {
+        return writeName(String.valueOf(id));
+    }
+
+    protected void _writeFieldName(String name) {
         // escape characters if necessary
         name = escapeCharacters(name);
 
@@ -390,7 +461,7 @@ public class BsonGenerator extends GeneratorBase {
     }
 
     @Override
-    protected void _verifyValueWrite(String typeMsg) throws IOException {
+    protected void _verifyValueWrite(String typeMsg) {
         int status = _writeContext.writeValue();
         if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
             _reportError("Can not " + typeMsg + ", expecting field name");
@@ -400,16 +471,19 @@ public class BsonGenerator extends GeneratorBase {
     /**
      * Tries to flush the output buffer if streaming is enabled. This
      * method is a no-op if streaming is disabled.
-     * @throws IOException if flushing failed
      */
-    protected void flushBuffer() throws IOException {
-        if (isEnabled(Feature.ENABLE_STREAMING)) {
-            _buffer.flushTo(_out);
+    protected void flushBuffer() {
+        try {
+            if (isEnabled(Feature.ENABLE_STREAMING)) {
+                _buffer.flushTo(_out);
+            }
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
         }
     }
 
     @Override
-    public void writeString(String text) throws IOException {
+    public JsonGenerator writeString(String text) {
         _writeArrayFieldNameIfNeeded();
 
         _verifyValueWrite("write string");
@@ -418,15 +492,16 @@ public class BsonGenerator extends GeneratorBase {
         _writeString(text);
 
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len) throws IOException {
-        writeString(new String(text, offset, len));
+    public JsonGenerator writeString(char[] text, int offset, int len) {
+        return writeString(new String(text, offset, len));
     }
 
     @Override
-    public void writeRaw(String text) throws IOException {
+    public JsonGenerator writeRaw(String text) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write raw string");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
@@ -434,15 +509,16 @@ public class BsonGenerator extends GeneratorBase {
         _buffer.putByte(BsonConstants.SUBTYPE_BINARY);
         _buffer.putString(text);
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeRaw(String text, int offset, int len) throws IOException {
-        writeRaw(text.substring(offset, len));
+    public JsonGenerator writeRaw(String text, int offset, int len) {
+        return writeRaw(text.substring(offset, offset + len));
     }
 
     @Override
-    public void writeRaw(char[] text, int offset, int len) throws IOException {
+    public JsonGenerator writeRaw(char[] text, int offset, int len) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write raw string");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_BINARY);
@@ -450,17 +526,18 @@ public class BsonGenerator extends GeneratorBase {
         _buffer.putByte(BsonConstants.SUBTYPE_BINARY);
         _buffer.putString(CharBuffer.wrap(text));
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeRaw(char c) throws IOException {
-        writeRaw(new char[] { c }, 0, 1);
+    public JsonGenerator writeRaw(char c) {
+        return writeRaw(new char[] { c }, 0, 1);
     }
 
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset,
-            int len) throws IOException {
-        writeBinary(b64variant, BsonConstants.SUBTYPE_BINARY, data,
+    public JsonGenerator writeBinary(Base64Variant b64variant, byte[] data, int offset,
+            int len) {
+        return writeBinary(b64variant, BsonConstants.SUBTYPE_BINARY, data,
                 offset, len);
     }
 
@@ -473,10 +550,9 @@ public class BsonGenerator extends GeneratorBase {
      * @param data the binary data to write
      * @param offset the offset of the first byte to write
      * @param len the number of bytes to write
-     * @throws IOException if the binary data could not be written
      */
-    public void writeBinary(Base64Variant b64variant, byte subType,
-            byte[] data, int offset, int len) throws IOException {
+    public JsonGenerator writeBinary(Base64Variant b64variant, byte subType,
+            byte[] data, int offset, int len) {
         // base64 is not needed for BSON
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write binary");
@@ -489,55 +565,64 @@ public class BsonGenerator extends GeneratorBase {
         }
         _buffer.putBytes(data, offset, end);
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeNumber(int v) throws IOException {
+    public JsonGenerator writeNumber(int v) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write number");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_INT32);
         _buffer.putInt(v);
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeNumber(long v) throws IOException {
+    public JsonGenerator writeNumber(short v) {
+        return writeNumber((int) v);
+    }
+
+    @Override
+    public JsonGenerator writeNumber(long v) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write number");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_INT64);
         _buffer.putLong(v);
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws IOException {
+    public JsonGenerator writeNumber(BigInteger v) {
         int bl = v.bitLength();
         if (bl < 32) {
-            writeNumber(v.intValue());
+            return writeNumber(v.intValue());
         } else if (bl < 64) {
-            writeNumber(v.longValue());
+            return writeNumber(v.longValue());
         } else {
-            writeString(v.toString());
+            return writeString(v.toString());
         }
     }
 
     @Override
-    public void writeNumber(double d) throws IOException {
+    public JsonGenerator writeNumber(double d) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write number");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_DOUBLE);
         _buffer.putDouble(d);
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeNumber(float f) throws IOException {
+    public JsonGenerator writeNumber(float f) {
         // BSON understands double values only
-        writeNumber((double)f);
+        return writeNumber((double)f);
     }
 
     @Override
-    public void writeNumber(BigDecimal dec) throws IOException {
+    public JsonGenerator writeNumber(BigDecimal dec) {
         if (isEnabled(Feature.WRITE_BIGDECIMALS_AS_DECIMAL128)) {
             Decimal128 d = new Decimal128(dec);
             _writeArrayFieldNameIfNeeded();
@@ -546,50 +631,50 @@ public class BsonGenerator extends GeneratorBase {
             _buffer.putLong(d.getLow());
             _buffer.putLong(d.getHigh());
             flushBuffer();
-            return;
+            return this;
         }
 
         if (isEnabled(Feature.WRITE_BIGDECIMALS_AS_STRINGS)) {
-            writeString(dec.toString());
-            return;
+            return writeString(dec.toString());
         }
 
         // BSON does not know 32-bit floating point numbers, so we can
         // convert to a double directly
         double d = dec.doubleValue();
         if (!Double.isInfinite(d)) {
-            writeNumber(d);
+            return writeNumber(d);
         } else {
-            writeString(dec.toString());
+            return writeString(dec.toString());
         }
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws IOException,
-            UnsupportedOperationException {
-        writeString(encodedValue);
+    public JsonGenerator writeNumber(String encodedValue)
+            throws UnsupportedOperationException {
+        return writeString(encodedValue);
     }
 
     @Override
-    public void writeBoolean(boolean state) throws IOException {
+    public JsonGenerator writeBoolean(boolean state) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write boolean");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_BOOLEAN);
         _buffer.putByte((byte)(state ? 1 : 0));
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeNull() throws IOException {
+    public JsonGenerator writeNull() {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write null");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_NULL);
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int length)
-            throws IOException {
+    public JsonGenerator writeRawUTF8String(byte[] text, int offset, int length) {
         _writeArrayFieldNameIfNeeded();
 
         _verifyValueWrite("write raw utf8 string");
@@ -600,7 +685,7 @@ public class BsonGenerator extends GeneratorBase {
         _buffer.putInt(0);
 
         // write string
-        for (int i = offset; i < length; ++i) {
+        for (int i = offset; i < offset + length; ++i) {
             _buffer.putByte(text[i]);
         }
         _buffer.putByte(BsonConstants.END_OF_STRING);
@@ -609,35 +694,34 @@ public class BsonGenerator extends GeneratorBase {
         _buffer.putInt(p, length);
 
         flushBuffer();
+        return this;
     }
 
     @Override
-    public void writeUTF8String(byte[] text, int offset, int length)
-            throws IOException {
-        writeRawUTF8String(text, offset, length);
+    public JsonGenerator writeUTF8String(byte[] text, int offset, int length) {
+        return writeRawUTF8String(text, offset, length);
     }
 
     /**
      * Write a BSON date time
      *
      * @param date The date to write
-     * @throws IOException If an error occurred in the stream while writing
      */
-    public void writeDateTime(Date date) throws IOException {
+    public JsonGenerator writeDateTime(Date date) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write datetime");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_DATETIME);
         _buffer.putLong(date.getTime());
         flushBuffer();
+        return this;
     }
 
     /**
      * Write a BSON ObjectId
      *
      * @param objectId The objectId to write
-     * @throws IOException If an error occurred in the stream while writing
      */
-    public void writeObjectId(ObjectId objectId) throws IOException {
+    public JsonGenerator writeObjectId(ObjectId objectId) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write objectId");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_OBJECTID);
@@ -653,17 +737,17 @@ public class BsonGenerator extends GeneratorBase {
         _buffer.putByte((byte)((objectId.getCounter() >> 8) & 0xFF));
         _buffer.putByte((byte)(objectId.getCounter() & 0xFF));
         flushBuffer();
+        return this;
     }
 
     /**
      * Write a BSON ObjectId in the legacy format
      *
      * @param objectId The objectId to write
-     * @throws IOException If an error occurred in the stream while writing
      * @deprecated Use {@link #writeObjectId(ObjectId)} instead
      */
     @Deprecated
-    public void writeObjectIdLegacy(ObjectId objectId) throws IOException {
+    public JsonGenerator writeObjectIdLegacy(ObjectId objectId) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write legacy objectId");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_OBJECTID);
@@ -675,6 +759,7 @@ public class BsonGenerator extends GeneratorBase {
         _buffer.putInt(machine);
         _buffer.putInt(inc);
         flushBuffer();
+        return this;
     }
 
     /**
@@ -704,40 +789,39 @@ public class BsonGenerator extends GeneratorBase {
      * Write a BSON regex
      *
      * @param pattern The regex to write
-     * @throws IOException If an error occurred in the stream while writing
      */
-    public void writeRegex(Pattern pattern) throws IOException {
+    public JsonGenerator writeRegex(Pattern pattern) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write regex");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_REGEX);
         _writeCString(pattern.pattern());
         _writeCString(flagsToRegexOptions(pattern.flags()));
         flushBuffer();
+        return this;
     }
 
     /**
      * Write a MongoDB timestamp
      *
      * @param timestamp The timestamp to write
-     * @throws IOException If an error occurred in the stream while writing
      */
-    public void writeTimestamp(Timestamp timestamp) throws IOException {
+    public JsonGenerator writeTimestamp(Timestamp timestamp) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write timestamp");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_TIMESTAMP);
         _buffer.putInt(timestamp.getInc());
         _buffer.putInt(timestamp.getTime());
         flushBuffer();
+        return this;
     }
 
     /**
      * Write a BSON JavaScript object
      *
      * @param javaScript The javaScript to write
-     * @param provider The serializer provider, for serializing the scope
-     * @throws IOException If an error occurred in the stream while writing
+     * @param ctxt The serializer context, for serializing the scope
      */
-    public void writeJavaScript(JavaScript javaScript, SerializerProvider provider) throws IOException {
+    public JsonGenerator writeJavaScript(JavaScript javaScript, SerializationContext ctxt) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write javascript");
         if (javaScript.getScope() == null) {
@@ -754,7 +838,7 @@ public class BsonGenerator extends GeneratorBase {
 
             nextObjectIsEmbeddedInValue = true;
             // write the document
-            provider.findValueSerializer(Map.class, null).serialize(javaScript.getScope(), this, provider);
+            ctxt.writeValue(this, javaScript.getScope());
             // write the length
             if (!isEnabled(Feature.ENABLE_STREAMING)) {
                 int l = _buffer.size() - p;
@@ -762,20 +846,21 @@ public class BsonGenerator extends GeneratorBase {
             }
         }
         flushBuffer();
+        return this;
     }
 
     /**
      * Write a BSON Symbol object
      *
      * @param symbol The symbol to write
-     * @throws IOException If an error occurred in the stream while writing
      */
-    public void writeSymbol(Symbol symbol) throws IOException {
+    public JsonGenerator writeSymbol(Symbol symbol) {
         _writeArrayFieldNameIfNeeded();
         _verifyValueWrite("write symbol");
         _buffer.putByte(_typeMarker, BsonConstants.TYPE_SYMBOL);
         _writeString(symbol.getSymbol());
         flushBuffer();
+        return this;
     }
 
     /**
@@ -783,9 +868,8 @@ public class BsonGenerator extends GeneratorBase {
      *
      * @param string The string to write
      * @return The number of bytes written, including the terminating null byte and the size of the string
-     * @throws IOException If an error occurred in the stream while writing
      */
-    protected int _writeString(String string) throws IOException {
+    protected int _writeString(String string) {
         // reserve space for the string size
         int p = _buffer.size();
         _buffer.putInt(0);
@@ -803,9 +887,8 @@ public class BsonGenerator extends GeneratorBase {
      *
      * @param string The string to write
      * @return The number of bytes written, including the terminating null byte
-     * @throws IOException If an error occurred in the stream while writing
      */
-    protected int _writeCString(String string) throws IOException {
+    protected int _writeCString(String string) {
         // escape characters if necessary
         string = escapeCharacters(string);
         int l = _buffer.putUTF8(string);
@@ -818,9 +901,8 @@ public class BsonGenerator extends GeneratorBase {
      * there are no character escapes returns the original string.
      * @param string the string to escape
      * @return the escaped string or the original one if there is nothing to escape
-     * @throws IOException if an escape sequence could not be retrieved
      */
-    protected String escapeCharacters(String string) throws IOException {
+    protected String escapeCharacters(String string) {
         if (_characterEscapes == null) {
             // escaping not necessary
             return string;

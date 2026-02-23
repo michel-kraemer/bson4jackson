@@ -7,14 +7,14 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'java'
 
-version = '2.18.0'
+version = '3.0.0'
 group = 'de.undercouch'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -25,116 +25,19 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-Xlint"
 }
 
-configurations {
-    integrationTestBase
-    integrationTest21 { extendsFrom integrationTestBase }
-    integrationTest22 { extendsFrom integrationTestBase }
-    integrationTest23 { extendsFrom integrationTestBase }
-    integrationTest24 { extendsFrom integrationTestBase }
-    integrationTest25 { extendsFrom integrationTestBase }
-    integrationTest26 { extendsFrom integrationTestBase }
-    integrationTest27 { extendsFrom integrationTestBase }
-    integrationTest28 { extendsFrom integrationTestBase }
-    integrationTest29 { extendsFrom integrationTestBase }
-    integrationTest210 { extendsFrom integrationTestBase }
-    integrationTest211 { extendsFrom integrationTestBase }
-    integrationTest212 { extendsFrom integrationTestBase }
-    integrationTest213 { extendsFrom integrationTestBase }
-    integrationTest214 { extendsFrom integrationTestBase }
-    integrationTest215 { extendsFrom integrationTestBase }
-    integrationTest216 { extendsFrom integrationTestBase }
-    integrationTest217 { extendsFrom integrationTestBase }
-    integrationTest218 { extendsFrom integrationTestBase }
-}
-
-String jacksonCore = 'com.fasterxml.jackson.core:jackson-core:'
+String jacksonCore = 'tools.jackson.core:jackson-core:'
 String jacksonAnnotations = 'com.fasterxml.jackson.core:jackson-annotations:'
-String jacksonDatabind = 'com.fasterxml.jackson.core:jackson-databind:'
+String jacksonDatabind = 'tools.jackson.core:jackson-databind:'
 String junit = 'junit:junit:4.13.2'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:3.12.14'
 
 dependencies {
-    implementation jacksonCore + '2.18.3'
-    implementation jacksonAnnotations + '2.18.3'
-    implementation jacksonDatabind + '2.18.3'
+    implementation jacksonCore + '3.0.4'
+    implementation jacksonAnnotations + '2.20'
+    implementation jacksonDatabind + '3.0.4'
 
     testImplementation junit
     testImplementation mongoDbJavaDriver
-
-    integrationTestBase junit
-    integrationTestBase mongoDbJavaDriver
-
-    integrationTest21 jacksonCore + '2.1.0'
-    integrationTest21 jacksonAnnotations + '2.1.0'
-    integrationTest21 jacksonDatabind + '2.1.0'
-
-    integrationTest22 jacksonCore + '2.2.0'
-    integrationTest22 jacksonAnnotations + '2.2.0'
-    integrationTest22 jacksonDatabind + '2.2.0'
-
-    integrationTest23 jacksonCore + '2.3.0'
-    integrationTest23 jacksonAnnotations + '2.3.0'
-    integrationTest23 jacksonDatabind + '2.3.0'
-
-    integrationTest24 jacksonCore + '2.4.0'
-    integrationTest24 jacksonAnnotations + '2.4.0'
-    integrationTest24 jacksonDatabind + '2.4.0'
-
-    integrationTest25 jacksonCore + '2.5.0'
-    integrationTest25 jacksonAnnotations + '2.5.0'
-    integrationTest25 jacksonDatabind + '2.5.0'
-
-    integrationTest26 jacksonCore + '2.6.4'
-    integrationTest26 jacksonAnnotations + '2.6.4'
-    integrationTest26 jacksonDatabind + '2.6.4'
-
-    integrationTest27 jacksonCore + '2.7.0'
-    integrationTest27 jacksonAnnotations + '2.7.0'
-    integrationTest27 jacksonDatabind + '2.7.0'
-
-    integrationTest28 jacksonCore + '2.8.0'
-    integrationTest28 jacksonAnnotations + '2.8.0'
-    integrationTest28 jacksonDatabind + '2.8.0'
-
-    integrationTest29 jacksonCore + '2.9.3'
-    integrationTest29 jacksonAnnotations + '2.9.3'
-    integrationTest29 jacksonDatabind + '2.9.3'
-
-    integrationTest210 jacksonCore + '2.10.5'
-    integrationTest210 jacksonAnnotations + '2.10.5'
-    integrationTest210 jacksonDatabind + '2.10.5'
-
-    integrationTest211 jacksonCore + '2.11.1'
-    integrationTest211 jacksonAnnotations + '2.11.1'
-    integrationTest211 jacksonDatabind + '2.11.1'
-
-    integrationTest212 jacksonCore + '2.12.5'
-    integrationTest212 jacksonAnnotations + '2.12.5'
-    integrationTest212 jacksonDatabind + '2.12.5'
-
-    integrationTest213 jacksonCore + '2.13.0'
-    integrationTest213 jacksonAnnotations + '2.13.0'
-    integrationTest213 jacksonDatabind + '2.13.0'
-
-    integrationTest214 jacksonCore + '2.14.3'
-    integrationTest214 jacksonAnnotations + '2.14.3'
-    integrationTest214 jacksonDatabind + '2.14.3'
-
-    integrationTest215 jacksonCore + '2.15.2'
-    integrationTest215 jacksonAnnotations + '2.15.2'
-    integrationTest215 jacksonDatabind + '2.15.2'
-
-    integrationTest216 jacksonCore + '2.16.2'
-    integrationTest216 jacksonAnnotations + '2.16.2'
-    integrationTest216 jacksonDatabind + '2.16.2'
-
-    integrationTest217 jacksonCore + '2.17.3'
-    integrationTest217 jacksonAnnotations + '2.17.3'
-    integrationTest217 jacksonDatabind + '2.17.3'
-
-    integrationTest218 jacksonCore + '2.18.3'
-    integrationTest218 jacksonAnnotations + '2.18.3'
-    integrationTest218 jacksonDatabind + '2.18.3'
 }
 
 tasks.named("jar") {
@@ -148,138 +51,6 @@ tasks.named("jar") {
         )
     }
 }
-
-tasks.register('doIntegrationTest21', Test) {
-    useJUnit {
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
-    }
-
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest21
-}
-
-tasks.register('doIntegrationTest22', Test) {
-    useJUnit {
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_3'
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
-    }
-
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest22
-}
-
-tasks.register('doIntegrationTest23', Test) {
-    useJUnit {
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
-    }
-
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest23
-}
-
-tasks.register('doIntegrationTest24', Test) {
-    useJUnit {
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_5'
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
-    }
-
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest24
-}
-
-tasks.register('doIntegrationTest25', Test) {
-    useJUnit {
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
-    }
-
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest25
-}
-
-tasks.register('doIntegrationTest26', Test) {
-    useJUnit {
-        excludeCategories 'de.undercouch.bson4jackson.RequiresJackson_v2_7'
-    }
-
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest26
-}
-
-tasks.register('doIntegrationTest27', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest27
-}
-
-tasks.register('doIntegrationTest28', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest28
-}
-
-tasks.register('doIntegrationTest29', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest29
-}
-
-tasks.register('doIntegrationTest210', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest210
-}
-
-tasks.register('doIntegrationTest211', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest211
-}
-
-tasks.register('doIntegrationTest212', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest212
-}
-
-tasks.register('doIntegrationTest213', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest213
-}
-
-tasks.register('doIntegrationTest214', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest214
-}
-
-tasks.register('doIntegrationTest215', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest215
-}
-
-tasks.register('doIntegrationTest216', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest216
-}
-
-tasks.register('doIntegrationTest217', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest217
-}
-
-tasks.register('doIntegrationTest218', Test) {
-    testClassesDirs = testing.suites.test.sources.output.classesDirs
-    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest218
-}
-
-tasks.register('integrationTest') {
-    dependsOn([doIntegrationTest21, doIntegrationTest22,
-            doIntegrationTest23, doIntegrationTest24, doIntegrationTest25,
-            doIntegrationTest26, doIntegrationTest27, doIntegrationTest28,
-            doIntegrationTest29, doIntegrationTest210, doIntegrationTest211,
-            doIntegrationTest212, doIntegrationTest213, doIntegrationTest214,
-            doIntegrationTest215, doIntegrationTest216, doIntegrationTest217,
-            doIntegrationTest218])
-}
-
-check.dependsOn integrationTest
 
 java {
     withJavadocJar()

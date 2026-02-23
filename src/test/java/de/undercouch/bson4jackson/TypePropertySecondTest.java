@@ -3,13 +3,13 @@ package de.undercouch.bson4jackson;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
 import de.undercouch.bson4jackson.types.Timestamp;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
  * at the second position (after the first normal property but before all
  * properties that will be handled by one of bson4jackson's deserializers). This
  * basically tests if normal parsers and token buffers can be mixed in a
- * {@link com.fasterxml.jackson.core.util.JsonParserSequence} and if our
+ * {@link tools.jackson.core.util.JsonParserSequence} and if our
  * deserializers are able to handle that.
  * @see <a href="https://github.com/michel-kraemer/bson4jackson/issues/72">issue #72</a>.
  */
@@ -152,10 +152,10 @@ public class TypePropertySecondTest {
      * @throws Exception if something goes wrong
      */
     @Test
-    @Category(value = RequiresJackson_v2_7.class)
     public void parse() throws Exception {
-        ObjectMapper mapper = new ObjectMapper(new BsonFactory())
-                .registerModule(new BsonModule());
+        ObjectMapper mapper = JsonMapper.builder(new BsonFactory())
+            .addModule(new BsonModule())
+            .build();
         TypeAsPropertyA a = new TypeAsPropertyA();
         byte[] bytes = mapper.writeValueAsBytes(a);
         TypeAsProperty v = mapper.readValue(bytes, TypeAsProperty.class);

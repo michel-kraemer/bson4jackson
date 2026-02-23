@@ -1,13 +1,12 @@
 package de.undercouch.bson4jackson.serializers;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.UUIDSerializer;
 import de.undercouch.bson4jackson.BsonConstants;
 import de.undercouch.bson4jackson.BsonGenerator;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.ser.jdk.UUIDSerializer;
 
-import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -15,16 +14,16 @@ import java.util.UUID;
  * @author Ed Anuff
  * @author Michel Kraemer
  */
-public class BsonUuidSerializer extends JsonSerializer<UUID> {
+public class BsonUuidSerializer extends ValueSerializer<UUID> {
     @Override
     public void serialize(UUID value, JsonGenerator gen,
-            SerializerProvider provider) throws IOException {
+            SerializationContext ctxt) {
         if (gen instanceof BsonGenerator) {
             BsonGenerator bgen = (BsonGenerator)gen;
             bgen.writeBinary(null, BsonConstants.SUBTYPE_UUID,
                     uuidToLittleEndianBytes(value), 0, 16);
         } else {
-            new UUIDSerializer().serialize(value, gen, provider);
+            new UUIDSerializer().serialize(value, gen, ctxt);
         }
     }
 

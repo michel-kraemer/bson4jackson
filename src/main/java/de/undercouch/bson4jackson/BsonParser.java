@@ -1,14 +1,5 @@
 package de.undercouch.bson4jackson;
 
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.base.ParserBase;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.undercouch.bson4jackson.io.BoundedInputStream;
 import de.undercouch.bson4jackson.io.ByteOrderUtil;
 import de.undercouch.bson4jackson.io.CountingInputStream;
@@ -20,6 +11,20 @@ import de.undercouch.bson4jackson.types.JavaScript;
 import de.undercouch.bson4jackson.types.ObjectId;
 import de.undercouch.bson4jackson.types.Symbol;
 import de.undercouch.bson4jackson.types.Timestamp;
+import tools.jackson.core.Base64Variant;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.TokenStreamContext;
+import tools.jackson.core.TokenStreamLocation;
+import tools.jackson.core.Version;
+import tools.jackson.core.base.ParserBase;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.io.ContentReference;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.json.JsonReadContext;
+import tools.jackson.core.type.TypeReference;
 
 import java.io.BufferedInputStream;
 import java.io.EOFException;
@@ -80,19 +85,14 @@ public class BsonParser extends ParserBase {
     protected InputStream _rawInputStream;
 
     /**
-     * True if the parser has been closed
-     */
-    protected boolean _closed;
-
-    /**
-     * The ObjectCodec used to parse the Bson object(s)
-     */
-    protected ObjectCodec _codec;
-
-    /**
      * The position of the current token
      */
     protected int _tokenPos;
+
+    /**
+     * The Jackson read context for tracking parsing state
+     */
+    protected JsonReadContext _streamReadContext;
 
     /**
      * The current parser state
@@ -101,15 +101,17 @@ public class BsonParser extends ParserBase {
 
     /**
      * Constructs a new parser
+     * @param readCtxt the object read context
      * @param ctxt the Jackson IO context
      * @param jsonFeatures bit flag composed of bits that indicate which
-     * {@link com.fasterxml.jackson.core.JsonParser.Feature}s are enabled.
+     * {@link StreamReadFeature}s are enabled.
      * @param bsonFeatures bit flag composed of bits that indicate which
      * {@link Feature}s are enabled.
      * @param in the input stream to parse.
      */
-    public BsonParser(IOContext ctxt, int jsonFeatures, int bsonFeatures, InputStream in) {
-        super(ctxt, jsonFeatures);
+    public BsonParser(ObjectReadContext readCtxt, IOContext ctxt, int jsonFeatures, int bsonFeatures, InputStream in) {
+        super(readCtxt, ctxt, jsonFeatures);
+        _streamReadContext = JsonReadContext.createRootContext(null);
         _bsonFeatures = bsonFeatures;
         _rawInputStream = in;
         // only initialize streams here if document length isn't going to be honored
@@ -195,190 +197,185 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public ObjectCodec getCodec() {
-        return _codec;
-    }
-
-    @Override
-    public void setCodec(ObjectCodec c) {
-        _codec = c;
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE)) {
-            _in.close();
-        }
-        _closed = true;
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public JsonToken nextToken() throws IOException {
-        Context ctx = _currentContext;
-        if (_currToken == null && ctx == null) {
-            try {
-                _currToken = handleNewDocument(false);
-            } catch (EOFException e) {
-                // there is nothing more to read. indicate EOF
-                return null;
+    public void close() {
+        try {
+            if (isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE) && _in != null) {
+                _in.close();
             }
-        } else {
-            _tokenPos = _counter.getPosition();
-            if (ctx == null) {
-                if (_currToken == JsonToken.END_OBJECT) {
-                    // end of input
-                    _currToken = null;
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
+        super.close();
+    }
+
+    @Override
+    public JsonToken nextToken() {
+        try {
+            Context ctx = _currentContext;
+            if (_currToken == null && ctx == null) {
+                try {
+                    _currToken = handleNewDocument(false);
+                } catch (EOFException e) {
+                    // there is nothing more to read. indicate EOF
                     return null;
                 }
-                throw new JsonParseException("Found element outside the document",
-                        getTokenLocation());
-            }
-
-            if (ctx.state == State.DONE) {
-                // next field
-                ctx.reset();
-            }
-
-            boolean readValue = true;
-            if (ctx.state == State.FIELDNAME) {
-                readValue = false;
-                while (true) {
-                    // read field name or end of document
-                    ctx.type = _in.readByte();
-                    if (ctx.type == BsonConstants.TYPE_END) {
-                        // end of document
-                        _currToken = ctx.array ? JsonToken.END_ARRAY : JsonToken.END_OBJECT;
-                        _currentContext = _currentContext.parent;
-                    } else if (ctx.type == BsonConstants.TYPE_UNDEFINED) {
-                        // skip field name and then ignore this token
-                        skipCString();
-                        continue;
-                    } else {
-                        ctx.state = State.VALUE;
-                        _currToken = JsonToken.FIELD_NAME;
-
-                        if (ctx.array) {
-                            // immediately read value of array element (discard field name)
-                            readValue = true;
-                            skipCString();
-                            ctx.fieldName = null;
-                        } else {
-                            // read field name
-                            ctx.fieldName = readCString();
-                        }
+            } else {
+                _tokenPos = _counter.getPosition();
+                if (ctx == null) {
+                    if (_currToken == JsonToken.END_OBJECT || _currToken == JsonToken.END_ARRAY) {
+                        // end of input
+                        _currToken = null;
+                        return null;
                     }
-                    break;
+                    throw new StreamReadException(this, "Found element outside the document");
+                }
+
+                if (ctx.state == State.DONE) {
+                    // next field
+                    ctx.reset();
+                }
+
+                boolean readValue = true;
+                if (ctx.state == State.FIELDNAME) {
+                    readValue = false;
+                    while (true) {
+                        // read field name or end of document
+                        ctx.type = _in.readByte();
+                        if (ctx.type == BsonConstants.TYPE_END) {
+                            // end of document
+                            _currToken = ctx.array ? JsonToken.END_ARRAY : JsonToken.END_OBJECT;
+                            _currentContext = _currentContext.parent;
+                        } else if (ctx.type == BsonConstants.TYPE_UNDEFINED) {
+                            // skip field name and then ignore this token
+                            skipCString();
+                            continue;
+                        } else {
+                            ctx.state = State.VALUE;
+                            _currToken = JsonToken.PROPERTY_NAME;
+
+                            if (ctx.array) {
+                                // immediately read value of array element (discard field name)
+                                readValue = true;
+                                skipCString();
+                                ctx.fieldName = null;
+                            } else {
+                                // read field name
+                                ctx.fieldName = readCString();
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                if (readValue) {
+                    // parse element's value
+                    switch (ctx.type) {
+                        case BsonConstants.TYPE_DOUBLE:
+                            ctx.value = _in.readDouble();
+                            _currToken = JsonToken.VALUE_NUMBER_FLOAT;
+                            break;
+
+                        case BsonConstants.TYPE_STRING:
+                            ctx.value = readString();
+                            _currToken = JsonToken.VALUE_STRING;
+                            break;
+
+                        case BsonConstants.TYPE_DOCUMENT:
+                            _currToken = handleNewDocument(false);
+                            break;
+
+                        case BsonConstants.TYPE_ARRAY:
+                            _currToken = handleNewDocument(true);
+                            break;
+
+                        case BsonConstants.TYPE_BINARY:
+                            _currToken = handleBinary();
+                            break;
+
+                        case BsonConstants.TYPE_OBJECTID:
+                            ctx.value = readObjectId();
+                            _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+                            break;
+
+                        case BsonConstants.TYPE_BOOLEAN:
+                            boolean b = _in.readBoolean();
+                            ctx.value = b;
+                            _currToken = b ? JsonToken.VALUE_TRUE : JsonToken.VALUE_FALSE;
+                            break;
+
+                        case BsonConstants.TYPE_DATETIME:
+                            ctx.value = new Date(_in.readLong());
+                            _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+                            break;
+
+                        case BsonConstants.TYPE_NULL:
+                            _currToken = JsonToken.VALUE_NULL;
+                            break;
+
+                        case BsonConstants.TYPE_REGEX:
+                            _currToken = handleRegEx();
+                            break;
+
+                        case BsonConstants.TYPE_DBPOINTER:
+                            _currToken = handleDBPointer();
+                            break;
+
+                        case BsonConstants.TYPE_JAVASCRIPT:
+                            ctx.value = new JavaScript(readString());
+                            _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+                            break;
+
+                        case BsonConstants.TYPE_SYMBOL:
+                            ctx.value = readSymbol();
+                            _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+                            break;
+
+                        case BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE:
+                            _currToken = handleJavascriptWithScope();
+                            break;
+
+                        case BsonConstants.TYPE_INT32:
+                            ctx.value = _in.readInt();
+                            _currToken = JsonToken.VALUE_NUMBER_INT;
+                            break;
+
+                        case BsonConstants.TYPE_TIMESTAMP:
+                            ctx.value = readTimestamp();
+                            _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+                            break;
+
+                        case BsonConstants.TYPE_INT64:
+                            ctx.value = _in.readLong();
+                            _currToken = JsonToken.VALUE_NUMBER_INT;
+                            break;
+
+                        case BsonConstants.TYPE_DECIMAL128:
+                            long low = _in.readLong();
+                            long high = _in.readLong();
+                            ctx.value = Decimal128.fromIEEE754BIDEncoding(high, low);
+                            _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
+                            break;
+
+                        case BsonConstants.TYPE_MINKEY:
+                            ctx.value = "MinKey";
+                            _currToken = JsonToken.VALUE_STRING;
+                            break;
+
+                        case BsonConstants.TYPE_MAXKEY:
+                            ctx.value = "MaxKey";
+                            _currToken = JsonToken.VALUE_STRING;
+                            break;
+
+                        default:
+                            throw new StreamReadException(this, "Unknown element type " + ctx.type);
+                    }
+                    ctx.state = State.DONE;
                 }
             }
-
-            if (readValue) {
-                // parse element's value
-                switch (ctx.type) {
-                    case BsonConstants.TYPE_DOUBLE:
-                        ctx.value = _in.readDouble();
-                        _currToken = JsonToken.VALUE_NUMBER_FLOAT;
-                        break;
-
-                    case BsonConstants.TYPE_STRING:
-                        ctx.value = readString();
-                        _currToken = JsonToken.VALUE_STRING;
-                        break;
-
-                    case BsonConstants.TYPE_DOCUMENT:
-                        _currToken = handleNewDocument(false);
-                        break;
-
-                    case BsonConstants.TYPE_ARRAY:
-                        _currToken = handleNewDocument(true);
-                        break;
-
-                    case BsonConstants.TYPE_BINARY:
-                        _currToken = handleBinary();
-                        break;
-
-                    case BsonConstants.TYPE_OBJECTID:
-                        ctx.value = readObjectId();
-                        _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
-                        break;
-
-                    case BsonConstants.TYPE_BOOLEAN:
-                        boolean b = _in.readBoolean();
-                        ctx.value = b;
-                        _currToken = b ? JsonToken.VALUE_TRUE : JsonToken.VALUE_FALSE;
-                        break;
-
-                    case BsonConstants.TYPE_DATETIME:
-                        ctx.value = new Date(_in.readLong());
-                        _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
-                        break;
-
-                    case BsonConstants.TYPE_NULL:
-                        _currToken = JsonToken.VALUE_NULL;
-                        break;
-
-                    case BsonConstants.TYPE_REGEX:
-                        _currToken = handleRegEx();
-                        break;
-
-                    case BsonConstants.TYPE_DBPOINTER:
-                        _currToken = handleDBPointer();
-                        break;
-
-                    case BsonConstants.TYPE_JAVASCRIPT:
-                        ctx.value = new JavaScript(readString());
-                        _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
-                        break;
-
-                    case BsonConstants.TYPE_SYMBOL:
-                        ctx.value = readSymbol();
-                        _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
-                        break;
-
-                    case BsonConstants.TYPE_JAVASCRIPT_WITH_SCOPE:
-                        _currToken = handleJavascriptWithScope();
-                        break;
-
-                    case BsonConstants.TYPE_INT32:
-                        ctx.value = _in.readInt();
-                        _currToken = JsonToken.VALUE_NUMBER_INT;
-                        break;
-
-                    case BsonConstants.TYPE_TIMESTAMP:
-                        ctx.value = readTimestamp();
-                        _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
-                        break;
-
-                    case BsonConstants.TYPE_INT64:
-                        ctx.value = _in.readLong();
-                        _currToken = JsonToken.VALUE_NUMBER_INT;
-                        break;
-
-                    case BsonConstants.TYPE_DECIMAL128:
-                        long low = _in.readLong();
-                        long high = _in.readLong();
-                        ctx.value = Decimal128.fromIEEE754BIDEncoding(high, low);
-                        _currToken = JsonToken.VALUE_EMBEDDED_OBJECT;
-                        break;
-
-                    case BsonConstants.TYPE_MINKEY:
-                        ctx.value = "MinKey";
-                        _currToken = JsonToken.VALUE_STRING;
-                        break;
-
-                    case BsonConstants.TYPE_MAXKEY:
-                        ctx.value = "MaxKey";
-                        _currToken = JsonToken.VALUE_STRING;
-                        break;
-
-                    default:
-                        throw new JsonParseException("Unknown element type " + ctx.type,
-                                getTokenLocation());
-                }
-                ctx.state = State.DONE;
-            }
+            return _currToken;
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
         }
-        return _currToken;
     }
 
     /**
@@ -461,10 +458,9 @@ public class BsonParser extends ParserBase {
      * can be used in {@link Pattern#compile(String, int)}
      * @param pattern the regex pattern string
      * @return the Java flags
-     * @throws JsonParseException if the pattern string contains a unsupported flag
+     * @throws StreamReadException if the pattern string contains a unsupported flag
      */
-    @SuppressWarnings("deprecation")
-    protected int regexStrToFlags(String pattern) throws JsonParseException {
+    protected int regexStrToFlags(String pattern) throws StreamReadException {
         int flags = 0;
         for (int i = 0; i < pattern.length(); ++i) {
             char c = pattern.charAt(i);
@@ -491,7 +487,7 @@ public class BsonParser extends ParserBase {
                     break;
 
                 default:
-                    throw new JsonParseException("Invalid regex", getTokenLocation());
+                    throw new StreamReadException(this, "Invalid regex");
             }
         }
         return flags;
@@ -614,33 +610,28 @@ public class BsonParser extends ParserBase {
      * @throws IOException if the document could not be read
      */
     protected Map<String, Object> readDocument() throws IOException {
-        ObjectCodec codec = getCodec();
-        if (codec == null) {
+        ObjectReadContext readCtxt = objectReadContext();
+        if (readCtxt == null) {
             throw new IllegalStateException("Could not parse embedded document " +
-                    "because BSON parser has no codec");
+                    "because BSON parser has no read context");
         }
         _currToken = handleNewDocument(false);
-        return codec.readValue(this, new TypeReference<Map<String, Object>>() {});
+        return readCtxt.readValue(this, new TypeReference<Map<String, Object>>() {});
     }
 
     /**
      * @return the context of the current element
-     * @throws IOException if there is no context
+     * @throws IllegalStateException if there is no context
      */
-    protected Context getContext() throws IOException {
+    protected Context getContext() {
         if (_currentContext == null) {
-            throw new IOException("Context unknown");
+            throw new IllegalStateException("Context unknown");
         }
         return _currentContext;
     }
 
     @Override
-    public boolean isClosed() {
-        return _closed;
-    }
-
-    @Override
-    public String getCurrentName() {
+    public String currentName() {
         if (_currentContext == null) {
             return null;
         }
@@ -658,17 +649,18 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public JsonLocation getTokenLocation() {
-        return new BsonLocation(_in, _tokenPos);
+    public TokenStreamLocation currentTokenLocation() {
+        return new BsonLocation(_ioContext.contentReference(), _tokenPos);
     }
 
     @Override
-    public JsonLocation getCurrentLocation() {
-        return new BsonLocation(_in, _counter.getPosition());
+    public TokenStreamLocation currentLocation() {
+        long pos = _counter != null ? _counter.getPosition() : 0L;
+        return new BsonLocation(_ioContext.contentReference(), pos);
     }
 
     @Override
-    public String getText() {
+    public String getString() {
         if (_currentContext == null || _currentContext.state == State.FIELDNAME) {
             return null;
         }
@@ -679,40 +671,42 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public char[] getTextCharacters() {
-        // not very efficient; that's why hasTextCharacters()
+    public char[] getStringCharacters() {
+        // not very efficient; that's why hasStringCharacters()
         // always returns false
-        return getText().toCharArray();
+        String s = getString();
+        return s == null ? null : s.toCharArray();
     }
 
     @Override
-    public int getTextLength() {
-        return getText().length();
+    public int getStringLength() {
+        String s = getString();
+        return s == null ? 0 : s.length();
     }
 
     @Override
-    public int getTextOffset() {
+    public int getStringOffset() {
         return 0;
     }
 
     @Override
-    public boolean hasTextCharacters() {
-        // getTextCharacters is obviously not the most efficient way
+    public boolean hasStringCharacters() {
+        // getStringCharacters is obviously not the most efficient way
         return false;
     }
 
     @Override
-    public Number getNumberValue() throws IOException {
+    public Number getNumberValue() {
         return (Number)getContext().value;
     }
 
     @Override
-    public Number getNumberValueExact() throws IOException {
+    public Number getNumberValueExact() {
         return getNumberValue();
     }
 
     @Override
-    public Object getNumberValueDeferred() throws IOException {
+    public Object getNumberValueDeferred() {
         return getNumberValue();
     }
 
@@ -738,17 +732,17 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public int getIntValue() throws IOException {
+    public int getIntValue() {
         return ((Number)getContext().value).intValue();
     }
 
     @Override
-    public long getLongValue() throws IOException {
+    public long getLongValue() {
         return ((Number)getContext().value).longValue();
     }
 
     @Override
-    public BigInteger getBigIntegerValue() throws IOException {
+    public BigInteger getBigIntegerValue() {
         Number n = getNumberValue();
         if (n == null) {
             return null;
@@ -763,17 +757,17 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public float getFloatValue() throws IOException {
+    public float getFloatValue() {
         return ((Number)getContext().value).floatValue();
     }
 
     @Override
-    public double getDoubleValue() throws IOException {
+    public double getDoubleValue() {
         return ((Number)getContext().value).doubleValue();
     }
 
     @Override
-    public BigDecimal getDecimalValue() throws IOException {
+    public BigDecimal getDecimalValue() {
         Number n = getNumberValue();
         if (n == null) {
             return null;
@@ -788,7 +782,7 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    public byte[] getBinaryValue(Base64Variant b64variant) throws IOException {
+    public byte[] getBinaryValue(Base64Variant b64variant) {
         return (byte[])getContext().value;
     }
 
@@ -798,25 +792,39 @@ public class BsonParser extends ParserBase {
     }
 
     @Override
-    protected void _handleEOF() throws JsonParseException {
+    protected void _handleEOF() throws StreamReadException {
         _reportInvalidEOF();
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    protected boolean loadMore() {
-        // we don't actually use this
-        return true;
+    public TokenStreamContext streamReadContext() {
+        return _streamReadContext;
     }
 
     @Override
-    protected void _finishString() {
-        // not used
+    public Object streamReadInputSource() {
+        return _rawInputStream;
+    }
+
+    @Override
+    public Version version() {
+        return new Version(3, 0, 0, "", "de.undercouch", "bson4jackson");
     }
 
     @Override
     protected void _closeInput() throws IOException {
         _rawInputStream.close();
+    }
+
+    @Override
+    protected int _parseIntValue() {
+        // BSON values are already parsed, no lazy parsing needed
+        return ((Number)_currentContext.value).intValue();
+    }
+
+    @Override
+    protected void _parseNumericValue(int expType) {
+        // BSON values are already parsed via other overridden methods
     }
 
     /**
@@ -893,13 +901,10 @@ public class BsonParser extends ParserBase {
         }
     }
 
-    /**
-     * Extends {@link JsonLocation} to offer a specialized string representation
-     */
-    protected static class BsonLocation extends JsonLocation {
+    protected static class BsonLocation extends TokenStreamLocation {
         private static final long serialVersionUID = -5441597278886285168L;
 
-        public BsonLocation(Object srcRef, long totalBytes) {
+        public BsonLocation(ContentReference srcRef, long totalBytes) {
             super(srcRef, totalBytes, -1, -1, -1);
         }
 
@@ -907,10 +912,10 @@ public class BsonParser extends ParserBase {
         public String toString() {
             StringBuilder sb = new StringBuilder(80);
             sb.append("[Source: ");
-            if (getSourceRef() == null) {
+            if (contentReference().getRawContent() == null) {
                 sb.append("UNKNOWN");
             } else {
-                sb.append(getSourceRef().toString());
+                sb.append(contentReference().getRawContent().toString());
             }
             sb.append("; pos: ");
             sb.append(getByteOffset());
