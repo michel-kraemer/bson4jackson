@@ -1,6 +1,6 @@
 # BSON for Jackson [![Actions Status](https://github.com/michel-kraemer/bson4jackson/workflows/CI/badge.svg)](https://github.com/michel-kraemer/bson4jackson/actions) [![Apache License, Version 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-This library adds support for [BSON](http://bsonspec.org) to the
+This library adds support for [BSON](https://bsonspec.org) to the
 [Jackson JSON processor](https://github.com/FasterXML/jackson).
 
 BSON is a binary representation of [JSON](https://json.org/). It is
@@ -12,7 +12,7 @@ format of [MongoDB](https://www.mongodb.com/).
 Just create a Jackson `ObjectMapper` with a `BsonFactory` as follows:
 
 ```java
-ObjectMapper mapper = new ObjectMapper(new BsonFactory());
+ObjectMapper mapper = JsonMapper.builder(new BsonFactory()).build();
 ```
 
 For more information, you may read my
@@ -24,7 +24,7 @@ or the complete [documentation of Jackson](https://github.com/FasterXML/jackson)
 bson4jackson binaries are available from the
 [GitHub releases page](https://github.com/michel-kraemer/bson4jackson/releases>).
 
-You may also use [Maven](http://maven.apache.org/) to download bson4jackson:
+You may also use [Maven](https://maven.apache.org/) to download bson4jackson:
 
 ```xml
 <dependencies>
@@ -49,12 +49,11 @@ dependencies {
 
 bson4jackson 3.x is compatible with Jackson 3.x and requires Java 17 or later.
 
-If you are looking for a version compatible to Jackson 2.x, please use
+If you are looking for a version compatible with Jackson 2.x, please use
 bson4jackson 2.18.0. It's the last version for the 2.x branch.
 
-If you are looking for a version compatible to Jackson 1.x, please use
-bson4jackson 1.3.0. It's the last version for the 1.x branch.
-bson4jackson 1.3.0 is compatible to Jackson 1.7 up to 1.9.
+If you are looking for a version compatible with Jackson 1.x, please use
+bson4jackson 1.3.0.
 
 ## Compiling
 
