@@ -25,17 +25,32 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-Xlint"
 }
 
+configurations {
+    integrationTestBase
+    integrationTest30 { extendsFrom integrationTestBase }
+    integrationTest31 { extendsFrom integrationTestBase }
+}
+
 String jacksonCore = 'tools.jackson.core:jackson-core:'
 String jacksonDatabind = 'tools.jackson.core:jackson-databind:'
 String junit = 'junit:junit:4.13.2'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:3.12.14'
 
 dependencies {
-    implementation jacksonCore + '3.0.4'
-    implementation jacksonDatabind + '3.0.4'
+    implementation jacksonCore + '3.1.0'
+    implementation jacksonDatabind + '3.1.0'
 
     testImplementation junit
     testImplementation mongoDbJavaDriver
+
+    integrationTestBase junit
+    integrationTestBase mongoDbJavaDriver
+
+    integrationTest30 jacksonCore + '3.0.4'
+    integrationTest30 jacksonDatabind + '3.0.4'
+
+    integrationTest31 jacksonCore + '3.1.0'
+    integrationTest31 jacksonDatabind + '3.1.0'
 }
 
 tasks.named("jar") {
@@ -49,6 +64,22 @@ tasks.named("jar") {
         )
     }
 }
+
+tasks.register('doIntegrationTest30', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest30
+}
+
+tasks.register('doIntegrationTest31', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest31
+}
+
+tasks.register('integrationTest') {
+    dependsOn([doIntegrationTest30, doIntegrationTest31])
+}
+
+check.dependsOn integrationTest
 
 java {
     withJavadocJar()
