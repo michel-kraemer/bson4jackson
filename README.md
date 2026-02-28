@@ -31,7 +31,7 @@ You may also use [Maven](https://maven.apache.org/) to download bson4jackson:
     <dependency>
         <groupId>de.undercouch</groupId>
         <artifactId>bson4jackson</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -41,7 +41,7 @@ following snippet to your `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'de.undercouch:bson4jackson:3.0.0'
+    implementation 'de.undercouch:bson4jackson:3.1.0'
 }
 ```
 
