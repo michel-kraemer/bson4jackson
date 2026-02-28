@@ -9,9 +9,24 @@ import java.io.InputStream;
  * This class is not thread-safe.
  */
 public class BoundedInputStream extends FilterInputStream {
+    /**
+     * The stream's size
+     */
     protected final int size;
+
+    /**
+     * The number of bytes read so far
+     */
     protected int count = 0;
+
+    /**
+     * Whether the end of the underlying stream has been reached
+     */
     protected boolean eof = false;
+
+    /**
+     * A marked position
+     */
     protected int mark;
 
     /**

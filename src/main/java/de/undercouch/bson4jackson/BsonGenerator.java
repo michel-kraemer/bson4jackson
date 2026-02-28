@@ -548,6 +548,7 @@ public class BsonGenerator extends GeneratorBase {
      * @param data the binary data to write
      * @param offset the offset of the first byte to write
      * @param len the number of bytes to write
+     * @return this generator
      */
     public JsonGenerator writeBinary(Base64Variant b64variant, byte subType,
             byte[] data, int offset, int len) {
@@ -702,8 +703,8 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Write a BSON date time
-     *
      * @param date The date to write
+     * @return this generator
      */
     public JsonGenerator writeDateTime(Date date) {
         _writeArrayFieldNameIfNeeded();
@@ -716,8 +717,8 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Write a BSON ObjectId
-     *
      * @param objectId The objectId to write
+     * @return this generator
      */
     public JsonGenerator writeObjectId(ObjectId objectId) {
         _writeArrayFieldNameIfNeeded();
@@ -740,7 +741,6 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Converts a a Java flags word into a BSON options pattern
-     *
      * @param flags the Java flags
      * @return the regex options string
      */
@@ -763,8 +763,8 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Write a BSON regex
-     *
      * @param pattern The regex to write
+     * @return this generator
      */
     public JsonGenerator writeRegex(Pattern pattern) {
         _writeArrayFieldNameIfNeeded();
@@ -778,8 +778,8 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Write a MongoDB timestamp
-     *
      * @param timestamp The timestamp to write
+     * @return this generator
      */
     public JsonGenerator writeTimestamp(Timestamp timestamp) {
         _writeArrayFieldNameIfNeeded();
@@ -793,9 +793,9 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Write a BSON JavaScript object
-     *
      * @param javaScript The javaScript to write
      * @param ctxt The serializer context, for serializing the scope
+     * @return this generator
      */
     public JsonGenerator writeJavaScript(JavaScript javaScript, SerializationContext ctxt) {
         _writeArrayFieldNameIfNeeded();
@@ -827,8 +827,8 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Write a BSON Symbol object
-     *
      * @param symbol The symbol to write
+     * @return this generator
      */
     public JsonGenerator writeSymbol(Symbol symbol) {
         _writeArrayFieldNameIfNeeded();
@@ -841,7 +841,6 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Write a BSON string structure (a null terminated string prependend by the length of the string)
-     *
      * @param string The string to write
      * @return The number of bytes written, including the terminating null byte and the size of the string
      */
@@ -860,7 +859,6 @@ public class BsonGenerator extends GeneratorBase {
 
     /**
      * Write a BSON cstring structure (a null terminated string)
-     *
      * @param string The string to write
      * @return The number of bytes written, including the terminating null byte
      */
