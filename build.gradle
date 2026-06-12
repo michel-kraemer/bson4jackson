@@ -29,6 +29,7 @@ configurations {
     integrationTestBase
     integrationTest30 { extendsFrom integrationTestBase }
     integrationTest31 { extendsFrom integrationTestBase }
+    integrationTest32 { extendsFrom integrationTestBase }
 }
 
 String jacksonCore = 'tools.jackson.core:jackson-core:'
@@ -37,8 +38,8 @@ String junit = 'junit:junit:4.13.2'
 String mongoDbJavaDriver = 'org.mongodb:mongo-java-driver:3.12.14'
 
 dependencies {
-    implementation jacksonCore + '3.1.0'
-    implementation jacksonDatabind + '3.1.0'
+    implementation jacksonCore + '3.2.0'
+    implementation jacksonDatabind + '3.2.0'
 
     testImplementation junit
     testImplementation mongoDbJavaDriver
@@ -51,6 +52,9 @@ dependencies {
 
     integrationTest31 jacksonCore + '3.1.0'
     integrationTest31 jacksonDatabind + '3.1.0'
+
+    integrationTest32 jacksonCore + '3.2.0'
+    integrationTest32 jacksonDatabind + '3.2.0'
 }
 
 tasks.named("jar") {
@@ -75,8 +79,13 @@ tasks.register('doIntegrationTest31', Test) {
     classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest31
 }
 
+tasks.register('doIntegrationTest32', Test) {
+    testClassesDirs = testing.suites.test.sources.output.classesDirs
+    classpath = sourceSets.test.output + sourceSets.main.output + configurations.integrationTest32
+}
+
 tasks.register('integrationTest') {
-    dependsOn([doIntegrationTest30, doIntegrationTest31])
+    dependsOn([doIntegrationTest30, doIntegrationTest31, doIntegrationTest32])
 }
 
 check.dependsOn integrationTest
